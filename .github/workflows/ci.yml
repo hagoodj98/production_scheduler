@@ -37,7 +37,7 @@ jobs:
         run: npm run --if-present type-check
 
       - name: Lint
-        run: npm run --if-present lint
+        run: npm run lint
 
       - name: Build
         run: npm run build
