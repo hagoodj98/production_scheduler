@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Install, Lint, Type Check, Build
+    name: Install, Lint, Type Check, Test, Build
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
@@ -43,6 +43,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Run tests
+        run: npm test
 
       - name: Build
         run: npm run build

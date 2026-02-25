@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+//import { AppWrapper, SlotWrapper } from "./context";
+import { ResourceWrapper, GetAllSelectedResourcesWrapper } from "./context";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,7 +31,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ResourceWrapper>
+          <GetAllSelectedResourcesWrapper>
+            {children}
+          </GetAllSelectedResourcesWrapper>
+        </ResourceWrapper>
       </body>
     </html>
   );

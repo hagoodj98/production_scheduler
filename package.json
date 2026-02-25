@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"next dev\" \"npm run start:cron\"",
+    "start:cron": "node node_cron/cron.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -11,15 +12,22 @@
     "db:up": "docker-compose up -d",
     "db:down": "docker-compose down",
     "db:logs": "docker-compose logs -f db",
+    "db:seed": "prisma db seed",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "test": "npm run test:zod",
+    "test:zod": "vitest run --config vitest.config.ts",
+    "prisma:seed": "tsx prisma/seeds/seed.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.8",
+    "@mui/x-date-pickers": "^8.27.2",
     "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "^7.4.1",
     "concurrently": "^9.2.1",
+    "csv-parse": "^6.1.0",
     "dayjs": "^1.11.19",
     "dotenv": "^17.3.1",
     "next": "16.1.6",
@@ -30,21 +38,27 @@
     "recharts": "^3.7.0",
     "swr": "^2.4.0",
     "vite": "^7.3.1",
+    "vitest": "^4.0.18",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
+    "@types/react-big-calendar": "^1.16.3",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "prisma": "^7.4.1",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "5.9.3"
   },
   "overrides": {
     "picomatch": "^4.0.3",
     "yaml": "^2.4.2"
+  },
+  "prisma": {
+    "seed": "npm run prisma:seed"
   }
 }
