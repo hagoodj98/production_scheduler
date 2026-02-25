@@ -174,14 +174,3 @@ const AddResource: React.FC = () => {
 };
 
 export default AddResource;
-/*
-   <Divider className="my-4" />
- <List dense>
-        {allPossibleResources.map((r) => (
-          <ListItem key={r.id} className="justify-between">
-            <span className="text-sm">{r.resource_name}</span>
-            <small className="text-xs text-gray-400">#{r.id}</small>
-          </ListItem>
-        ))}
-      </List>
-      */

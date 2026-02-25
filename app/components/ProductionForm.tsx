@@ -155,9 +155,8 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       setOpenNotifier(true);
       return false;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       if (error instanceof z.ZodError) {
-        console.log(error.issues);
         const fieldErrors: ErrorMessage[] = error.issues.map((issue) => ({
           field: issue.path.join("."),
           message: issue.message,
@@ -174,8 +173,6 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
     if (!validate()) return;
     try {
       setSubmitting(true);
-      console.log(productionOrder.timeRange);
-
       await fetch("/api/create-order", {
         method: "POST",
         headers: {
@@ -190,7 +187,6 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       router.push("/");
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.log(error.issues);
         const fieldErrors: ErrorMessage[] = error.issues.map((issue) => ({
           field: issue.path.join("."),
           message: issue.message,

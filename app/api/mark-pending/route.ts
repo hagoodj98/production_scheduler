@@ -63,10 +63,6 @@ export async function POST(req: NextRequest) {
         { status: 200 },
       );
     } else {
-      //updating existing order
-      // Log received payload to aid debugging
-      console.debug("mark-pending update received:", { order: order });
-
       const updatedOrder = await prisma.productionOrder.update({
         where: {
           id: order.orderId!,

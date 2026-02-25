@@ -8,7 +8,5 @@ export async function GET() {
     },
   });
 
-  console.log(resources);
-
   return NextResponse.json({ resources });
 }

@@ -21,8 +21,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log(result);
-
     if (!result) {
       return NextResponse.json(
         { message: "No matching order found" },

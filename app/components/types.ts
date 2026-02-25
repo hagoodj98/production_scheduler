@@ -61,15 +61,7 @@ export type ProductionOrder = {
 export type AvailableSlotPair = {
   name: ClientResource;
   value: number;
-}; /*
-
-export type Resource = {
-  id: number, //Like any array give each item a number
-  name: string,//Name of job
-  row: string //This is so that I can have access to the row on the backend in which aligns with the job the user selected.
-} & {
-  [key in SlotKey]: SlotStatus
-}*/
+};
 
 export type Slot = {
   id: {
@@ -118,7 +110,6 @@ export type ErrorMessage = {
   field: string;
   message: string;
 };
-//Omit<Resource, 'id' | 'status'>[]
 export type CustomError = {
   message: string;
   status: number;
