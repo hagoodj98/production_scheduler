@@ -1,20 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/database";
+import { productionOrderRepository } from "@/lib/repositories";
 import { loopThroughScheduledJobs } from "@/task/schedulerTask";
 import { CustomError } from "@/utils/CustomErrors";
 
 export async function POST() {
   try {
-    const getAllRequestedJobs = await prisma.productionOrder.findMany({
-      select: {
-        id: true,
-        dayMonthYear: true,
-        startTime: true,
-        endTime: true,
-        resourceStatus: true,
-        resourceId: false,
-      },
-    });
+    const getAllRequestedJobs =
+      await productionOrderRepository.findAllForStatusCheck();
 
     try {
       loopThroughScheduledJobs(getAllRequestedJobs);

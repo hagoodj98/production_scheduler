@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/database";
+import { selectedResourceRepository } from "@/lib/repositories";
 import { resourceSchema } from "@/app/validation/resourceSchemas";
 
 export async function POST(req: NextRequest) {
@@ -8,11 +8,7 @@ export async function POST(req: NextRequest) {
 
     const addResource = resourceSchema.parse(rawData).resource_name;
 
-    await prisma.selectedResource.create({
-      data: {
-        resource_name: addResource,
-      },
-    });
+    await selectedResourceRepository.create(addResource);
 
     return NextResponse.json({ message: `received endpoint` }, { status: 200 });
   } catch (error) {

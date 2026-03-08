@@ -12,6 +12,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["tests/zod/**/*.spec.ts"],
+    setupFiles: ["tests/setup.ts"],
+    include: ["tests/**/*.spec.ts", "tests/**/*.spec.tsx"],
+    exclude: ["tests/e2e/**"],
   },
 });

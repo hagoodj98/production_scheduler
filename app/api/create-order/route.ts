@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/database";
 import dayjs from "dayjs";
 import { productionOrderSchema } from "@/app/validation/productionOrderSchemas";
+import {
+  selectedResourceRepository,
+  productionOrderRepository,
+} from "@/lib/repositories";
 
 export async function POST(req: NextRequest) {
   const rawData = await req.json();
@@ -55,28 +58,19 @@ export async function POST(req: NextRequest) {
   const date = dayjs(`${year}-${month}-${day}`);
   //Get ID of resource from the SelectedResource database we can along with the rest of the production order
   const getIdOfSelectedResource =
-    await prisma.selectedResource.findFirstOrThrow({
-      where: {
-        resource_name: resourceName,
-      },
-    });
+    await selectedResourceRepository.findByNameOrThrow(resourceName);
   const retrievedId = getIdOfSelectedResource.id;
 
   try {
     // If orderId exists, update the pending order to Processing. Otherwise create a new one.
     if (orderId) {
       // Update the pending order that was created by mark-pending
-      await prisma.productionOrder.update({
-        where: {
-          id: orderId,
-        },
-        data: {
-          dayMonthYear: date.toDate(),
-          startTime: startTime.toDate(),
-          endTime: endTime.toDate(),
-          resourceId: retrievedId,
-          resourceStatus: "Processing",
-        },
+      await productionOrderRepository.update(orderId, {
+        dayMonthYear: date.toDate(),
+        startTime: startTime.toDate(),
+        endTime: endTime.toDate(),
+        resourceId: retrievedId,
+        resourceStatus: "Processing",
       });
       return NextResponse.json(
         {
@@ -87,14 +81,12 @@ export async function POST(req: NextRequest) {
       );
     } else {
       // Fallback: create new order if no pending order exists
-      const createdOrder = await prisma.productionOrder.create({
-        data: {
-          dayMonthYear: date.toDate(),
-          startTime: startTime.toDate(),
-          endTime: endTime.toDate(),
-          resourceId: retrievedId,
-          resourceStatus: "Processing",
-        },
+      const createdOrder = await productionOrderRepository.create({
+        dayMonthYear: date.toDate(),
+        startTime: startTime.toDate(),
+        endTime: endTime.toDate(),
+        resourceId: retrievedId,
+        resourceStatus: "Processing",
       });
       return NextResponse.json(
         {

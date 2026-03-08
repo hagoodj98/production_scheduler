@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/database";
+import { productionOrderRepository } from "@/lib/repositories";
 import { NextRequest, NextResponse } from "next/server";
 
 // Deletes orders matching resourceId AND startTime.
@@ -15,11 +15,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await prisma.productionOrder.delete({
-      where: {
-        id: orderId,
-      },
-    });
+    const result = await productionOrderRepository.remove(orderId);
 
     if (!result) {
       return NextResponse.json(
