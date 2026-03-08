@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CustomError } from "@/utils/CustomErrors";
 import dayjs from "dayjs";
-import { prisma } from "@/lib/database";
 import z from "zod/v4";
 import { markPendingRequestSchema } from "@/app/validation/productionOrderSchemas";
+import {
+  selectedResourceRepository,
+  productionOrderRepository,
+} from "@/lib/repositories";
 
 //validating data before use
 //This handler takes care of the pending state. This route is only called when the data is valid.
@@ -36,23 +39,17 @@ export async function POST(req: NextRequest) {
     const date = dayjs(`${year}-${month}-${day}`);
     //Get ID of resource from the SelectedResource database we can along with the rest of the production order
     const getIdOfSelectedResource =
-      await prisma.selectedResource.findFirstOrThrow({
-        where: {
-          resource_name: resourceName,
-        },
-      });
+      await selectedResourceRepository.findByNameOrThrow(resourceName);
     const retrievedId = getIdOfSelectedResource.id;
 
     if (!existingOrder) {
       // Best practice: convert to JS Date when saving with Prisma
-      const createdOrder = await prisma.productionOrder.create({
-        data: {
-          dayMonthYear: date.toDate(), // Prisma DateTime
-          startTime: startTime.toDate(),
-          endTime: endTime.toDate(),
-          resourceId: retrievedId,
-          resourceStatus: "Pending",
-        },
+      const createdOrder = await productionOrderRepository.create({
+        dayMonthYear: date.toDate(), // Prisma DateTime
+        startTime: startTime.toDate(),
+        endTime: endTime.toDate(),
+        resourceId: retrievedId,
+        resourceStatus: "Pending",
       });
 
       return NextResponse.json(
@@ -63,18 +60,16 @@ export async function POST(req: NextRequest) {
         { status: 200 },
       );
     } else {
-      const updatedOrder = await prisma.productionOrder.update({
-        where: {
-          id: order.orderId!,
-        },
-        data: {
+      const updatedOrder = await productionOrderRepository.update(
+        order.orderId!,
+        {
           dayMonthYear: date.toDate(), // Prisma DateTime
           startTime: startTime.toDate(),
           endTime: endTime.toDate(),
           resourceId: retrievedId,
           resourceStatus: "Pending",
         },
-      });
+      );
       return NextResponse.json(
         {
           message: "succeed",

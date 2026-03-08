@@ -1,12 +1,8 @@
-import { prisma } from "@/lib/database";
+import { productionOrderRepository } from "@/lib/repositories";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const resources = await prisma.productionOrder.findMany({
-    include: {
-      resource: true,
-    },
-  });
+  const resources = await productionOrderRepository.findAll();
 
   return NextResponse.json({ resources });
 }

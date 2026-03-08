@@ -12,7 +12,7 @@ export default async function Home() {
       <h2 className="text-[#FFBB28] text-2xl">Production Scheduler</h2>
 
       <div className=" top-0 z-20  bg-white py-4 flex justify-center  gap-4">
-        <div className="hidden md:flex ml-4 mr-4">
+        <div className="flex ml-1 mr-1 md:ml-4 md:mr-4">
           <Recharts compact />
         </div>
         <div className=" flex items-center gap-3">

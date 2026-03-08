@@ -1,18 +1,21 @@
 import ProductionForm from "@/app/components/ProductionForm";
 import React from "react";
-import prisma from "@/prisma/client";
+import {
+  productionOrderRepository,
+  selectedResourceRepository,
+} from "@/lib/repositories";
 export default async function EditOrderForm({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const pendingOrder = await prisma.productionOrder.findUniqueOrThrow({
-    where: { id: parseInt(id) },
-  });
-  const getResourceName = await prisma.selectedResource.findFirstOrThrow({
-    where: { id: pendingOrder.resourceId },
-  });
+  const pendingOrder = await productionOrderRepository.findByIdOrThrow(
+    parseInt(id),
+  );
+  const getResourceName = await selectedResourceRepository.findByIdOrThrow(
+    pendingOrder.resourceId,
+  );
   const previousOrder = {
     ...pendingOrder,
     resourceName: getResourceName.resource_name,
