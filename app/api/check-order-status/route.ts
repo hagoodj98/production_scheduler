@@ -12,7 +12,6 @@ export async function POST() {
       loopThroughScheduledJobs(getAllRequestedJobs);
     } catch (error) {
       if (error instanceof CustomError) {
-        console.log("catching the error in schedule-task");
         return NextResponse.json(
           { message: error.message },
           { status: error.statusCode },
