@@ -29,7 +29,7 @@ npm install
 Create/update `.env` with at least:
 
 ```env
-DATABASE_URL="postgresql://<user>:<password>@localhost:5432/<db>?schema=public"
+DATABASE_URL="postgresql://<user>:<password>@localhost:5433/<db>?schema=public"
 POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<password>
 POSTGRES_DB=<db>
@@ -38,7 +38,7 @@ POSTGRES_DB=<db>
 Example:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/production_orders?schema=public"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/production_orders?schema=public"
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=production_orders
@@ -76,6 +76,10 @@ The app will be available at `http://localhost:3000`.
 ```bash
 npm run lint
 npm run type-check
+npm run test:unit
+npm run test:api
+npm run test:components
+npm run test:e2e
 npm run db:logs
 npm run db:down
 ```
@@ -96,13 +100,19 @@ npm run db:down
 ### How to run tests
 
 ```bash
-npm run test:zod
+npm run test:unit
+npm run test:api
+npm run test:components
+npm run test:e2e
 ```
 
 ### What is covered
 
 - Zod schema/unit tests for validation rules in `tests/zod/zod-schemas.spec.ts`.
-- Focus is on guarding core input contracts (orders/resources) before API/database writes.
+- API route tests for key handlers in `tests/api/*.spec.ts` with repository mocking.
+- Component tests for rendering and interaction behavior in `tests/components/*.spec.tsx`.
+- Scheduler task status-transition tests in `tests/task/schedulerTask.spec.ts`.
+- Playwright e2e coverage for core home/add-resource/notifier flows in `tests/e2e/home.spec.ts`.
 - Type safety checks via TypeScript (`npm run type-check`).
 - Lint checks for code quality and consistency (`npm run lint`).
 
@@ -133,13 +143,26 @@ npm run type-check
 - **UI layer:** App Router pages + reusable React components.
 - **API layer:** Next.js route handlers in `app/api/*` for resource/order operations.
 - **Validation layer:** Zod schemas for request/input constraints.
-- **Data layer:** Prisma ORM with PostgreSQL, migrations, and seed scripts.
+- **Data layer:** Prisma ORM with PostgreSQL, migrations, seed scripts, and a repository layer under `lib/repositories/*`.
 - **Background processing:** cron-driven status transitions for scheduled work.
+
+## CI Pipeline
+
+- Workflow name: `Production Scheduler CI`
+- Location: `.github/workflows/ci.yml`
+- Runs on push/PR to `main`:
+  - Install
+  - Prisma client generation
+  - Type check
+  - Lint
+  - Unit tests (`npm run test:unit`)
+  - E2E tests (`npm run test:e2e`)
+  - Build
 
 ## Known Issues / Limitations
 
 - No authentication/authorization yet; all flows assume a trusted user.
-- Test coverage is currently focused on Zod validation (not full API/UI integration tests).
+- Current e2e coverage is smoke-level and can be expanded for full multi-step workflows.
 - Scheduling/status logic is functional but can be further hardened for timezone edge cases and concurrency.
 - Some UX polish opportunities remain (form feedback consistency, loading/error states across all screens).
 - Error boundaries and observability/monitoring are minimal in current scope.
