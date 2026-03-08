@@ -7,7 +7,6 @@ type ResourceRow = {
   resource_name: string;
 };
 const seedResources = async (prisma: PrismaClient) => {
-  console.log("🌱 Seeding resources...");
   //Load CSV file
   const csvPath = path.join(process.cwd(), "prisma", "data", "resources.csv");
   const file = fs.readFileSync(csvPath, "utf8");

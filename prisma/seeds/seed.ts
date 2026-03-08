@@ -13,7 +13,6 @@ const prisma = new PrismaClient({
 
 async function main() {
   await seedResources(prisma);
-  console.log("Seeding completed:");
 }
 main()
   .catch((error) => {

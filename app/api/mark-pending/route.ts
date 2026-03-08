@@ -81,8 +81,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error(error);
     if (error instanceof z.ZodError) {
-      console.log(error.issues);
-
       return NextResponse.json(
         { error: error.issues.map((e) => e.message).join(", ") },
         { status: 400 },
