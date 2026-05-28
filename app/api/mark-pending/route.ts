@@ -1,24 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
-import { CustomError } from "@/utils/CustomErrors";
-import dayjs from "dayjs";
-import z from "zod/v4";
-import { markPendingRequestSchema } from "@/app/validation/productionOrderSchemas";
-import {
-  selectedResourceRepository,
-  productionOrderRepository,
-} from "@/lib/repositories";
+import { NextRequest, NextResponse } from 'next/server';
+import { CustomError } from '@/utils/CustomErrors';
+import dayjs from 'dayjs';
+import z from 'zod/v4';
+import { markPendingRequestSchema } from '@/app/validation/productionOrderSchemas';
+import { selectedResourceRepository, productionOrderRepository } from '@/lib/repositories';
+import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 
 //validating data before use
 //This handler takes care of the pending state. This route is only called when the data is valid.
 export async function POST(req: NextRequest) {
   try {
     if (!req) {
-      throw new CustomError("Missing input information", 404);
+      throw new CustomError('Missing input information', 404);
     }
 
     const rawData = await req.json();
-    const { order, existingOrder } =
-      await markPendingRequestSchema.parseAsync(rawData);
+    const { order, existingOrder } = await markPendingRequestSchema.parseAsync(rawData);
     //Getting data out of rawData so we can push clean and clarified data to database
     const year = order.dayMonthYear.year;
     const month = order.dayMonthYear.month;
@@ -30,13 +27,15 @@ export async function POST(req: NextRequest) {
     const resourceName = order.resource.resource_name;
     const startTime = dayjs(
       `${year}-${month}-${day} ${startHour}:${startMinute}:00`,
-      "YYYY-M-D HH:mm:ss",
+      'YYYY-M-D HH:mm:ss',
     );
     const endTime = dayjs(
       `${year}-${month}-${day} ${endHour}:${endMinute}:00`,
-      "YYYY-M-D HH:mm:ss",
+      'YYYY-M-D HH:mm:ss',
     );
     const date = dayjs(`${year}-${month}-${day}`);
+    //validating the times with the timeScheduleValidator function I created. This will throw an error if the times are not valid and the catch block will handle it.
+    timeScheduleValidator(order.dayMonthYear, order.timeRange);
     //Get ID of resource from the SelectedResource database we can along with the rest of the production order
     const getIdOfSelectedResource =
       await selectedResourceRepository.findByNameOrThrow(resourceName);
@@ -49,30 +48,27 @@ export async function POST(req: NextRequest) {
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
         resourceId: retrievedId,
-        resourceStatus: "Pending",
+        resourceStatus: 'Pending',
       });
 
       return NextResponse.json(
         {
-          message: "succeed",
+          message: 'succeed',
           orderId: createdOrder.id,
         },
         { status: 200 },
       );
     } else {
-      const updatedOrder = await productionOrderRepository.update(
-        order.orderId!,
-        {
-          dayMonthYear: date.toDate(), // Prisma DateTime
-          startTime: startTime.toDate(),
-          endTime: endTime.toDate(),
-          resourceId: retrievedId,
-          resourceStatus: "Pending",
-        },
-      );
+      const updatedOrder = await productionOrderRepository.update(order.orderId!, {
+        dayMonthYear: date.toDate(), // Prisma DateTime
+        startTime: startTime.toDate(),
+        endTime: endTime.toDate(),
+        resourceId: retrievedId,
+        resourceStatus: 'Pending',
+      });
       return NextResponse.json(
         {
-          message: "succeed",
+          message: 'succeed',
           orderId: updatedOrder.id,
         },
         { status: 200 },
@@ -82,13 +78,16 @@ export async function POST(req: NextRequest) {
     console.error(error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: error.issues.map((e) => e.message).join(", ") },
+        { error: error.issues.map((e) => e.message).join(', ') },
         { status: 400 },
       );
     }
+    if (error instanceof CustomError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
 
     return NextResponse.json(
-      { error: "There was an internal error. Try again later" },
+      { error: 'There was an internal error. Try again later' },
       { status: 500 },
     );
   }
