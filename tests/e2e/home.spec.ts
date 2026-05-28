@@ -1,4 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { gotoHomeAndWaitForJobs, mockLoadJobs } from "./helpers";
+
+const todayAt = (hour: number, minute = 0) => {
+  const d = new Date();
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+};
 
 test("home page renders scheduler controls", async ({ page }) => {
   await page.goto("/");
@@ -14,32 +21,24 @@ test("home page renders scheduler controls", async ({ page }) => {
 });
 
 test("shows warning notifier when editing a Completed order", async ({ page }) => {
-  await page.route("**/api/load-jobs-to-chart", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        ResourceProductionOrders: [
-          {
-            id: 1,
-            resource_name: "CNC Machine 1",
-            productionOrders: [
-              {
-                id: 101,
-                dayMonthYear: "2026-03-08T00:00:00.000Z",
-                startTime: "2026-03-08T08:00:00.000Z",
-                endTime: "2026-03-08T09:00:00.000Z",
-                resourceStatus: "Completed",
-                resourceId: 1,
-              },
-            ],
-          },
-        ],
-      }),
-    });
-  });
+  await mockLoadJobs(page, [
+    {
+      id: 1,
+      resource_name: "CNC Machine 1",
+      productionOrders: [
+        {
+          id: 101,
+          dayMonthYear: todayAt(0, 0),
+          startTime: todayAt(8, 0),
+          endTime: todayAt(9, 0),
+          resourceStatus: "Completed",
+          resourceId: 1,
+        },
+      ],
+    },
+  ]);
 
-  await page.goto("/");
+  await gotoHomeAndWaitForJobs(page);
 
   const event = page.getByText(/CNC Machine 1 at/i).first();
   await expect(event).toBeVisible();
@@ -74,32 +73,24 @@ test("shows network error snackbar when add resource API fails", async ({ page }
 });
 
 test("shows warning notifier when deleting a Completed order", async ({ page }) => {
-  await page.route("**/api/load-jobs-to-chart", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        ResourceProductionOrders: [
-          {
-            id: 2,
-            resource_name: "CNC Machine 2",
-            productionOrders: [
-              {
-                id: 202,
-                dayMonthYear: "2026-03-08T00:00:00.000Z",
-                startTime: "2026-03-08T10:00:00.000Z",
-                endTime: "2026-03-08T11:00:00.000Z",
-                resourceStatus: "Completed",
-                resourceId: 2,
-              },
-            ],
-          },
-        ],
-      }),
-    });
-  });
+  await mockLoadJobs(page, [
+    {
+      id: 2,
+      resource_name: "CNC Machine 2",
+      productionOrders: [
+        {
+          id: 202,
+          dayMonthYear: todayAt(0, 0),
+          startTime: todayAt(10, 0),
+          endTime: todayAt(11, 0),
+          resourceStatus: "Completed",
+          resourceId: 2,
+        },
+      ],
+    },
+  ]);
 
-  await page.goto("/");
+  await gotoHomeAndWaitForJobs(page);
 
   const event = page.getByText(/CNC Machine 2 at/i).first();
   await expect(event).toBeVisible();
@@ -113,32 +104,24 @@ test("shows warning notifier when deleting a Completed order", async ({ page }) 
 });
 
 test("renders Busy status with red calendar event color", async ({ page }) => {
-  await page.route("**/api/load-jobs-to-chart", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        ResourceProductionOrders: [
-          {
-            id: 3,
-            resource_name: "CNC Machine 3",
-            productionOrders: [
-              {
-                id: 303,
-                dayMonthYear: "2026-03-08T00:00:00.000Z",
-                startTime: "2026-03-08T12:00:00.000Z",
-                endTime: "2026-03-08T13:00:00.000Z",
-                resourceStatus: "Busy",
-                resourceId: 3,
-              },
-            ],
-          },
-        ],
-      }),
-    });
-  });
+  await mockLoadJobs(page, [
+    {
+      id: 3,
+      resource_name: "CNC Machine 3",
+      productionOrders: [
+        {
+          id: 303,
+          dayMonthYear: todayAt(0, 0),
+          startTime: todayAt(12, 0),
+          endTime: todayAt(13, 0),
+          resourceStatus: "Busy",
+          resourceId: 3,
+        },
+      ],
+    },
+  ]);
 
-  await page.goto("/");
+  await gotoHomeAndWaitForJobs(page);
 
   const event = page.locator(".rbc-event", {
     hasText: /CNC Machine 3 at/i,

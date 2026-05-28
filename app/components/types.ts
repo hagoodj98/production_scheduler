@@ -1,7 +1,7 @@
-import { Prisma } from "../generated/prisma/client";
-import React from "react";
+import { Prisma } from '../generated/prisma/client';
+import React from 'react';
 
-export type SlotStatus = "Pending" | "Available" | "Scheduled" | "Busy";
+export type SlotStatus = 'Pending' | 'Available' | 'Scheduled' | 'Busy';
 
 export type CellID = {
   row: string;
@@ -43,8 +43,8 @@ export type TimeSlot = {
   minute: number | null;
 };
 export type TimeRange = {
-  startTimeSlot: Pick<TimeSlot, "hour" | "minute">;
-  endTimeSlot: Pick<TimeSlot, "hour" | "minute">;
+  startTimeSlot: Pick<TimeSlot, 'hour' | 'minute'>;
+  endTimeSlot: Pick<TimeSlot, 'hour' | 'minute'>;
 };
 
 export type DayMonthYear = {
@@ -97,17 +97,15 @@ export type ResourcesContextType = {
   setSelectedStatus: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
-export type ClientResource = Omit<Resource, "id" | "status">;
+export type ClientResource = Omit<Resource, 'id' | 'status'>;
 
 export type GetAllSelectedResourcesContextType = {
   selectedResourceData: ClientResource[];
-  setSelectedResourceData: React.Dispatch<
-    React.SetStateAction<ClientResource[]>
-  >;
+  setSelectedResourceData: React.Dispatch<React.SetStateAction<ClientResource[]>>;
 };
 
 export type ErrorMessage = {
-  field: string;
+  field?: string;
   message: string;
 };
 export type CustomError = {
