@@ -24,12 +24,12 @@ const freezeClientClock = async (page: Page) => {
     const NativeDate = Date;
 
     class MockDate extends NativeDate {
-      constructor(...args: ConstructorParameters<typeof Date>) {
+      constructor(...args: (string | number | Date)[]) {
         if (args.length === 0) {
           super(fixedNow);
           return;
         }
-        super(...args);
+        super(args[0]);
       }
 
       static now() {
@@ -38,7 +38,6 @@ const freezeClientClock = async (page: Page) => {
     }
 
     // Keep browser-side validation deterministic for date-sensitive schedules.
-    // eslint-disable-next-line no-global-assign
     // @ts-expect-error - replacing Date for the test page only
     Date = MockDate;
   });
