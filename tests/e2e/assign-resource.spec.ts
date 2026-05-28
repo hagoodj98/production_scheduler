@@ -1,22 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-
-const mockLoadJobs = async (page: Page) => {
-  await page.route('**/api/load-jobs-to-chart', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        ResourceProductionOrders: [
-          {
-            id: 1,
-            resource_name: 'Mixer A',
-            productionOrders: [],
-          },
-        ],
-      }),
-    });
-  });
-};
+import { gotoCreateOrderAndWaitForJobs, mockLoadJobs } from './helpers';
 
 const freezeClientClock = async (page: Page) => {
   await page.addInitScript(() => {
@@ -24,12 +7,60 @@ const freezeClientClock = async (page: Page) => {
     const NativeDate = Date;
 
     class MockDate extends NativeDate {
-      constructor(...args: (string | number | Date)[]) {
+      constructor(...args: unknown[]) {
         if (args.length === 0) {
           super(fixedNow);
           return;
         }
-        super(args[0]);
+
+        // Preserve native Date constructor behavior for all supported overloads.
+        if (args.length === 1) {
+          super(args[0] as string | number | Date);
+          return;
+        }
+        if (args.length === 2) {
+          super(args[0] as number, args[1] as number);
+          return;
+        }
+        if (args.length === 3) {
+          super(args[0] as number, args[1] as number, args[2] as number);
+          return;
+        }
+        if (args.length === 4) {
+          super(args[0] as number, args[1] as number, args[2] as number, args[3] as number);
+          return;
+        }
+        if (args.length === 5) {
+          super(
+            args[0] as number,
+            args[1] as number,
+            args[2] as number,
+            args[3] as number,
+            args[4] as number,
+          );
+          return;
+        }
+        if (args.length === 6) {
+          super(
+            args[0] as number,
+            args[1] as number,
+            args[2] as number,
+            args[3] as number,
+            args[4] as number,
+            args[5] as number,
+          );
+          return;
+        }
+
+        super(
+          args[0] as number,
+          args[1] as number,
+          args[2] as number,
+          args[3] as number,
+          args[4] as number,
+          args[5] as number,
+          args[6] as number,
+        );
       }
 
       static now() {
@@ -92,17 +123,17 @@ const fillResourceAndDate = async (page: Page, date: string) => {
 test.describe('assign resource scheduling validation', () => {
   test('shows an error when the start time is in the past', async ({ page }) => {
     await freezeClientClock(page);
-    await mockLoadJobs(page);
-
-    await Promise.all([
-      page.waitForResponse((response) => response.url().includes('/api/load-jobs-to-chart')),
-      page.goto('/'),
+    await mockLoadJobs(page, [
+      {
+        id: 1,
+        resource_name: 'Mixer A',
+        productionOrders: [],
+      },
     ]);
-
-    await page.getByRole('link', { name: 'Navigate to Create Order' }).click();
+    await gotoCreateOrderAndWaitForJobs(page);
 
     await fillSchedule(page, {
-      date: '05/27/2026',
+      date: '01/01/2020',
       startTime: '09:00 AM',
       endTime: '11:00 AM',
     });
@@ -114,17 +145,17 @@ test.describe('assign resource scheduling validation', () => {
 
   test('shows an error when the end time is before the start time', async ({ page }) => {
     await freezeClientClock(page);
-    await mockLoadJobs(page);
-
-    await Promise.all([
-      page.waitForResponse((response) => response.url().includes('/api/load-jobs-to-chart')),
-      page.goto('/'),
+    await mockLoadJobs(page, [
+      {
+        id: 1,
+        resource_name: 'Mixer A',
+        productionOrders: [],
+      },
     ]);
-
-    await page.getByRole('link', { name: 'Navigate to Create Order' }).click();
+    await gotoCreateOrderAndWaitForJobs(page);
 
     await fillSchedule(page, {
-      date: '06/01/2026',
+      date: '12/31/2099',
       startTime: '10:00 AM',
       endTime: '09:30 AM',
     });
@@ -136,14 +167,14 @@ test.describe('assign resource scheduling validation', () => {
 
   test('shows zod errors when time fields are left unselected', async ({ page }) => {
     await freezeClientClock(page);
-    await mockLoadJobs(page);
-
-    await Promise.all([
-      page.waitForResponse((response) => response.url().includes('/api/load-jobs-to-chart')),
-      page.goto('/'),
+    await mockLoadJobs(page, [
+      {
+        id: 1,
+        resource_name: 'Mixer A',
+        productionOrders: [],
+      },
     ]);
-
-    await page.getByRole('link', { name: 'Navigate to Create Order' }).click();
+    await gotoCreateOrderAndWaitForJobs(page);
 
     await fillResourceAndDate(page, '06/01/2026');
 
