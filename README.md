@@ -1,4 +1,4 @@
-# Production Scheduler (Coding Challenge)
+# Production Scheduler
 
 Production Scheduler is a full-stack planning tool for assigning production work to resources by date and time, then tracking status through completion.
 
