@@ -1,9 +1,11 @@
-import Recharts from "./components/Recharts";
-import NavButton from "./components/NavButton";
-import Calendar from "./components/Calendar";
+import Recharts from './components/Recharts';
+import NavButton from './components/NavButton';
+import Calendar from './components/Calendar';
+import LockIcon from '@mui/icons-material/Lock';
 
 export default async function Home() {
   // Load resources and production orders on the server
+  let adminAccessGranted = false; // Replace with actual access control logic
 
   return (
     <div className="p-6">
@@ -11,17 +13,22 @@ export default async function Home() {
 
       <h2 className="text-[#FFBB28] text-2xl">Production Scheduler</h2>
 
-      <div className=" top-0 z-20  bg-white py-4 flex justify-center  gap-4">
-        <div className="flex ml-1 mr-1 md:ml-4 md:mr-4">
+      <div className=" top-0 z-20  bg-white py-4 flex  gap-4">
+        <div className="flex items-center justify-center border w-1/3 border-red-700 p-2">
+          <h3 className="text-sm font-bold text-red-700">Admin Access Only</h3>
+          <div className="text-red-700 text-sm">
+            <LockIcon />
+          </div>
+        </div>
+        <div className="flex ml-1 mr-1 w-1/3 md:ml-4 md:mr-4">
           <Recharts compact />
         </div>
-        <div className=" flex items-center gap-3">
-          <a
-            href="/add-resource"
-            className="rounded bg-yellow-400 text-black px-3 py-2 text-sm hover:bg-yellow-500"
-          >
-            + Add Resource
-          </a>
+        <div className=" flex items-center w-1/3 gap-3">
+          <NavButton
+            adminAccess={adminAccessGranted}
+            pageNav="/add-resource"
+            resourceLabel="Add Resource"
+          />
           <NavButton pageNav="/assign-resource" resourceLabel="Create Order" />
         </div>
       </div>
