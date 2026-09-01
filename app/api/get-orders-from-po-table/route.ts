@@ -1,8 +1,8 @@
-import { productionOrderRepository } from "@/lib/repositories";
-import { NextResponse } from "next/server";
+import { productionOrder } from '@/lib/repositories';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const resources = await productionOrderRepository.findAll();
+  const resources = await productionOrder.findAll();
 
   return NextResponse.json({ resources });
 }

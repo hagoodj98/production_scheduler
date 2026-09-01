@@ -5,6 +5,7 @@ import LockIcon from '@mui/icons-material/Lock';
 
 export default async function Home() {
   // Load resources and production orders on the server
+  // eslint-disable-next-line prefer-const
   let adminAccessGranted = false; // Replace with actual access control logic
 
   return (
@@ -24,11 +25,7 @@ export default async function Home() {
           <Recharts compact />
         </div>
         <div className=" flex items-center w-1/3 gap-3">
-          <NavButton
-            adminAccess={adminAccessGranted}
-            pageNav="/add-resource"
-            resourceLabel="Add Resource"
-          />
+          <NavButton adminAccess={adminAccessGranted} resourceLabel="Add Resource" />
           <NavButton pageNav="/assign-resource" resourceLabel="Create Order" />
         </div>
       </div>

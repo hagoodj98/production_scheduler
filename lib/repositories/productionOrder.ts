@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/database";
+import { prisma } from '@/lib/database';
 
 type ProductionOrderWriteInput = {
   dayMonthYear: Date;
@@ -52,7 +52,7 @@ const remove = (id: number) => {
   });
 };
 
-export const productionOrderRepository = {
+export const productionOrder = {
   findAll,
   findAllForStatusCheck,
   findByIdOrThrow,

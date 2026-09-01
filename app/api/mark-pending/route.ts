@@ -3,7 +3,7 @@ import { CustomError } from '@/utils/CustomErrors';
 import dayjs from 'dayjs';
 import z from 'zod/v4';
 import { markPendingRequestSchema } from '@/app/validation/productionOrderSchemas';
-import { selectedResourceRepository, productionOrderRepository } from '@/lib/repositories';
+import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 
 //validating data before use
@@ -37,13 +37,12 @@ export async function POST(req: NextRequest) {
     //validating the times with the timeScheduleValidator function I created. This will throw an error if the times are not valid and the catch block will handle it.
     timeScheduleValidator(order.dayMonthYear, order.timeRange);
     //Get ID of resource from the SelectedResource database we can along with the rest of the production order
-    const getIdOfSelectedResource =
-      await selectedResourceRepository.findByNameOrThrow(resourceName);
+    const getIdOfSelectedResource = await selectedResource.findByNameOrThrow(resourceName);
     const retrievedId = getIdOfSelectedResource.id;
 
     if (!existingOrder) {
       // Best practice: convert to JS Date when saving with Prisma
-      const createdOrder = await productionOrderRepository.create({
+      const createdOrder = await productionOrder.create({
         dayMonthYear: date.toDate(), // Prisma DateTime
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
@@ -59,7 +58,7 @@ export async function POST(req: NextRequest) {
         { status: 200 },
       );
     } else {
-      const updatedOrder = await productionOrderRepository.update(order.orderId!, {
+      const updatedOrder = await productionOrder.update(order.orderId!, {
         dayMonthYear: date.toDate(), // Prisma DateTime
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),

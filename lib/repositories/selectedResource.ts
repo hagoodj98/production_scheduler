@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/database";
+import { prisma } from '@/lib/database';
 
 const findAllWithOrders = () => {
   return prisma.selectedResource.findMany({
@@ -37,7 +37,7 @@ const create = (resource_name: string) => {
   });
 };
 
-export const selectedResourceRepository = {
+export const selectedResource = {
   findAllWithOrders,
   findByNameOrThrow,
   findByIdOrThrow,

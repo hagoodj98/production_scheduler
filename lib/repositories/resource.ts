@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/database";
+import { prisma } from '@/lib/database';
 
 const findAll = () => {
   return prisma.resource.findMany();
@@ -9,15 +9,15 @@ const findByNamePrefix = (name: string) => {
     where: {
       resource_name: {
         startsWith: name,
-        mode: "insensitive",
+        mode: 'insensitive',
       },
     },
-    orderBy: { resource_name: "asc" },
+    orderBy: { resource_name: 'asc' },
     take: 100,
   });
 };
 
-export const resourceRepository = {
+export const resource = {
   findAll,
   findByNamePrefix,
 };

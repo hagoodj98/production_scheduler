@@ -62,6 +62,10 @@ export type AvailableSlotPair = {
   name: ClientResource;
   value: number;
 };
+export type AuthData = {
+  username: string;
+  password: string;
+};
 
 export type Slot = {
   id: {

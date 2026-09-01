@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { selectedResourceRepository } from "@/lib/repositories";
-import { resourceSchema } from "@/app/validation/resourceSchemas";
+import { NextRequest, NextResponse } from 'next/server';
+import { selectedResource } from '@/lib/repositories';
+import { resourceSchema } from '@/app/validation/resourceSchemas';
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,14 +8,11 @@ export async function POST(req: NextRequest) {
 
     const addResource = resourceSchema.parse(rawData).resource_name;
 
-    await selectedResourceRepository.create(addResource);
+    await selectedResource.create(addResource);
 
     return NextResponse.json({ message: `received endpoint` }, { status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      { message: "Failed to add resource" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: 'Failed to add resource' }, { status: 500 });
   }
 }

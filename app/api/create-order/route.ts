@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import z from 'zod/v4';
 import { CustomError } from '@/utils/CustomErrors';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
-import { selectedResourceRepository, productionOrderRepository } from '@/lib/repositories';
+import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 
 export async function POST(req: NextRequest) {
@@ -46,14 +46,13 @@ export async function POST(req: NextRequest) {
     );
     const date = dayjs(`${year}-${month}-${day}`);
     //Get ID of resource from the SelectedResource database we can along with the rest of the production order
-    const getIdOfSelectedResource =
-      await selectedResourceRepository.findByNameOrThrow(resourceName);
+    const getIdOfSelectedResource = await selectedResource.findByNameOrThrow(resourceName);
     const retrievedId = getIdOfSelectedResource.id;
 
     // If orderId exists, update the pending order to Processing. Otherwise create a new one.
     if (orderId) {
       // Update the pending order that was created by mark-pending
-      await productionOrderRepository.update(orderId, {
+      await productionOrder.update(orderId, {
         dayMonthYear: date.toDate(),
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
@@ -69,7 +68,7 @@ export async function POST(req: NextRequest) {
       );
     } else {
       // Fallback: create new order if no pending order exists
-      const createdOrder = await productionOrderRepository.create({
+      const createdOrder = await productionOrder.create({
         dayMonthYear: date.toDate(),
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
