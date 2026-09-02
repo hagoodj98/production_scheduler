@@ -31,13 +31,13 @@ export default async function Home() {
       </div>
 
       {/* Main layout */}
-      <div>
-        <main className="md:col-span-9">
+      <main className="md:col-span-9">
+        <div>
           <div className="bg-white p-4 rounded shadow-sm min-h-[60vh]">
             <Calendar />
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

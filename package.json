@@ -13,6 +13,7 @@
     "db:down": "docker-compose down",
     "db:logs": "docker-compose logs -f db",
     "db:seed": "prisma db seed",
+    "db:show": "prisma studio",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test": "npm run test:unit && npm run test:e2e",

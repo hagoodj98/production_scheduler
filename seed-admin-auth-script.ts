@@ -6,7 +6,8 @@ async function seedAdminAuth() {
     const adminData = {
       email: process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL : '',
       password: process.env.ADMIN_PASSWORD ? process.env.ADMIN_PASSWORD : '',
-      admin_key: process.env.ADMIN_ACCESS_KEY ? parseInt(process.env.ADMIN_ACCESS_KEY) : 0,
+      admin_key: process.env.ADMIN_ACCESS_KEY ? process.env.ADMIN_ACCESS_KEY : '',
+      role: 'admin',
     };
 
     console.log('Seeding admin auth...');
