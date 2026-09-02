@@ -1,19 +1,28 @@
+'use server';
+
 import { adminAccessValidationSchema } from '../../utils/validationSchema';
 import { z } from 'zod';
-import { NextResponse, NextRequest } from 'next/server';
 
-export async function authenticateAdmin(payload: NextRequest) {
+interface FormData {
+  email: string;
+  password: string;
+  admin_key: string;
+}
+export async function signin(state: unknown, formData: FormData) {
   try {
-    const body = await payload.json();
-    await adminAccessValidationSchema.parseAsync(body);
-    return NextResponse.json({ message: 'Admin access validated successfully' });
+    const { email, password, admin_key } = await adminAccessValidationSchema.parseAsync(formData);
+
+    console.log(email);
+    console.log(password);
+    console.log(admin_key);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: 'Validation failed', error: error.issues },
-        { status: 400 },
-      );
+      console.error(error.issues.map((err) => err.message).join(', '));
+      return {
+        fields: error.issues.map((err) => err.path.join('.')),
+        errors: error.issues.map((err) => err.message),
+      };
     }
-    return NextResponse.json({ message: 'Validation failed', error }, { status: 400 });
+    console.error(error);
   }
 }
