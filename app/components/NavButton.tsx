@@ -37,7 +37,7 @@ const NavButton: React.FC<NavProps> = ({ resourceLabel, allPossibleResources, ad
           {resourceLabel}
         </Button>
       </Link>
-      {showAdminAccessForm && <AdminAccessForm />}
+      <AdminAccessForm open={showAdminAccessForm} onClose={() => setShowAdminAccessForm(false)} />
     </div>
   );
 };

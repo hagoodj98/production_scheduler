@@ -2,19 +2,26 @@
 import CustomModal from './ui/modal';
 import TextInput from './ui/input';
 import Button from '@mui/material/Button';
-import { useState, useActionState } from 'react';
-import { adminAccessValidationSchema } from '../../utils/validationSchema';
-import { ZodError } from 'zod';
+import { useState, useActionState, useEffect, useReducer } from 'react';
 import { signin } from '../actions/auth';
 
-const AdminAccessForm = () => {
+interface AdminAccessFormProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const AdminAccessForm = ({ open, onClose }: AdminAccessFormProps) => {
   const [formData, setFormData] = useState({ email: '', password: '', admin_key: '' });
-  const [error, setError] = useState('');
   const [state, formAction, pending] = useActionState(signin, undefined);
-  const [showModal, setShowModal] = useState(true);
+  useEffect(() => {
+    if (state?.userAuthenticated) {
+      onClose();
+    }
+  }, [state, onClose]);
+  // const handleClose = () => setShowModal(false);
 
   return (
-    <CustomModal open={showModal} onClose={() => setShowModal(false)}>
+    <CustomModal open={open} onClose={onClose}>
       <h3>Admin Access Required</h3>
       <p>Please enter admin credentials to proceed.</p>
       <form
@@ -52,7 +59,7 @@ const AdminAccessForm = () => {
         {state?.fields?.includes('admin_key') && (
           <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('admin_key')]}</p>
         )}
-        <Button variant="contained" type="submit">
+        <Button disabled={pending} variant="contained" type="submit">
           Submit
         </Button>
       </form>
