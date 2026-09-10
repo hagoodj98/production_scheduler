@@ -3,16 +3,19 @@
 import { adminAccessValidationSchema } from '../../utils/validationSchema';
 import { z } from 'zod';
 import { user } from '../../lib/repositories';
+import { createSession } from '../../lib/session';
 
-interface FormData {
-  email: string;
-  password: string;
-  admin_key: string;
-}
 export async function signin(state: unknown, formData: FormData) {
   try {
-    const { email, password, admin_key } = await adminAccessValidationSchema.parseAsync(formData);
+    const { email, password, admin_key, redirectPath } =
+      await adminAccessValidationSchema.parseAsync({
+        email: formData.get('email'),
+        password: formData.get('password'),
+        admin_key: formData.get('admin_key'),
+        redirectPath: formData.get('redirectPath'),
+      });
 
+    console.log(redirectPath); // You can remove this line later if not needed
     const authenticateUser = await user.login(email);
     if (!authenticateUser) {
       throw new Error('Invalid email');
@@ -21,7 +24,8 @@ export async function signin(state: unknown, formData: FormData) {
       //Kind of want to keep this section error ambiguous to not reveal which part failed
       throw new Error('Invalid password or admin key');
     }
-    return { userAuthenticated: true };
+    await createSession(authenticateUser.id);
+    return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(error.issues.map((err) => err.message).join(', '));

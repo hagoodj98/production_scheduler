@@ -2,23 +2,34 @@
 import CustomModal from './ui/modal';
 import TextInput from './ui/input';
 import Button from '@mui/material/Button';
-import { useState, useActionState, useEffect, useReducer } from 'react';
+import { useState, useActionState, useEffect } from 'react';
 import { signin } from '../actions/auth';
+import { useAuthenticatedAdminUser } from '../context';
+import { useRouter } from 'next/navigation';
 
 interface AdminAccessFormProps {
   open: boolean;
   onClose: () => void;
+  redirectPath?: string;
 }
 
-const AdminAccessForm = ({ open, onClose }: AdminAccessFormProps) => {
-  const [formData, setFormData] = useState({ email: '', password: '', admin_key: '' });
+const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    admin_key: '',
+    redirectPath: redirectPath || '',
+  });
+  const router = useRouter();
+  const { setIsAuthenticated } = useAuthenticatedAdminUser();
   const [state, formAction, pending] = useActionState(signin, undefined);
+
   useEffect(() => {
-    if (state?.userAuthenticated) {
-      onClose();
+    if (state?.success) {
+      router.push(redirectPath || '/');
+      setIsAuthenticated(true);
     }
-  }, [state, onClose]);
-  // const handleClose = () => setShowModal(false);
+  }, [state?.success, router, setIsAuthenticated, redirectPath]);
 
   return (
     <CustomModal open={open} onClose={onClose}>
@@ -26,7 +37,13 @@ const AdminAccessForm = ({ open, onClose }: AdminAccessFormProps) => {
       <p>Please enter admin credentials to proceed.</p>
       <form
         action={() => {
-          formAction(formData);
+          // Convert the formData state into a FormData object for submission
+          const data = new FormData();
+          data.append('email', formData.email);
+          data.append('password', formData.password);
+          data.append('admin_key', formData.admin_key);
+          data.append('redirectPath', formData.redirectPath);
+          formAction(data);
         }}
       >
         <TextInput
@@ -58,6 +75,10 @@ const AdminAccessForm = ({ open, onClose }: AdminAccessFormProps) => {
         />
         {state?.fields?.includes('admin_key') && (
           <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('admin_key')]}</p>
+        )}
+        <input type="hidden" name="redirectPath" value={formData.redirectPath} />
+        {state?.fields?.includes('redirectPath') && (
+          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('redirectPath')]}</p>
         )}
         <Button disabled={pending} variant="contained" type="submit">
           Submit

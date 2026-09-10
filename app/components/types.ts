@@ -12,7 +12,11 @@ export type Resource = {
   id: number;
   resource_name: string | null;
 };
-
+export type SessionPayload = {
+  userId: number;
+  role: string;
+  expiresAt: Date;
+};
 export type TimeSlots = {
   id: number;
   slot: StartEndTime;
