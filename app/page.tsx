@@ -36,7 +36,7 @@ export default async function Home() {
       <main className="md:col-span-9">
         <div>
           <div className="bg-white p-4 rounded shadow-sm min-h-[60vh]">
-            <Calendar />
+            <Calendar isAdminUserAuthenticated={isAdminUserAuthenticated} />
           </div>
         </div>
       </main>

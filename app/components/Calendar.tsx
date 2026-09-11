@@ -1,11 +1,11 @@
-"use client";
-import React, { useCallback, useState } from "react";
-import { Calendar, dayjsLocalizer } from "react-big-calendar";
-import dayjs from "dayjs";
-import useSWR from "swr";
-import { useRouter } from "next/navigation";
-import { useResourcesContext } from "../context";
-import Notifier, { Severity } from "./Notifier";
+'use client';
+import React, { useCallback, useState } from 'react';
+import { Calendar, dayjsLocalizer } from 'react-big-calendar';
+import dayjs from 'dayjs';
+import useSWR from 'swr';
+import { useRouter } from 'next/navigation';
+import { useResourcesContext } from '../context';
+import Notifier, { Severity } from './Notifier';
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -33,7 +33,9 @@ interface CalendarEvent {
   [key: string]: unknown;
 }
 
-const MyCalendar: React.FC = () => {
+const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
+  isAdminUserAuthenticated,
+}) => {
   const fetcher = async (url: string) => {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`API ${url} failed: ${res.status}`);
@@ -41,7 +43,7 @@ const MyCalendar: React.FC = () => {
   };
   const { data: fetchedData } = useSWR<{
     ResourceProductionOrders: OrderProps[];
-  }>("/api/load-jobs-to-chart", fetcher, {
+  }>('/api/load-jobs-to-chart', fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
 
@@ -49,10 +51,10 @@ const MyCalendar: React.FC = () => {
   const [openNotifier, setOpenNotifier] = useState(false);
   const navigate = useRouter();
   const [notifierSeverity, setNotifierSeverity] = useState<Severity>();
-  const [notifierMessage, setNotifierMessage] = useState("");
+  const [notifierMessage, setNotifierMessage] = useState('');
   const events = fetchedData?.ResourceProductionOrders.flatMap((order) =>
     order.productionOrders.map((job) => ({
-      title: `${order.resource_name} at ${dayjs(job.startTime).format("h:mm A")}`,
+      title: `${order.resource_name} at ${dayjs(job.startTime).format('h:mm A')}`,
       start: dayjs(job.startTime).toDate(),
       end: dayjs(job.endTime).toDate(),
       resourceStatus: job.resourceStatus,
@@ -80,20 +82,24 @@ const MyCalendar: React.FC = () => {
           type="button"
           className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2  rounded mr-2"
           onClick={async () => {
+            if (!isAdminUserAuthenticated) {
+              setNotifierMessage('You are not authorized to edit this order');
+              setOpenNotifier(true);
+              setNotifierSeverity('error');
+              return;
+            }
             if (
               !(
-                event.resourceStatus === "Busy" ||
-                event.resourceStatus === "Completed" ||
-                event.resourceStatus === "Scheduled"
+                event.resourceStatus === 'Busy' ||
+                event.resourceStatus === 'Completed' ||
+                event.resourceStatus === 'Scheduled'
               )
             ) {
               navigate.push(`/assign-resource/${event.id}`);
             } else {
-              setNotifierMessage(
-                "Busy/Completed/Scheduled orders cannot be edited",
-              );
+              setNotifierMessage('Busy/Completed/Scheduled orders cannot be edited');
               setOpenNotifier(true);
-              setNotifierSeverity("warning");
+              setNotifierSeverity('warning');
             }
           }}
         >
@@ -103,34 +109,38 @@ const MyCalendar: React.FC = () => {
           type="button"
           className="w-1/2 cursor-pointer bg-red-500 hover:bg-red-600 text-white px-2  rounded"
           onClick={async () => {
+            if (!isAdminUserAuthenticated) {
+              setNotifierMessage('You are not authorized to delete this order');
+              setOpenNotifier(true);
+              setNotifierSeverity('error');
+              return;
+            }
             if (
               !(
-                event.resourceStatus === "Busy" ||
-                event.resourceStatus === "Completed" ||
-                event.resourceStatus === "Scheduled"
+                event.resourceStatus === 'Busy' ||
+                event.resourceStatus === 'Completed' ||
+                event.resourceStatus === 'Scheduled'
               )
             ) {
               try {
-                await fetch("/api/delete-order", {
-                  method: "POST",
+                await fetch('/api/delete-order', {
+                  method: 'POST',
                   headers: {
-                    "Content-Type": "application/json",
+                    'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({ orderId: event.id }),
                 });
-                setNotifierMessage("Order deleted successfully");
+                setNotifierMessage('Order deleted successfully');
                 setOpenNotifier(true);
               } catch (error) {
-                console.error("Error deleting order:", error);
-                setNotifierMessage("Error deleting order");
+                console.error('Error deleting order:', error);
+                setNotifierMessage('Error deleting order');
                 setOpenNotifier(true);
               }
             } else {
-              setNotifierMessage(
-                "Busy/Completed/Scheduled orders cannot be deleted",
-              );
+              setNotifierMessage('Busy/Completed/Scheduled orders cannot be deleted');
               setOpenNotifier(true);
-              setNotifierSeverity("warning");
+              setNotifierSeverity('warning');
             }
           }}
         >
@@ -142,10 +152,7 @@ const MyCalendar: React.FC = () => {
     );
 
     return (
-      <div
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
-      >
+      <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
         {display}
       </div>
     );
@@ -155,39 +162,38 @@ const MyCalendar: React.FC = () => {
   const handleBackgroundColor = useCallback(() => {
     return (event: CalendarEvent) => {
       let backgroundColor;
-      if (event.resourceStatus === "Busy") {
-        backgroundColor = "#ff4d4d";
-      } else if (event.resourceStatus === "Scheduled") {
-        backgroundColor = "#007bff";
-      } else if (event.resourceStatus === "Completed") {
-        backgroundColor = "#2ecc71";
-      } else if (event.resourceStatus === "Pending") {
-        backgroundColor = "#f39c12";
+      if (event.resourceStatus === 'Busy') {
+        backgroundColor = '#ff4d4d';
+      } else if (event.resourceStatus === 'Scheduled') {
+        backgroundColor = '#007bff';
+      } else if (event.resourceStatus === 'Completed') {
+        backgroundColor = '#2ecc71';
+      } else if (event.resourceStatus === 'Pending') {
+        backgroundColor = '#f39c12';
       } else {
-        backgroundColor = "#cccccc"; // Default color
+        backgroundColor = '#cccccc'; // Default color
       }
 
       const style: React.CSSProperties = {
         backgroundColor,
-        borderRadius: "4px",
-        color: "#fff",
-        transition:
-          "opacity 200ms ease, box-shadow 200ms ease, transform 150ms ease",
+        borderRadius: '4px',
+        color: '#fff',
+        transition: 'opacity 200ms ease, box-shadow 200ms ease, transform 150ms ease',
       };
 
       if (selectedStatus) {
         if (event.resourceStatus === selectedStatus) {
-          style.boxShadow = "0 0 0 3px rgba(0,0,0,0.12)";
+          style.boxShadow = '0 0 0 3px rgba(0,0,0,0.12)';
           style.opacity = 1;
-          style.transform = "scale(1.02)";
+          style.transform = 'scale(1.02)';
         } else {
           style.opacity = 0.25;
-          style.transform = "none";
-          style.boxShadow = "none";
+          style.transform = 'none';
+          style.boxShadow = 'none';
         }
       } else {
         style.opacity = 1;
-        style.transform = "none";
+        style.transform = 'none';
       }
 
       return {
@@ -203,7 +209,7 @@ const MyCalendar: React.FC = () => {
         localizer={localizer}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: "calc(100vh - 220px)", fontSize: 10, width: "100%" }}
+        style={{ height: 'calc(100vh - 220px)', fontSize: 10, width: '100%' }}
         eventPropGetter={handleBackgroundColor()}
         components={{ event: EventComponent }}
       />
