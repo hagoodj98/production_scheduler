@@ -3,9 +3,9 @@
 import { adminAccessValidationSchema } from '../../utils/validationSchema';
 import { z } from 'zod';
 import { user } from '../../lib/repositories';
-import { createSession } from '../../lib/session';
+import { createSession, deleteSession } from '../../lib/session';
 
-export async function signin(state: unknown, formData: FormData) {
+export async function login(state: unknown, formData: FormData) {
   try {
     const { email, password, admin_key, redirectPath } =
       await adminAccessValidationSchema.parseAsync({
@@ -25,7 +25,7 @@ export async function signin(state: unknown, formData: FormData) {
       throw new Error('Invalid password or admin key');
     }
     await createSession(authenticateUser.id);
-    return { success: true };
+    return { login_success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(error.issues.map((err) => err.message).join(', '));
@@ -40,4 +40,8 @@ export async function signin(state: unknown, formData: FormData) {
       errors: [error instanceof Error ? error.message : 'Unknown error'],
     };
   }
+}
+export async function logout() {
+  await deleteSession();
+  return { logout_success: true };
 }

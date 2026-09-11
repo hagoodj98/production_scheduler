@@ -3,7 +3,7 @@ import CustomModal from './ui/modal';
 import TextInput from './ui/input';
 import Button from '@mui/material/Button';
 import { useState, useActionState, useEffect } from 'react';
-import { signin } from '../actions/auth';
+import { login } from '../actions/auth';
 import { useAuthenticatedAdminUser } from '../context';
 import { useRouter } from 'next/navigation';
 
@@ -22,14 +22,15 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
   });
   const router = useRouter();
   const { setIsAuthenticated } = useAuthenticatedAdminUser();
-  const [state, formAction, pending] = useActionState(signin, undefined);
+  const [state, formAction, pending] = useActionState(login, undefined);
 
   useEffect(() => {
-    if (state?.success) {
+    if (state?.login_success) {
       router.push(redirectPath || '/');
       setIsAuthenticated(true);
+      onClose();
     }
-  }, [state?.success, router, setIsAuthenticated, redirectPath]);
+  }, [state?.login_success, router, setIsAuthenticated, redirectPath, onClose]);
 
   return (
     <CustomModal open={open} onClose={onClose}>
