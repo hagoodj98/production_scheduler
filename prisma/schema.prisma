@@ -36,6 +36,8 @@ model SelectedResource {
 
 model User {
   id       Int    @id @default(autoincrement())
+  email    String @unique
+  name     String
   employeeId String @unique
   password String
   role     String
