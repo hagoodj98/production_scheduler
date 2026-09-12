@@ -23,7 +23,7 @@
     "test:zod": "vitest run --config vitest.config.ts tests/zod",
     "test:e2e": "playwright test",
     "prisma:seed": "tsx prisma/seeds/seed.ts",
-    "seed:admin": "tsx seed-admin-auth-script.ts"
+    "seed:employee": "tsx seed-employee-auth-script.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
