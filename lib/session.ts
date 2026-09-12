@@ -2,6 +2,7 @@ import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { SessionPayload } from '../app/components/types';
 import { cookies } from 'next/headers';
+
 const secretKey = process.env.SESSION_SECRET;
 // Encode the secret key for use with the jose library
 const encodedKey = new TextEncoder().encode(secretKey);
@@ -41,4 +42,13 @@ export async function createSession(userId: number) {
 export async function deleteSession() {
   const cookieStore = await cookies();
   cookieStore.delete('session');
+}
+export async function validateSession() {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('session')?.value; // Replace 'someCookieName' with the actual cookie name you want to access
+
+  if (!sessionToken) {
+    throw new Error('Unauthorized', { cause: 'No session token found' });
+  }
+  return sessionToken;
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validateSession } from '@/lib/session';
 import dayjs from 'dayjs';
 import z from 'zod/v4';
 import { CustomError } from '@/utils/CustomErrors';
@@ -15,7 +16,12 @@ export async function POST(req: NextRequest) {
     if (!order) {
       return NextResponse.json({ message: 'Missing order payload' }, { status: 400 });
     }
-
+    try {
+      await validateSession();
+    } catch (error) {
+      console.error('Unauthorized access attempt', error);
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
     // Getting data out of order so we can push clean and clarified data to database
     const year = order.dayMonthYear?.year;
     const month = order.dayMonthYear?.month;
