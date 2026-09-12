@@ -1,11 +1,16 @@
 import { prisma } from '@/lib/database';
 
-const create = (data: { email: string; password: string; admin_key: string; role: string }) => {
+const create = (data: {
+  password: string;
+  admin_key: string;
+  role: string;
+  employeeId: string;
+}) => {
   return prisma.user.create({ data });
 };
-const login = async (email: string) => {
+const login = async (employeeId: string) => {
   return await prisma.user.findUnique({
-    where: { email },
+    where: { employeeId },
   });
 };
 

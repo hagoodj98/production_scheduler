@@ -36,8 +36,23 @@ model SelectedResource {
 
 model User {
   id       Int    @id @default(autoincrement())
-  email    String @unique
+  employeeId String @unique
   password String
   role     String
   admin_key String
+  userPermissions UserPermission[]
+}
+
+model UserPermission {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  permissionId Int
+  user       User       @relation(fields: [userId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+}
+
+model Permission {
+  id       Int    @id @default(autoincrement())
+  name     String @unique
+  userPermissions UserPermission[]
 }
