@@ -1,15 +1,17 @@
+import { Employee } from '@/app/components/types';
 import { prisma } from '@/lib/database';
 
-const create = (data: {
-  email: string;
-  name: string;
-  password: string;
-  admin_key?: string | undefined;
-  role: string;
-  employeeId: string;
-  userPermissions: string[];
-}) => {
-  return prisma.user.create({ data });
+const createMany = (data: Employee[]) => {
+  return prisma.user.createMany({
+    data: data.map(({ name, email, password, admin_key, role, employeeId }) => ({
+      name,
+      email,
+      password,
+      admin_key,
+      role,
+      employeeId,
+    })),
+  });
 };
 const login = async (employeeId: string) => {
   return await prisma.user.findUnique({
@@ -18,6 +20,6 @@ const login = async (employeeId: string) => {
 };
 
 export const user = {
-  create,
+  createMany,
   login,
 };

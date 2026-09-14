@@ -9,7 +9,7 @@ export async function login(state: unknown, formData: FormData) {
   try {
     const { email, password, admin_key, redirectPath } =
       await adminAccessValidationSchema.parseAsync({
-        email: formData.get('email'),
+        email: formData.get('employee_ID'),
         password: formData.get('password'),
         admin_key: formData.get('admin_key'),
         redirectPath: formData.get('redirectPath'),

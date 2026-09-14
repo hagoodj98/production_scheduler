@@ -71,14 +71,13 @@ export type AuthData = {
   password: string;
 };
 export type Employee = {
-  id: string;
   employeeId: string;
   name: string;
   email: string;
   password: string;
   role: string;
-  admin_key: string | undefined;
-  userPermissions: string[];
+  admin_key?: string | null;
+  userPermissions?: string[];
 };
 export type Slot = {
   id: {

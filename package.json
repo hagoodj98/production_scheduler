@@ -16,6 +16,7 @@
     "db:show": "prisma studio",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:api": "vitest run --config vitest.config.ts tests/api",

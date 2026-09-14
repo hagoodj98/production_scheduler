@@ -15,7 +15,7 @@ interface AdminAccessFormProps {
 
 const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) => {
   const [formData, setFormData] = useState({
-    email: '',
+    employee_ID: '',
     password: '',
     admin_key: '',
     redirectPath: redirectPath || '',
@@ -40,7 +40,7 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
         action={() => {
           // Convert the formData state into a FormData object for submission
           const data = new FormData();
-          data.append('email', formData.email);
+          data.append('employee_ID', formData.employee_ID);
           data.append('password', formData.password);
           data.append('admin_key', formData.admin_key);
           data.append('redirectPath', formData.redirectPath);
@@ -48,14 +48,14 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
         }}
       >
         <TextInput
-          label="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          name="email"
-          type="email"
+          label="Employee ID"
+          value={formData.employee_ID}
+          onChange={(e) => setFormData({ ...formData, employee_ID: e.target.value })}
+          name="employee_ID"
+          type="text"
         />
-        {state?.fields?.includes('email') && (
-          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('email')]}</p>
+        {state?.fields?.includes('employee_ID') && (
+          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('employee_ID')]}</p>
         )}
         <TextInput
           label="Password"
