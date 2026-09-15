@@ -112,7 +112,7 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
                 const data = await response.json();
                 setOpenNotifier(true);
                 setNotifierMessage(data.error || 'Error fetching order details');
-                setNotifierSeverity('warning');
+                setNotifierSeverity('error');
                 return;
               }
               navigate.push(`/assign-resource/${event.id}`);
