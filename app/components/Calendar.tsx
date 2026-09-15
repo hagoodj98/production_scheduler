@@ -6,6 +6,7 @@ import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
 import { useResourcesContext } from '../context';
 import Notifier, { Severity } from './Notifier';
+import { CheckAuth } from './CookieLookUp';
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -41,12 +42,12 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
     if (!res.ok) throw new Error(`API ${url} failed: ${res.status}`);
     return await res.json();
   };
+
   const { data: fetchedData } = useSWR<{
     ResourceProductionOrders: OrderProps[];
   }>('/api/load-jobs-to-chart', fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
-
   const { selectedResourceIds, selectedStatus } = useResourcesContext();
   const [openNotifier, setOpenNotifier] = useState(false);
   const navigate = useRouter();
@@ -88,6 +89,7 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
               setNotifierSeverity('error');
               return;
             }
+            /*
             if (
               !(
                 event.resourceStatus === 'Busy' ||
@@ -100,6 +102,25 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
               setNotifierMessage('Busy/Completed/Scheduled orders cannot be edited');
               setOpenNotifier(true);
               setNotifierSeverity('warning');
+            }
+              */
+            try {
+              const response = await fetch(`/api/edit-resource?resourceId=${event.id}`, {
+                method: 'GET',
+              });
+              if (!response.ok) {
+                const data = await response.json();
+                setOpenNotifier(true);
+                setNotifierMessage(data.error || 'Error fetching order details');
+                setNotifierSeverity('warning');
+                return;
+              }
+              navigate.push(`/assign-resource/${event.id}`);
+            } catch (error) {
+              console.error('Error fetching order details:', error);
+              setNotifierMessage('Error fetching order details');
+              setOpenNotifier(true);
+              setNotifierSeverity('error');
             }
           }}
         >

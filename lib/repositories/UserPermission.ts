@@ -8,7 +8,18 @@ const createMany = (data: { userId: number; permissionId: number }[]) => {
     })),
   });
 };
+const find = (userId: number) => {
+  return prisma.userPermission.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      permission: true,
+    },
+  });
+};
 
 export const userPermission = {
   createMany,
+  find,
 };

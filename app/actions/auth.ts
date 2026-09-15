@@ -2,29 +2,36 @@
 
 import { adminAccessValidationSchema } from '../../utils/validationSchema';
 import { z } from 'zod';
-import { user } from '../../lib/repositories';
+import { user, userPermission } from '../../lib/repositories';
 import { createSession, deleteSession } from '../../lib/session';
 
 export async function login(state: unknown, formData: FormData) {
   try {
-    const { email, password, admin_key, redirectPath } =
-      await adminAccessValidationSchema.parseAsync({
-        email: formData.get('employee_ID'),
-        password: formData.get('password'),
-        admin_key: formData.get('admin_key'),
-        redirectPath: formData.get('redirectPath'),
-      });
+    const { employee_id, password, admin_key } = await adminAccessValidationSchema.parseAsync({
+      employee_id: formData.get('employee_id'),
+      password: formData.get('password'),
+      admin_key: formData.get('admin_key'),
+    });
 
-    console.log(redirectPath); // You can remove this line later if not needed
-    const authenticateUser = await user.login(email);
+    const authenticateUser = await user.login(employee_id);
     if (!authenticateUser) {
-      throw new Error('Invalid email');
+      throw new Error('Invalid employee ID');
     }
     if (authenticateUser.password !== password || authenticateUser.admin_key !== admin_key) {
       //Kind of want to keep this section error ambiguous to not reveal which part failed
       throw new Error('Invalid password or admin key');
     }
-    await createSession(authenticateUser.id);
+    const userPermissions = await userPermission.find(authenticateUser.id);
+    // Extract the permission names from the userPermissions array
+    const permissions = userPermissions.map((up) => up.permission.name);
+
+    const payloadSession = {
+      employee_id: authenticateUser.employeeId,
+      role: authenticateUser.role,
+      permissions: permissions,
+    };
+
+    await createSession(payloadSession);
     return { login_success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {

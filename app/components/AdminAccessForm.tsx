@@ -15,10 +15,9 @@ interface AdminAccessFormProps {
 
 const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) => {
   const [formData, setFormData] = useState({
-    employee_ID: '',
+    employee_id: '',
     password: '',
     admin_key: '',
-    redirectPath: redirectPath || '',
   });
   const router = useRouter();
   const { setIsAuthenticated } = useAuthenticatedAdminUser();
@@ -40,22 +39,21 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
         action={() => {
           // Convert the formData state into a FormData object for submission
           const data = new FormData();
-          data.append('employee_ID', formData.employee_ID);
+          data.append('employee_id', formData.employee_id);
           data.append('password', formData.password);
           data.append('admin_key', formData.admin_key);
-          data.append('redirectPath', formData.redirectPath);
           formAction(data);
         }}
       >
         <TextInput
           label="Employee ID"
-          value={formData.employee_ID}
-          onChange={(e) => setFormData({ ...formData, employee_ID: e.target.value })}
-          name="employee_ID"
+          value={formData.employee_id}
+          onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
+          name="employee_id"
           type="text"
         />
-        {state?.fields?.includes('employee_ID') && (
-          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('employee_ID')]}</p>
+        {state?.fields?.includes('employee_id') && (
+          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('employee_id')]}</p>
         )}
         <TextInput
           label="Password"
@@ -77,10 +75,7 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
         {state?.fields?.includes('admin_key') && (
           <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('admin_key')]}</p>
         )}
-        <input type="hidden" name="redirectPath" value={formData.redirectPath} />
-        {state?.fields?.includes('redirectPath') && (
-          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('redirectPath')]}</p>
-        )}
+
         <Button disabled={pending} variant="contained" type="submit">
           Submit
         </Button>
