@@ -19,22 +19,22 @@ export async function GET(req: NextRequest) {
 
     if (!payloadSession.permissions.includes('edit')) {
       return NextResponse.json(
-        { success: false, error: 'You are unauthorized to edit this resource' },
+        { success: false, error: 'You are unauthorized to edit this order' },
         { status: 403 },
       );
     }
 
     const params = req.nextUrl.searchParams;
-    const resourceId = params.get('resourceId');
-    console.log('Resource ID:', resourceId);
+    const orderId = params.get('orderId');
+    console.log('Order ID:', orderId);
 
-    // Perform your update logic here, e.g., update the resource in the database
+    // Perform your update logic here, e.g., update the order in the database
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error editing resource:', error);
-    return NextResponse.json({ success: false, error: 'Error editing resource' }, { status: 500 });
+    console.error('Error editing order:', error);
+    return NextResponse.json({ success: false, error: 'Error editing order' }, { status: 500 });
   }
 
-  // Perform your update logic here, e.g., update the resource in the database
+  // Perform your update logic here, e.g., update the order in the database
 }

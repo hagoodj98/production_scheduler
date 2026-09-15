@@ -89,32 +89,18 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
               setNotifierSeverity('error');
               return;
             }
-            /*
-            if (
-              !(
-                event.resourceStatus === 'Busy' ||
-                event.resourceStatus === 'Completed' ||
-                event.resourceStatus === 'Scheduled'
-              )
-            ) {
-              navigate.push(`/assign-resource/${event.id}`);
-            } else {
-              setNotifierMessage('Busy/Completed/Scheduled orders cannot be edited');
-              setOpenNotifier(true);
-              setNotifierSeverity('warning');
-            }
-              */
             try {
-              const response = await fetch(`/api/edit-resource?resourceId=${event.id}`, {
+              const response = await fetch(`/api/edit-order?orderId=${event.id}`, {
                 method: 'GET',
               });
               if (!response.ok) {
                 const data = await response.json();
                 setOpenNotifier(true);
-                setNotifierMessage(data.error || 'Error fetching order details');
+                setNotifierMessage(data.error);
                 setNotifierSeverity('error');
                 return;
               }
+              // If the response is OK, navigate to the assign resource page
               navigate.push(`/assign-resource/${event.id}`);
             } catch (error) {
               console.error('Error fetching order details:', error);
@@ -136,32 +122,25 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
               setNotifierSeverity('error');
               return;
             }
-            if (
-              !(
-                event.resourceStatus === 'Busy' ||
-                event.resourceStatus === 'Completed' ||
-                event.resourceStatus === 'Scheduled'
-              )
-            ) {
-              try {
-                await fetch('/api/delete-order', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ orderId: event.id }),
-                });
-                setNotifierMessage('Order deleted successfully');
+            try {
+              const response = await fetch(`/api/delete-order?orderId=${event.id}`, {
+                method: 'DELETE',
+              });
+              if (!response.ok) {
+                const data = await response.json();
                 setOpenNotifier(true);
-              } catch (error) {
-                console.error('Error deleting order:', error);
-                setNotifierMessage('Error deleting order');
-                setOpenNotifier(true);
+                setNotifierMessage(data.error);
+                setNotifierSeverity('error');
+                return;
               }
-            } else {
-              setNotifierMessage('Busy/Completed/Scheduled orders cannot be deleted');
+              setNotifierMessage('Order deleted successfully');
               setOpenNotifier(true);
-              setNotifierSeverity('warning');
+              setNotifierSeverity('success');
+            } catch (error) {
+              console.error('Error deleting order:', error);
+              setNotifierMessage('Error deleting order');
+              setOpenNotifier(true);
+              setNotifierSeverity('error');
             }
           }}
         >
