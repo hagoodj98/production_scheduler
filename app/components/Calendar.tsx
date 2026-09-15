@@ -90,7 +90,7 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
               return;
             }
             try {
-              const response = await fetch(`/api/edit-order?orderId=${event.id}`, {
+              const response = await fetch(`/api/reschedule-order?orderId=${event.id}`, {
                 method: 'GET',
               });
               if (!response.ok) {
@@ -101,7 +101,7 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
                 return;
               }
               // If the response is OK, navigate to the assign resource page
-              navigate.push(`/assign-resource/${event.id}`);
+              navigate.push(`/assign-order/${event.id}`);
             } catch (error) {
               console.error('Error fetching order details:', error);
               setNotifierMessage('Error fetching order details');

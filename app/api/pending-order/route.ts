@@ -5,15 +5,33 @@ import z from 'zod/v4';
 import { markPendingRequestSchema } from '@/app/validation/productionOrderSchemas';
 import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
-
+import { PayloadSession } from '@/app/components/types';
+import { cookies } from 'next/headers';
+import { decrypt, validateSession } from '@/lib/session';
 //validating data before use
 //This handler takes care of the pending state. This route is only called when the data is valid.
 export async function POST(req: NextRequest) {
   try {
+    // Check for session cookie and user permissions before proceeding
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('session')?.value;
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { success: false, error: 'No session cookie found' },
+        { status: 401 },
+      );
+    }
+    const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
+    if (!payloadSession.permissions.includes('assign')) {
+      return NextResponse.json(
+        { success: false, error: 'You are unauthorized to schedule orders' },
+        { status: 403 },
+      );
+    }
+
     if (!req) {
       throw new CustomError('Missing input information', 404);
     }
-
     const rawData = await req.json();
     const { order, existingOrder } = await markPendingRequestSchema.parseAsync(rawData);
     //Getting data out of rawData so we can push clean and clarified data to database

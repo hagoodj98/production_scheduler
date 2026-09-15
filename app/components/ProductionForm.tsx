@@ -167,7 +167,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
 
     try {
       setSubmitting(true);
-      await fetch('/api/create-order', {
+      await fetch('/api/assign-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +255,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           return;
         }
 
-        const response = await fetch('/api/mark-pending', {
+        const response = await fetch('/api/pending-order', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -300,7 +300,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       markhasRun.current = true;
       const response = async () => {
         try {
-          await fetch('/api/mark-pending', {
+          await fetch('/api/pending-order', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

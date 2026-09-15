@@ -10,12 +10,12 @@ async function seedAdminAuth() {
     const insertEmployees: Employee[] = [];
     const insertUserPermission: { userId: number; permissionId: number }[] = [];
     const insertPermission: { name: string }[] = [
-      { name: 'read' },
-      { name: 'CREATE_RESOURCE' },
-      { name: 'ASSIGN_TASK' },
-      { name: 'ALL_ACCESS' },
-      { name: 'RESCHEDULE_TASK' },
-      { name: 'DELETE_TASK' },
+      { name: 'READ_ONLY' },
+      { name: 'ADD_RESOURCE' },
+      { name: 'ASSIGN_TASKS' },
+      { name: 'ALL_ACCESS_TO_TASKS' },
+      { name: 'RESCHEDULE_TASKS' },
+      { name: 'DELETE_TASKS' },
     ];
     // Seed initial admin and worker employees with their permissions
     insertEmployees.push(

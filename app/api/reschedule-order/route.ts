@@ -17,9 +17,9 @@ export async function GET(req: NextRequest) {
 
     console.log(payloadSession);
 
-    if (!payloadSession.permissions.includes('edit')) {
+    if (!payloadSession.permissions.includes('reschedule')) {
       return NextResponse.json(
-        { success: false, error: 'You are unauthorized to edit this order' },
+        { success: false, error: 'You are unauthorized to reschedule this order' },
         { status: 403 },
       );
     }
@@ -28,12 +28,15 @@ export async function GET(req: NextRequest) {
     const orderId = params.get('orderId');
     console.log('Order ID:', orderId);
 
-    // Perform your update logic here, e.g., update the order in the database
+    // Perform your rescheduling logic here, e.g., update the order in the database
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error editing order:', error);
-    return NextResponse.json({ success: false, error: 'Error editing order' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Error rescheduling order' },
+      { status: 500 },
+    );
   }
 
   // Perform your update logic here, e.g., update the order in the database

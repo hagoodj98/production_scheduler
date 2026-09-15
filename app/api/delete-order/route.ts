@@ -7,12 +7,6 @@ import { PayloadSession } from '@/app/components/types';
 // We use deleteMany because resourceId+startTime is not a unique constraint.
 export async function DELETE(req: NextRequest) {
   try {
-    const params = req.nextUrl.searchParams;
-    const orderId = params.get('orderId');
-
-    if (!orderId) {
-      return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
-    }
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get('session')?.value;
     if (!sessionCookie) {
@@ -29,6 +23,12 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    const params = req.nextUrl.searchParams;
+    const orderId = params.get('orderId');
+
+    if (!orderId) {
+      return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
+    }
     const result = await productionOrder.remove(Number(orderId));
 
     if (!result) {

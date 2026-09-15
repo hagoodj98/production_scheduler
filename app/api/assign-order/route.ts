@@ -1,14 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateSession } from '@/lib/session';
+import { decrypt, validateSession } from '@/lib/session';
 import dayjs from 'dayjs';
 import z from 'zod/v4';
 import { CustomError } from '@/utils/CustomErrors';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
+import { cookies } from 'next/headers';
+import { PayloadSession } from '@/app/components/types';
 
 export async function POST(req: NextRequest) {
   try {
+    // Check for session cookie and user permissions before proceeding
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('session')?.value;
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { success: false, error: 'No session cookie found' },
+        { status: 401 },
+      );
+    }
+    const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
+    if (!payloadSession.permissions.includes('assign')) {
+      return NextResponse.json(
+        { success: false, error: 'You are unauthorized to schedule orders' },
+        { status: 403 },
+      );
+    }
+
     const rawData = await req.json();
     const order = productionOrderSchema.parse(rawData.productionOrder ?? rawData.order);
     const orderId = order?.orderId; // Get the pending order ID
