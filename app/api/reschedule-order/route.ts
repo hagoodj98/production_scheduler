@@ -1,29 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
-import { decrypt } from '@/lib/session';
-import type { PayloadSession } from '@/app/components/types';
+import { requirePermission } from '@/utils/requirePermissionHelper';
 
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
-    if (!sessionCookie) {
-      return NextResponse.json(
-        { success: false, error: 'No session cookie found' },
-        { status: 401 },
-      );
-    }
-    const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
-
-    console.log(payloadSession);
-
-    if (!payloadSession.permissions.includes('reschedule')) {
-      return NextResponse.json(
-        { success: false, error: 'You are unauthorized to reschedule this order' },
-        { status: 403 },
-      );
-    }
-
+    await requirePermission('reschedule');
     const params = req.nextUrl.searchParams;
     const orderId = params.get('orderId');
     console.log('Order ID:', orderId);
@@ -34,8 +14,8 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error editing order:', error);
     return NextResponse.json(
-      { success: false, error: 'Error rescheduling order' },
-      { status: 500 },
+      { success: false, error: 'Unauthorized to reschedule' },
+      { status: 403 },
     );
   }
 

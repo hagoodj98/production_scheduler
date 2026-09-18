@@ -42,7 +42,7 @@ const NavButton: React.FC<NavProps> = ({
         </Button>
       ) : (
         <Link href={pageNav} aria-label={`Navigate to ${resourceLabel}`}>
-          <Button size="small" variant="contained" disableElevation>
+          <Button size="small" variant="contained" disableElevation onClick={() => {}}>
             {resourceLabel}
           </Button>
         </Link>

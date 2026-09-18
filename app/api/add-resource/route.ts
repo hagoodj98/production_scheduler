@@ -1,27 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { selectedResource } from '@/lib/repositories';
 import { resourceSchema } from '@/app/validation/resourceSchemas';
-import { decrypt, validateSession } from '@/lib/session';
-import { PayloadSession } from '@/app/components/types';
-import { cookies } from 'next/headers';
+import { validateSession } from '@/lib/session';
+
+import { requirePermission } from '@/utils/requirePermissionHelper';
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
-    if (!sessionCookie) {
-      return NextResponse.json(
-        { success: false, error: 'No session cookie found' },
-        { status: 401 },
-      );
-    }
-    const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
-    if (!payloadSession.permissions.includes('add')) {
-      return NextResponse.json(
-        { success: false, error: 'You are unauthorized to add this resource' },
-        { status: 403 },
-      );
-    }
-
+    // Check if the user has the 'add' permission before proceeding
+    await requirePermission('add');
     const rawData = await req.json();
     const addResource = resourceSchema.parse(rawData).resource_name;
     try {
