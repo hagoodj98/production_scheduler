@@ -1,7 +1,7 @@
 import { productionOrder } from '@/lib/repositories';
 import { NextRequest, NextResponse } from 'next/server';
-
 import { requirePermission } from '@/utils/requirePermissionHelper';
+import { handleError } from '@/utils/ErrorHandlingHelper';
 // Deletes orders matching resourceId AND startTime.
 // We use deleteMany because resourceId+startTime is not a unique constraint.
 export async function DELETE(req: NextRequest) {
@@ -22,7 +22,6 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ message: 'Order deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error('Delete order failed', error);
-    return NextResponse.json({ error: 'Unauthorized to delete' }, { status: 403 });
+    return handleError(error);
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resource } from '@/lib/repositories';
 import { requirePermission } from '@/utils/requirePermissionHelper';
+import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,10 +16,6 @@ export async function GET(request: NextRequest) {
       resources: dbResources,
     });
   } catch (error) {
-    console.error('Error searching resources:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error searching resources' },
-      { status: 500 },
-    );
+    return handleError(error);
   }
 }

@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateSession } from '@/lib/session';
 import { requirePermission } from '@/utils/requirePermissionHelper';
 import dayjs from 'dayjs';
-import z from 'zod/v4';
-import { CustomError } from '@/utils/CustomErrors';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
+import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,12 +17,9 @@ export async function POST(req: NextRequest) {
     if (!order) {
       return NextResponse.json({ message: 'Missing order payload' }, { status: 400 });
     }
-    try {
-      await validateSession();
-    } catch (error) {
-      console.error('Unauthorized access attempt', error);
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+
+    await validateSession();
+
     // Getting data out of order so we can push clean and clarified data to database
     const year = order.dayMonthYear?.year;
     const month = order.dayMonthYear?.month;
@@ -92,16 +88,6 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('Error processing order:', error);
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: error.issues.map((issue) => issue.message).join(', ') },
-        { status: 400 },
-      );
-    }
-    if (error instanceof CustomError) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
-    }
-    return NextResponse.json({ message: 'Failed to process order' }, { status: 500 });
+    return handleError(error);
   }
 }

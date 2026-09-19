@@ -1,24 +1,15 @@
 import { NextResponse } from 'next/server';
 import { productionOrder } from '@/lib/repositories';
 import { loopThroughScheduledJobs } from '@/task/schedulerTask';
-import { CustomError } from '@/utils/CustomErrors';
+import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function POST() {
   try {
     const getAllRequestedJobs = await productionOrder.findAllForStatusCheck();
-
-    try {
-      loopThroughScheduledJobs(getAllRequestedJobs);
-    } catch (error) {
-      if (error instanceof CustomError) {
-        return NextResponse.json({ message: error.message }, { status: error.statusCode });
-      }
-      return NextResponse.json({ message: 'Unknown error in task processing' }, { status: 500 });
-    }
+    loopThroughScheduledJobs(getAllRequestedJobs);
+    return NextResponse.json({ message: 'updated orders' });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: 'Failed to check order status' }, { status: 500 });
+    return handleError(error);
   }
-
-  return NextResponse.json({ message: 'updated orders' });
 }

@@ -30,7 +30,10 @@ export async function proxy(req: NextRequest) {
         },
       );
       if (!response.ok) {
+        const data = await response.json();
+        const message = data.error;
         const redirectUrl = new URL('/', req.url);
+        redirectUrl.searchParams.append('msg', encodeURIComponent(message));
         return NextResponse.redirect(redirectUrl);
       }
       return NextResponse.next();

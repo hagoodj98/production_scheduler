@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CustomError } from '@/utils/CustomErrors';
 import dayjs from 'dayjs';
-import z from 'zod/v4';
 import { markPendingRequestSchema } from '@/app/validation/productionOrderSchemas';
 import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 
 import { requirePermission } from '@/utils/requirePermissionHelper';
+import { handleError } from '@/utils/ErrorHandlingHelper';
 //validating data before use
 //This handler takes care of the pending state. This route is only called when the data is valid.
 export async function POST(req: NextRequest) {
@@ -76,20 +76,6 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    console.error(error);
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: error.issues.map((e) => e.message).join(', ') },
-        { status: 400 },
-      );
-    }
-    if (error instanceof CustomError) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
-    }
-
-    return NextResponse.json(
-      { error: 'There was an internal error. Try again later' },
-      { status: 500 },
-    );
+    return handleError(error);
   }
 }

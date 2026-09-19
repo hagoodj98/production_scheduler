@@ -2,6 +2,7 @@ import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { PayloadSession } from '../app/components/types';
+import { CustomError } from '../utils/CustomErrors';
 
 const secretKey = process.env.SESSION_SECRET;
 // Encode the secret key for use with the jose library
@@ -23,7 +24,9 @@ export async function decrypt(session: string | undefined = '') {
     });
     return payload;
   } catch (error) {
-    console.error('Failed to verify session', error);
+    if (error instanceof CustomError) {
+      throw new CustomError('Failed to decrypt session', 401);
+    }
   }
 }
 export async function createSession(payload: Omit<PayloadSession, 'expiresAt'>) {

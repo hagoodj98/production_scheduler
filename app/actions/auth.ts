@@ -1,9 +1,9 @@
 'use server';
 
 import { adminAccessValidationSchema } from '../../utils/validationSchema';
-import { z } from 'zod';
 import { user, userPermission } from '../../lib/repositories';
 import { createSession, deleteSession } from '../../lib/session';
+import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function login(state: unknown, formData: FormData) {
   try {
@@ -34,18 +34,7 @@ export async function login(state: unknown, formData: FormData) {
     await createSession(payloadSession);
     return { login_success: true };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error(error.issues.map((err) => err.message).join(', '));
-      return {
-        fields: error.issues.map((err) => err.path.join('.')),
-        errors: error.issues.map((err) => err.message),
-      };
-    }
-    console.error(error);
-    return {
-      fields: ['form'],
-      errors: [error instanceof Error ? error.message : 'Unknown error'],
-    };
+    return handleError(error);
   }
 }
 export async function logout() {

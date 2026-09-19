@@ -1,11 +1,9 @@
 import { requirePermission } from '@/utils/requirePermissionHelper';
 import { NextRequest, NextResponse } from 'next/server';
-import { ur } from 'zod/v4/locales/index.js';
+import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function GET(req: NextRequest) {
   try {
-    console.log('Authorization request received');
-
     let action: string = '';
 
     const url = new URL(req.url);
@@ -21,17 +19,8 @@ export async function GET(req: NextRequest) {
 
     await requirePermission(action);
 
-    //  const hasPermission = await requirePermission();
-    //   // Call the requirePermission function to check if the user has the necessary permissions
-    // if (!hasPermission) {
-    // return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    // }
     return NextResponse.json({ message: 'Authorized' }, { status: 200 });
   } catch (error) {
-    console.error('Authorization error:', error);
-    return NextResponse.json(
-      { error: 'There was an internal error. Try again later' },
-      { status: 500 },
-    );
+    return handleError(error);
   }
 }

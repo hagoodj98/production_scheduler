@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { requirePermission } from '@/utils/requirePermissionHelper';
+import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,10 +14,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error editing order:', error);
-    return NextResponse.json(
-      { success: false, error: 'Unauthorized to reschedule' },
-      { status: 403 },
-    );
+    return handleError(error);
   }
 
   // Perform your update logic here, e.g., update the order in the database
