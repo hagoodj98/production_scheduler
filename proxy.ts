@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import { handleError } from '@/utils/ErrorHandlingHelper';
 export async function proxy(req: NextRequest) {
   if (req.nextUrl.pathname === '/api/authorize-permission') {
     return NextResponse.next();
@@ -38,11 +38,7 @@ export async function proxy(req: NextRequest) {
       }
       return NextResponse.next();
     } catch (error) {
-      console.error('Proxy error:', error);
-      return NextResponse.json(
-        { error: 'There was an internal error. Try again later' },
-        { status: 500 },
-      );
+      return handleError(error);
     }
   }
 }

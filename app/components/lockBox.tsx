@@ -1,6 +1,5 @@
 'use client';
 import LockIcon from '@mui/icons-material/Lock';
-import { useAuthenticatedAdminUser } from '../context';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 
 const LockBox = ({ isAdminUserAuthenticated }: { isAdminUserAuthenticated: boolean }) => {

@@ -5,8 +5,7 @@ import dayjs from 'dayjs';
 import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
 import { useResourcesContext } from '../context';
-import Notifier, { Severity } from './Notifier';
-import { CheckAuth } from './CookieLookUp';
+import Notifier, { Severity } from './ui/snackbar';
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -86,7 +85,7 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
             if (!isAdminUserAuthenticated) {
               setNotifierMessage('You are not authorized to edit this order');
               setOpenNotifier(true);
-              setNotifierSeverity('error');
+              setNotifierSeverity(Severity.error);
               return;
             }
             try {
@@ -97,7 +96,7 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
                 const data = await response.json();
                 setOpenNotifier(true);
                 setNotifierMessage(data.error);
-                setNotifierSeverity('error');
+                setNotifierSeverity(Severity.error);
                 return;
               }
               // If the response is OK, navigate to the assign resource page
@@ -106,7 +105,7 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
               console.error('Error fetching order details:', error);
               setNotifierMessage('Error fetching order details');
               setOpenNotifier(true);
-              setNotifierSeverity('error');
+              setNotifierSeverity(Severity.error);
             }
           }}
         >
@@ -119,7 +118,7 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
             if (!isAdminUserAuthenticated) {
               setNotifierMessage('You are not authorized to delete this order');
               setOpenNotifier(true);
-              setNotifierSeverity('error');
+              setNotifierSeverity(Severity.error);
               return;
             }
             try {
@@ -130,17 +129,17 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
                 const data = await response.json();
                 setOpenNotifier(true);
                 setNotifierMessage(data.error);
-                setNotifierSeverity('error');
+                setNotifierSeverity(Severity.error);
                 return;
               }
               setNotifierMessage('Order deleted successfully');
               setOpenNotifier(true);
-              setNotifierSeverity('success');
+              setNotifierSeverity(Severity.success);
             } catch (error) {
               console.error('Error deleting order:', error);
               setNotifierMessage('Error deleting order');
               setOpenNotifier(true);
-              setNotifierSeverity('error');
+              setNotifierSeverity(Severity.error);
             }
           }}
         >

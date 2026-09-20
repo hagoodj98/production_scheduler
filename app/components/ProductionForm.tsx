@@ -15,7 +15,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
-import Notifier, { Severity } from './Notifier';
+import Notifier, { Severity } from './ui/snackbar';
 import { ProductionOrder } from './types';
 import type { ErrorMessage } from './types';
 import * as z from 'zod/v4';
@@ -175,7 +175,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         body: JSON.stringify({ productionOrder }),
       });
       setNotifierMessage('Order created');
-      setNotifierSeverity('success');
+      setNotifierSeverity(Severity.success);
       setOpenNotifier(true);
       setSubmitting(false);
       router.push('/');
@@ -195,7 +195,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       }
       console.error('Submission error:', error);
       setNotifierMessage('Could not create order');
-      setNotifierSeverity('error');
+      setNotifierSeverity(Severity.error);
       setOpenNotifier(true);
       setSubmitting(false);
     }

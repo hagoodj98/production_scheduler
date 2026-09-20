@@ -1,16 +1,13 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import { cookies } from 'next/headers';
-//import { AppWrapper, SlotWrapper } from "./context";
 import {
   ResourceWrapper,
   GetAllSelectedResourcesWrapper,
   AuthenticatedAdminUserWrapper,
-  useAuthenticatedAdminUser,
 } from './context';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-
+import GlobalMessageReader from './components/GlobalMessageReader';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -40,6 +37,7 @@ export default function RootLayout({
             <GetAllSelectedResourcesWrapper>{children}</GetAllSelectedResourcesWrapper>
           </ResourceWrapper>
         </AuthenticatedAdminUserWrapper>
+        <GlobalMessageReader />
       </body>
     </html>
   );

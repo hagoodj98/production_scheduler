@@ -4,6 +4,7 @@ import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function GET(req: NextRequest) {
   try {
+    // Check if the user has the required permission to reschedule orders
     await requirePermission('reschedule');
     const params = req.nextUrl.searchParams;
     const orderId = params.get('orderId');
