@@ -13,23 +13,32 @@ const GetAllSelectedResourcesContext = createContext<
   GetAllSelectedResourcesContextType | undefined
 >(undefined);
 const authenticatedAdminUser = createContext<
-  | { isAuthenticated: boolean; setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>> }
+  | {
+      userIsAuthenticated: { name: string | null; isAuthenticated: boolean };
+      setUserIsAuthenticated: React.Dispatch<
+        React.SetStateAction<{ name: string | null; isAuthenticated: boolean }>
+      >;
+    }
   | undefined
 >(undefined);
+
 export function AuthenticatedAdminUserWrapper({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userIsAuthenticated, setUserIsAuthenticated] = useState<{
+    name: string | null;
+    isAuthenticated: boolean;
+  }>({ name: null, isAuthenticated: false });
   return (
-    <authenticatedAdminUser.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+    <authenticatedAdminUser.Provider value={{ userIsAuthenticated, setUserIsAuthenticated }}>
       {children}
     </authenticatedAdminUser.Provider>
   );
 }
 
-export function useAuthenticatedAdminUser() {
+export function useAuthenticatedAdminUserContext() {
   const context = useContext(authenticatedAdminUser);
   if (context === undefined) {
     throw new Error(
-      'useAuthenticatedAdminUser must be used within an AuthenticatedAdminUserWrapper',
+      'useAuthenticatedAdminUserContext must be used within an AuthenticatedAdminUserWrapper',
     );
   }
   return context;
@@ -74,7 +83,7 @@ export function GetAllSelectedResourcesWrapper({ children }: { children: React.R
 export function useGetAllSelectedResourcesContext() {
   const context = useContext(GetAllSelectedResourcesContext);
   if (!context) {
-    throw new Error('useResourcesContext must be used within an AppWrapper');
+    throw new Error('useGetAllSelectedResourcesContext must be used within an AppWrapper');
   }
   return context;
 }

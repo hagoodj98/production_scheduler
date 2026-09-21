@@ -33,9 +33,7 @@ interface CalendarEvent {
   [key: string]: unknown;
 }
 
-const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
-  isAdminUserAuthenticated,
-}) => {
+const MyCalendar = () => {
   const fetcher = async (url: string) => {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`API ${url} failed: ${res.status}`);
@@ -82,15 +80,9 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
           type="button"
           className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2  rounded mr-2"
           onClick={async () => {
-            if (!isAdminUserAuthenticated) {
-              setNotifierMessage('You are not authorized to edit this order');
-              setOpenNotifier(true);
-              setNotifierSeverity(Severity.error);
-              return;
-            }
             try {
               const response = await fetch(`/api/reschedule-order?orderId=${event.id}`, {
-                method: 'GET',
+                method: 'PATCH',
               });
               if (!response.ok) {
                 const data = await response.json();
@@ -115,12 +107,6 @@ const MyCalendar: React.FC<{ isAdminUserAuthenticated: boolean }> = ({
           type="button"
           className="w-1/2 cursor-pointer bg-red-500 hover:bg-red-600 text-white px-2  rounded"
           onClick={async () => {
-            if (!isAdminUserAuthenticated) {
-              setNotifierMessage('You are not authorized to delete this order');
-              setOpenNotifier(true);
-              setNotifierSeverity(Severity.error);
-              return;
-            }
             try {
               const response = await fetch(`/api/delete-order?orderId=${event.id}`, {
                 method: 'DELETE',

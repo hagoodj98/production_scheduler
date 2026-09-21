@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateSession } from '@/lib/session';
-import { requirePermission } from '@/utils/requirePermissionHelper';
+import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import dayjs from 'dayjs';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { selectedResource, productionOrder } from '@/lib/repositories';
@@ -9,7 +9,7 @@ import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function POST(req: NextRequest) {
   try {
-    await requirePermission('assign');
+    await checkAuthMetaData('assign');
     const rawData = await req.json();
     const order = productionOrderSchema.parse(rawData.productionOrder ?? rawData.order);
     const orderId = order?.orderId; // Get the pending order ID

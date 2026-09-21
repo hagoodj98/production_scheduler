@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resource } from '@/lib/repositories';
-import { requirePermission } from '@/utils/requirePermissionHelper';
+import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 
 export async function GET(request: NextRequest) {
   try {
-    await requirePermission('add');
+    await checkAuthMetaData('add');
     const { searchParams } = new URL(request.url);
     const name = searchParams.get('name') || '';
 

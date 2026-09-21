@@ -1,4 +1,4 @@
-import { requirePermission } from '@/utils/requirePermissionHelper';
+import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { NextRequest, NextResponse } from 'next/server';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
       action = 'reschedule';
     }
 
-    await requirePermission(action);
+    await checkAuthMetaData(action);
 
     return NextResponse.json({ message: 'Authorized' }, { status: 200 });
   } catch (error) {

@@ -16,6 +16,7 @@ export type PayloadSession = {
   employee_id: string;
   role: string;
   expiresAt: Date;
+  name: string;
   permissions: string[];
 };
 export type TimeSlots = {

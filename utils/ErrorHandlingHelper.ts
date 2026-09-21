@@ -7,7 +7,7 @@ export function handleError(error: unknown) {
   console.error('Error occurred:', error);
   if (error instanceof z.ZodError) {
     return NextResponse.json(
-      { error: error.issues.map((issue) => issue.message).join(', ') },
+      { fields: error.issues.map((issue) => issue.message) },
       { status: 400 },
     );
   }

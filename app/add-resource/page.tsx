@@ -1,4 +1,4 @@
-import AddResource from "../components/AddResource";
+import AddResource from '../components/SearchResource';
 
 const page = () => {
   return (

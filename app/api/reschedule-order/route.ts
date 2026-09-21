@@ -1,11 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { requirePermission } from '@/utils/requirePermissionHelper';
+import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 
-export async function GET(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   try {
     // Check if the user has the required permission to reschedule orders
-    await requirePermission('reschedule');
+    await checkAuthMetaData('reschedule');
     const params = req.nextUrl.searchParams;
     const orderId = params.get('orderId');
     console.log('Order ID:', orderId);
@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error editing order:', error);
     return handleError(error);
   }
 

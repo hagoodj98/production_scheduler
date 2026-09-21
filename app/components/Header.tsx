@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import AdminAccessForm from './AdminAccessForm';
@@ -7,14 +7,17 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { logout } from '../actions/auth';
 import { useRouter } from 'next/navigation';
-const Header = ({ isAdminUserAuthenticated }: { isAdminUserAuthenticated: boolean }) => {
+import { useAuthenticatedAdminUserContext } from '../context';
+const Header = () => {
   const router = useRouter();
+  const { userIsAuthenticated } = useAuthenticatedAdminUserContext();
   const [showAdminAccessForm, setShowAdminAccessForm] = useState(false);
 
   const handleLoginClick = () => {
     // Logic to show the admin access form or trigger login
     setShowAdminAccessForm(true);
   };
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -31,8 +34,9 @@ const Header = ({ isAdminUserAuthenticated }: { isAdminUserAuthenticated: boolea
   return (
     <div className="flex items-center justify-between mb-4 p-2">
       <h2 className="text-[#FFBB28] text-2xl">Production Scheduler</h2>
-      {isAdminUserAuthenticated ? (
+      {userIsAuthenticated.isAuthenticated ? (
         <>
+          <h5 className="text-[#FFBB28] text-2xl">{userIsAuthenticated.name}</h5>
           <Avatar className="text-[#FFBB28] text-2xl" onClick={handleMenuClick} />
           <Menu
             id="basic-menu"
@@ -52,11 +56,7 @@ const Header = ({ isAdminUserAuthenticated }: { isAdminUserAuthenticated: boolea
         <Button onClick={handleLoginClick}>Login</Button>
       )}
 
-      <AdminAccessForm
-        open={showAdminAccessForm}
-        redirectPath="/"
-        onClose={() => setShowAdminAccessForm(false)}
-      />
+      <AdminAccessForm open={showAdminAccessForm} onClose={() => setShowAdminAccessForm(false)} />
     </div>
   );
 };

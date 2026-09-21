@@ -3,7 +3,7 @@
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { Resource } from './types';
-import { useResourcesContext, useAuthenticatedAdminUser } from '../context';
+import { useResourcesContext } from '../context';
 import { useEffect, useState } from 'react';
 import AdminAccessForm from './AdminAccessForm';
 

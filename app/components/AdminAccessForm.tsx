@@ -4,7 +4,7 @@ import TextInput from './ui/input';
 import Button from '@mui/material/Button';
 import { useState, useActionState, useEffect } from 'react';
 import { login } from '../actions/auth';
-import { useAuthenticatedAdminUser } from '../context';
+import { useAuthenticatedAdminUserContext } from '../context';
 import { useRouter } from 'next/navigation';
 
 interface AdminAccessFormProps {
@@ -20,16 +20,25 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
     admin_key: '',
   });
   const router = useRouter();
-  const { setIsAuthenticated } = useAuthenticatedAdminUser();
+  const { setUserIsAuthenticated, userIsAuthenticated } = useAuthenticatedAdminUserContext();
   const [state, formAction, pending] = useActionState(login, undefined);
 
   useEffect(() => {
-    if (state?.login_success) {
-      router.push(redirectPath || '/');
-      setIsAuthenticated(true);
-      onClose();
+    if (state && 'login_success' in state && state.login_success) {
+      if (!userIsAuthenticated.isAuthenticated) {
+        setUserIsAuthenticated({ name: state.name, isAuthenticated: true });
+        onClose();
+        router.push(redirectPath || '/');
+      }
     }
-  }, [state?.login_success, router, setIsAuthenticated, redirectPath, onClose]);
+  }, [
+    state,
+    router,
+    setUserIsAuthenticated,
+    redirectPath,
+    onClose,
+    userIsAuthenticated.isAuthenticated,
+  ]);
 
   return (
     <CustomModal open={open} onClose={onClose}>

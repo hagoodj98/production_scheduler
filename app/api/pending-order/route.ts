@@ -5,13 +5,13 @@ import { markPendingRequestSchema } from '@/app/validation/productionOrderSchema
 import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 
-import { requirePermission } from '@/utils/requirePermissionHelper';
+import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 //validating data before use
 //This handler takes care of the pending state. This route is only called when the data is valid.
 export async function POST(req: NextRequest) {
   try {
-    await requirePermission('assign');
+    await checkAuthMetaData('assign');
 
     const rawData = await req.json();
     if (!rawData) {

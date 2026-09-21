@@ -41,4 +41,5 @@ export async function proxy(req: NextRequest) {
       return handleError(error);
     }
   }
+  return NextResponse.next();
 }

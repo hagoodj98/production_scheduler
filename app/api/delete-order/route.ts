@@ -1,12 +1,12 @@
 import { productionOrder } from '@/lib/repositories';
 import { NextRequest, NextResponse } from 'next/server';
-import { requirePermission } from '@/utils/requirePermissionHelper';
+import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 // Deletes orders matching resourceId AND startTime.
 // We use deleteMany because resourceId+startTime is not a unique constraint.
 export async function DELETE(req: NextRequest) {
   try {
-    await requirePermission('delete');
+    await checkAuthMetaData('delete');
 
     const params = req.nextUrl.searchParams;
     const orderId = params.get('orderId');
