@@ -14,9 +14,15 @@ const GetAllSelectedResourcesContext = createContext<
 >(undefined);
 const authenticatedAdminUser = createContext<
   | {
-      userIsAuthenticated: { name: string | null; isAuthenticated: boolean };
+      userIsAuthenticated: {
+        name: string | null;
+        state: 'idle' | 'checking' | 'authenticated' | 'unauthenticated';
+      };
       setUserIsAuthenticated: React.Dispatch<
-        React.SetStateAction<{ name: string | null; isAuthenticated: boolean }>
+        React.SetStateAction<{
+          name: string | null;
+          state: 'idle' | 'checking' | 'authenticated' | 'unauthenticated';
+        }>
       >;
     }
   | undefined
@@ -25,8 +31,8 @@ const authenticatedAdminUser = createContext<
 export function AuthenticatedAdminUserWrapper({ children }: { children: React.ReactNode }) {
   const [userIsAuthenticated, setUserIsAuthenticated] = useState<{
     name: string | null;
-    isAuthenticated: boolean;
-  }>({ name: null, isAuthenticated: false });
+    state: 'idle' | 'checking' | 'authenticated' | 'unauthenticated';
+  }>({ name: null, state: 'idle' });
   return (
     <authenticatedAdminUser.Provider value={{ userIsAuthenticated, setUserIsAuthenticated }}>
       {children}

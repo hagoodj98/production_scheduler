@@ -24,21 +24,16 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
   const [state, formAction, pending] = useActionState(login, undefined);
 
   useEffect(() => {
+    // Reset form data when the component mounts or state changes
+
     if (state && 'login_success' in state && state.login_success) {
-      if (!userIsAuthenticated.isAuthenticated) {
-        setUserIsAuthenticated({ name: state.name, isAuthenticated: true });
+      if (userIsAuthenticated.state !== 'authenticated') {
+        setUserIsAuthenticated({ name: state.name, state: 'authenticated' });
         onClose();
         router.push(redirectPath || '/');
       }
     }
-  }, [
-    state,
-    router,
-    setUserIsAuthenticated,
-    redirectPath,
-    onClose,
-    userIsAuthenticated.isAuthenticated,
-  ]);
+  }, [state, router, setUserIsAuthenticated, redirectPath, onClose, userIsAuthenticated.state]);
 
   return (
     <CustomModal open={open} onClose={onClose}>

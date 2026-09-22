@@ -7,14 +7,25 @@ export const CheckAuth = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/fetch-auth-status');
+        const response = await fetch('/api/fetch-auth-status', {
+          method: 'GET',
+        });
         if (!response.ok) {
-          throw new Error('Authentication check failed');
+          const errorData = await response.json();
+          console.log('Error fetching auth status:', errorData);
+          if (userIsAuthenticated.state !== 'unauthenticated') {
+            setUserIsAuthenticated({
+              state: 'unauthenticated',
+              name: '',
+            });
+          }
+
+          return; // Stop further execution if there's an error
         }
         const data = await response.json();
-        if (!userIsAuthenticated.isAuthenticated) {
+        if (userIsAuthenticated.state !== 'authenticated') {
           setUserIsAuthenticated({
-            isAuthenticated: true,
+            state: 'authenticated',
             name: data.userName,
           });
         }
@@ -25,7 +36,15 @@ export const CheckAuth = () => {
     checkAuth();
   }, [userIsAuthenticated, setUserIsAuthenticated]);
 
-  return <>{userIsAuthenticated.isAuthenticated ? null : <p>Checking authentication...</p>}</>;
+  return (
+    <>
+      {userIsAuthenticated.state === 'authenticated'
+        ? null
+        : userIsAuthenticated.state === 'unauthenticated'
+          ? null
+          : ''}
+    </>
+  );
 };
 
 export default CheckAuth;

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import AdminAccessForm from './AdminAccessForm';
@@ -10,7 +10,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthenticatedAdminUserContext } from '../context';
 const Header = () => {
   const router = useRouter();
-  const { userIsAuthenticated } = useAuthenticatedAdminUserContext();
+  const { userIsAuthenticated, setUserIsAuthenticated } = useAuthenticatedAdminUserContext();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showAdminAccessForm, setShowAdminAccessForm] = useState(false);
 
   const handleLoginClick = () => {
@@ -18,15 +19,18 @@ const Header = () => {
     setShowAdminAccessForm(true);
   };
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const open = Boolean(anchorEl);
   const handleLogoutClick = async () => {
     await logout();
+    setUserIsAuthenticated({
+      state: 'unauthenticated',
+      name: '',
+    });
     handleMenuClose();
-    router.push('/');
+    // router.push('/');
   };
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -34,9 +38,9 @@ const Header = () => {
   return (
     <div className="flex items-center justify-between mb-4 p-2">
       <h2 className="text-[#FFBB28] text-2xl">Production Scheduler</h2>
-      {userIsAuthenticated.isAuthenticated ? (
+      {userIsAuthenticated.state === 'authenticated' ? (
         <>
-          <h5 className="text-[#FFBB28] text-2xl">{userIsAuthenticated.name}</h5>
+          <h5 className="text-[#FFBB28] text-2xl">Hello, {userIsAuthenticated.name}</h5>
           <Avatar className="text-[#FFBB28] text-2xl" onClick={handleMenuClick} />
           <Menu
             id="basic-menu"
@@ -55,8 +59,9 @@ const Header = () => {
       ) : (
         <Button onClick={handleLoginClick}>Login</Button>
       )}
-
-      <AdminAccessForm open={showAdminAccessForm} onClose={() => setShowAdminAccessForm(false)} />
+      {showAdminAccessForm && (
+        <AdminAccessForm open={showAdminAccessForm} onClose={() => setShowAdminAccessForm(false)} />
+      )}
     </div>
   );
 };
