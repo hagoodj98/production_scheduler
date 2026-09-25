@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { selectedResource } = vi.hoisted(() => ({
   selectedResource: {
@@ -6,29 +6,29 @@ const { selectedResource } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@/lib/repositories", () => ({
+vi.mock('@/lib/repositories', () => ({
   selectedResource,
 }));
 
-import { GET } from "@/app/api/load-jobs-to-chart/route";
+import { GET } from '@/app/api/load-jobs-to-chart/route';
 
-describe("GET /api/load-jobs-to-chart", () => {
+describe('GET /api/load-jobs-to-chart', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("returns selected resources and nested orders", async () => {
+  it('returns selected resources and nested orders', async () => {
     const payload = [
       {
         id: 1,
-        resource_name: "CNC Machine 1",
+        resource_name: 'CNC Machine 1',
         productionOrders: [
           {
             id: 10,
-            dayMonthYear: new Date("2026-03-08T00:00:00.000Z"),
-            startTime: new Date("2026-03-08T08:00:00.000Z"),
-            endTime: new Date("2026-03-08T09:00:00.000Z"),
-            resourceStatus: "Pending",
+            dayMonthYear: new Date('2026-03-08T00:00:00.000Z'),
+            startTime: new Date('2026-03-08T08:00:00.000Z'),
+            endTime: new Date('2026-03-08T09:00:00.000Z'),
+            resourceStatus: 'Pending',
             resourceId: 1,
           },
         ],
@@ -46,14 +46,14 @@ describe("GET /api/load-jobs-to-chart", () => {
       ResourceProductionOrders: [
         {
           id: 1,
-          resource_name: "CNC Machine 1",
+          resource_name: 'CNC Machine 1',
           productionOrders: [
             {
               id: 10,
-              dayMonthYear: "2026-03-08T00:00:00.000Z",
-              startTime: "2026-03-08T08:00:00.000Z",
-              endTime: "2026-03-08T09:00:00.000Z",
-              resourceStatus: "Pending",
+              dayMonthYear: '2026-03-08T00:00:00.000Z',
+              startTime: '2026-03-08T08:00:00.000Z',
+              endTime: '2026-03-08T09:00:00.000Z',
+              resourceStatus: 'Pending',
               resourceId: 1,
             },
           ],
