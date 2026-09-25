@@ -1,33 +1,36 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { selectedResourceRepository, productionOrderRepository } = vi.hoisted(() => ({
-  selectedResourceRepository: {
+const { selectedResource, productionOrder, checkAuthMetaData } = vi.hoisted(() => ({
+  selectedResource: {
     findByNameOrThrow: vi.fn(),
   },
-  productionOrderRepository: {
+  productionOrder: {
     create: vi.fn(),
     update: vi.fn(),
   },
+  checkAuthMetaData: vi.fn(),
 }));
 
 vi.mock('@/lib/repositories', () => ({
-  selectedResourceRepository,
-  productionOrderRepository,
+  selectedResource,
+  productionOrder,
 }));
+vi.mock('@/utils/CheckAuthHelper', () => ({ checkAuthMetaData }));
 
-import { POST } from '@/app/api/create-order/route';
+import { POST } from '@/app/api/pending-order/route';
 
-const makeRequest = (productionOrder: Record<string, unknown>) =>
-  new Request('http://localhost/api/create-order', {
+const makeRequest = (order: Record<string, unknown>) =>
+  new Request('http://localhost/api/pending-order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productionOrder }),
+    body: JSON.stringify({ order }),
   });
 
-describe('POST /api/create-order', () => {
+describe('POST /api/pending-order schedule validation', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    checkAuthMetaData.mockResolvedValue('Assign Admin');
   });
 
   afterEach(() => {
@@ -52,9 +55,9 @@ describe('POST /api/create-order', () => {
 
     expect(res.status).toBe(400);
     expect(body).toEqual({ error: 'Start time must be in the future' });
-    expect(selectedResourceRepository.findByNameOrThrow).not.toHaveBeenCalled();
-    expect(productionOrderRepository.create).not.toHaveBeenCalled();
-    expect(productionOrderRepository.update).not.toHaveBeenCalled();
+    expect(selectedResource.findByNameOrThrow).not.toHaveBeenCalled();
+    expect(productionOrder.create).not.toHaveBeenCalled();
+    expect(productionOrder.update).not.toHaveBeenCalled();
   });
 
   it('returns a 400 error when end time is before start time', async () => {
@@ -75,8 +78,8 @@ describe('POST /api/create-order', () => {
 
     expect(res.status).toBe(400);
     expect(body).toEqual({ error: 'End time must be after start time' });
-    expect(selectedResourceRepository.findByNameOrThrow).not.toHaveBeenCalled();
-    expect(productionOrderRepository.create).not.toHaveBeenCalled();
-    expect(productionOrderRepository.update).not.toHaveBeenCalled();
+    expect(selectedResource.findByNameOrThrow).not.toHaveBeenCalled();
+    expect(productionOrder.create).not.toHaveBeenCalled();
+    expect(productionOrder.update).not.toHaveBeenCalled();
   });
 });
