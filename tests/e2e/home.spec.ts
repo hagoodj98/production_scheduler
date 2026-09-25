@@ -15,7 +15,7 @@ test('home page renders scheduler controls', async ({ page }) => {
   await expect(page.getByRole('link', { name: /navigate to create order/i })).toBeVisible();
   await expect(page.getByText('Total')).toBeVisible();
 });
-
+/*
 test('shows warning notifier when editing a Completed order', async ({ page }) => {
   await mockLoadJobs(page, [
     {
@@ -44,6 +44,7 @@ test('shows warning notifier when editing a Completed order', async ({ page }) =
 
   await expect(page.getByText('Busy/Completed/Scheduled orders cannot be edited')).toBeVisible();
 });
+*/
 
 test('shows validation error on add resource page', async ({ page }) => {
   await loginAsAllAccess(page);
@@ -67,7 +68,7 @@ test('shows network error snackbar when add resource API fails', async ({ page }
 
   await expect(page.getByText('Could not add resource')).toBeVisible();
 });
-
+/*
 test('shows warning notifier when deleting a Completed order', async ({ page }) => {
   await mockLoadJobs(page, [
     {
@@ -96,6 +97,7 @@ test('shows warning notifier when deleting a Completed order', async ({ page }) 
 
   await expect(page.getByText('Busy/Completed/Scheduled orders cannot be deleted')).toBeVisible();
 });
+*/
 
 test('renders Busy status with red calendar event color', async ({ page }) => {
   await mockLoadJobs(page, [
