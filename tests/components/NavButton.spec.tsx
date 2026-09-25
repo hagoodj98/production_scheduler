@@ -18,18 +18,19 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+vi.mock("@/app/components/AdminAccessForm", () => ({
+  default: () => null,
+}));
+
 describe("NavButton", () => {
-  it("renders a navigation link with expected label", () => {
+  it("renders the admin access button when the user is unauthenticated", () => {
     render(
       withAppProviders(
         <NavButton resourceLabel="Create Order" pageNav="/assign-resource" />,
       ),
     );
 
-    expect(
-      screen.getByRole("button", { name: /create order/i }),
-    ).toBeInTheDocument();
-    const link = screen.getByRole("link", { name: /create order/i });
-    expect(link).toHaveAttribute("href", "/assign-resource");
+    expect(screen.getByRole("button", { name: /create order/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /create order/i })).not.toBeInTheDocument();
   });
 });

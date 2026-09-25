@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { selectedResourceRepository } = vi.hoisted(() => ({
-  selectedResourceRepository: {
+const { selectedResource } = vi.hoisted(() => ({
+  selectedResource: {
     findAllWithOrders: vi.fn(),
   },
 }));
 
 vi.mock("@/lib/repositories", () => ({
-  selectedResourceRepository,
+  selectedResource,
 }));
 
 import { GET } from "@/app/api/load-jobs-to-chart/route";
@@ -35,14 +35,12 @@ describe("GET /api/load-jobs-to-chart", () => {
       },
     ];
 
-    selectedResourceRepository.findAllWithOrders.mockResolvedValueOnce(payload);
+    selectedResource.findAllWithOrders.mockResolvedValueOnce(payload);
 
     const res = await GET();
     const body = await res.json();
 
-    expect(selectedResourceRepository.findAllWithOrders).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(selectedResource.findAllWithOrders).toHaveBeenCalledTimes(1);
     expect(res.status).toBe(200);
     expect(body).toEqual({
       ResourceProductionOrders: [
