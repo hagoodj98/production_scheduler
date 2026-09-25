@@ -1,11 +1,11 @@
-import AddResource from '../components/SearchResource';
+import SearchResource from '../components/SearchResource';
 
-const page = () => {
+const AddResourcePage = () => {
   return (
     <div>
-      <AddResource />
+      <SearchResource />
     </div>
   );
 };
 
-export default page;
+export default AddResourcePage;

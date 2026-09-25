@@ -16,7 +16,7 @@ interface AllPossibleResource {
   resource_name: string;
 }
 
-const AddResource: React.FC = () => {
+const SearchResource: React.FC = () => {
   const router = useRouter();
   const { setResourceData } = useResourcesContext();
   const [resourceName, setResourceName] = useState('');
@@ -42,7 +42,7 @@ const AddResource: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/search-resource/add-resource', {
+      const response = await fetch('/api/resource/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const AddResource: React.FC = () => {
     try {
       const searchResources = async () => {
         const response = await fetch(
-          `/api/search-resource?name=${encodeURIComponent(resourceName)}`,
+          `/api/resource/search?name=${encodeURIComponent(resourceName)}`,
         );
         const data = await response.json();
         setAllPossibleResources(data.resources);
@@ -162,4 +162,4 @@ const AddResource: React.FC = () => {
   );
 };
 
-export default AddResource;
+export default SearchResource;

@@ -33,6 +33,7 @@ interface CalendarEvent {
   [key: string]: unknown;
 }
 
+//
 const MyCalendar = () => {
   const fetcher = async (url: string) => {
     const res = await fetch(url);
@@ -42,7 +43,7 @@ const MyCalendar = () => {
 
   const { data: fetchedData } = useSWR<{
     ResourceProductionOrders: OrderProps[];
-  }>('/api/load-jobs-to-chart', fetcher, {
+  }>('/api/order/load', fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
   const { selectedResourceIds, selectedStatus } = useResourcesContext();
@@ -90,7 +91,7 @@ const MyCalendar = () => {
           className="w-1/2 cursor-pointer bg-red-500 hover:bg-red-600 text-white px-2  rounded"
           onClick={async () => {
             try {
-              const response = await fetch(`/api/delete-order?orderId=${event.id}`, {
+              const response = await fetch(`/api/order/delete?orderId=${event.id}`, {
                 method: 'DELETE',
               });
               if (!response.ok) {

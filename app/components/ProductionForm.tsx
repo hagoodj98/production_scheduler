@@ -168,7 +168,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
     try {
       setSubmitting(true);
       if (pendingOrder) {
-        await fetch('/api/reschedule-order', {
+        await fetch('/api/order/reschedule', {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ productionOrder }),
         });
       } else {
-        await fetch('/api/schedule-order', {
+        await fetch('/api/order/schedule', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -265,7 +265,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           return;
         }
 
-        const response = await fetch('/api/pending-order', {
+        const response = await fetch('/api/order/mark-pending', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -310,7 +310,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       markhasRun.current = true;
       const response = async () => {
         try {
-          await fetch('/api/pending-order', {
+          await fetch('/api/order/mark-pending', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

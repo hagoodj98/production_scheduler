@@ -1,35 +1,24 @@
-"use client";
+'use client';
 
-import { Cell, Pie, PieChart, Tooltip, ResponsiveContainer } from "recharts";
-import type { ClientResource } from "./types";
-import { useEffect, useMemo } from "react";
+import { Cell, Pie, PieChart, Tooltip, ResponsiveContainer } from 'recharts';
+import type { ClientResource } from './types';
+import { useEffect, useMemo } from 'react';
 
-import {
-  useGetAllSelectedResourcesContext,
-  useResourcesContext,
-} from "../context";
-import useSWR from "swr";
+import { useGetAllSelectedResourcesContext, useResourcesContext } from '../context';
+import useSWR from 'swr';
 
-const STATUS_ORDER = [
-  "Processing",
-  "Pending",
-  "Scheduled",
-  "Busy",
-  "Completed",
-];
+const STATUS_ORDER = ['Processing', 'Pending', 'Scheduled', 'Busy', 'Completed'];
 const STATUS_COLORS: Record<string, string> = {
-  Processing: "#cccccc",
-  Pending: "#FFBB28",
-  Scheduled: "#007bff",
-  Busy: "#DB441A",
-  Completed: "#2ecc71",
+  Processing: '#cccccc',
+  Pending: '#FFBB28',
+  Scheduled: '#007bff',
+  Busy: '#DB441A',
+  Completed: '#2ecc71',
 };
 
 type LoadJob = {
   resource_name: string;
-  productionOrders?: Array<
-    { resourceStatus: string } & Record<string, unknown>
-  >;
+  productionOrders?: Array<{ resourceStatus: string } & Record<string, unknown>>;
 };
 interface OrderProps {
   id: number;
@@ -53,7 +42,7 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const { selectedStatus, setSelectedStatus } = useResourcesContext();
   const { data: fetchedData } = useSWR<{
     ResourceProductionOrders: OrderProps[];
-  }>("/api/load-jobs-to-chart", fetcher, {
+  }>('/api/order/load', fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
   // compute flattened orders and counts by status
@@ -100,21 +89,19 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const outerRadius = compact ? 44 : 80;
 
   return (
-    <div className={`flex items-center ${compact ? "gap-2" : ""}`}>
+    <div className={`flex items-center ${compact ? 'gap-2' : ''}`}>
       {/* center label */}
       <div className="flex flex-col justify-center ml-3">
         <div className="text-sm font-medium">Total</div>
         <div className="text-xl font-semibold">{total}</div>
-        {selectedStatus && (
-          <div className="text-xs mt-1">Filtered: {selectedStatus}</div>
-        )}
+        {selectedStatus && <div className="text-xs mt-1">Filtered: {selectedStatus}</div>}
 
         <div className="mt-2 flex flex-col ">
           {chartData.map((entry) => (
             <button
               key={`legend-${entry.name}`}
               onClick={() => entry.value > 0 && onSliceClick(entry)}
-              className={`flex items-center gap-2 text-sm px-2 py-1 rounded transition-colors duration-200 ease-in-out ${entry.value === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"} ${selectedStatus === entry.name ? "bg-gray-100 ring-1 ring-offset-1 ring-gray-200" : ""}`}
+              className={`flex items-center gap-2 text-sm px-2 py-1 rounded transition-colors duration-200 ease-in-out ${entry.value === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'} ${selectedStatus === entry.name ? 'bg-gray-100 ring-1 ring-offset-1 ring-gray-200' : ''}`}
               aria-pressed={selectedStatus === entry.name}
               aria-disabled={entry.value === 0}
               title={`${entry.value} orders`}
@@ -143,8 +130,8 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
               {chartData.map((entry) => (
                 <Cell
                   key={`cell-${entry.name}`}
-                  fill={STATUS_COLORS[entry.name] ?? "#cccccc"}
-                  stroke={selectedStatus === entry.name ? "#000" : "none"}
+                  fill={STATUS_COLORS[entry.name] ?? '#cccccc'}
+                  stroke={selectedStatus === entry.name ? '#000' : 'none'}
                   strokeWidth={selectedStatus === entry.name ? 2 : 0}
                 />
               ))}

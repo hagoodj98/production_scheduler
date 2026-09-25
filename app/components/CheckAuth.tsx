@@ -7,7 +7,7 @@ export const CheckAuth = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/fetch-auth-status', {
+        const response = await fetch('/api/auth/status', {
           method: 'GET',
         });
         if (!response.ok) {
