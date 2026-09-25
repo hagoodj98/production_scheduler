@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { markPendingRequestSchema } from '@/app/validation/productionOrderSchemas';
 import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
+import PERMISSIONS from '@/utils/Permissions';
 
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
@@ -11,7 +12,7 @@ import { handleError } from '@/utils/ErrorHandlingHelper';
 //This handler takes care of the pending state. This route is only called when the data is valid.
 export async function POST(req: NextRequest) {
   try {
-    await checkAuthMetaData('assign');
+    await checkAuthMetaData(PERMISSIONS.assign?.name);
 
     const rawData = await req.json();
     if (!rawData) {

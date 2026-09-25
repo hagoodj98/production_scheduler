@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "concurrently \"next dev\" \"npm run start:cron\"",
     "dev:next": "next dev",
-    "dev:debug": "node --inspect=9229 node_modules/next/dist/bin/next dev",
+    "dev:debug": "concurrently \"node --inspect=9229 node_modules/next/dist/bin/next dev\" \"npm run start:cron\"",
     "start:cron": "node node_cron/cron.mjs",
     "build": "next build",
     "start": "next start",

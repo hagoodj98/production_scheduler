@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import React, { FormEvent, useEffect, useState } from "react";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import Divider from "@mui/material/Divider";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import { useRouter } from "next/navigation";
-import { useResourcesContext } from "../context";
+import React, { FormEvent, useEffect, useState } from 'react';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Divider from '@mui/material/Divider';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import { useRouter } from 'next/navigation';
+import { useResourcesContext } from '../context';
 
 interface AllPossibleResource {
   id: number;
@@ -19,16 +19,14 @@ interface AllPossibleResource {
 const AddResource: React.FC = () => {
   const router = useRouter();
   const { setResourceData } = useResourcesContext();
-  const [resourceName, setResourceName] = useState("");
-  const [allPossibleResources, setAllPossibleResources] = useState<
-    AllPossibleResource[]
-  >([]);
+  const [resourceName, setResourceName] = useState('');
+  const [allPossibleResources, setAllPossibleResources] = useState<AllPossibleResource[]>([]);
   const [loading, setLoading] = useState(false);
   const [snack, setSnack] = useState<{
     open: boolean;
     message: string;
-    severity: "success" | "error";
-  }>({ open: false, message: "", severity: "success" });
+    severity: 'success' | 'error';
+  }>({ open: false, message: '', severity: 'success' });
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -36,18 +34,18 @@ const AddResource: React.FC = () => {
     if (!resourceName || resourceName.trim().length < 2) {
       setSnack({
         open: true,
-        message: "Please enter a valid resource name",
-        severity: "error",
+        message: 'Please enter a valid resource name',
+        severity: 'error',
       });
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch("/api/add-resource", {
-        method: "POST",
+      const response = await fetch('/api/search-resource/add-resource', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ resource_name: resourceName.trim() }),
       });
@@ -62,21 +60,21 @@ const AddResource: React.FC = () => {
 
       setSnack({
         open: true,
-        message: "Resource added. Redirecting...",
-        severity: "success",
+        message: 'Resource added. Redirecting...',
+        severity: 'success',
       });
       setTimeout(() => {
-        router.push("/");
+        router.push('/');
       }, 3000);
-      setResourceName("");
+      setResourceName('');
       setLoading(false);
     } catch (error) {
       console.error(error);
       setLoading(false);
       setSnack({
         open: true,
-        message: "Could not add resource",
-        severity: "error",
+        message: 'Could not add resource',
+        severity: 'error',
       });
     }
   };
@@ -87,7 +85,7 @@ const AddResource: React.FC = () => {
     try {
       const searchResources = async () => {
         const response = await fetch(
-          `/api/search-resources?name=${encodeURIComponent(resourceName)}`,
+          `/api/search-resource?name=${encodeURIComponent(resourceName)}`,
         );
         const data = await response.json();
         setAllPossibleResources(data.resources);
@@ -138,19 +136,10 @@ const AddResource: React.FC = () => {
         </List>
 
         <div className="flex gap-3">
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={loading}
-          >
-            {loading ? "Adding…" : "Add Resource"}
+          <Button type="submit" variant="contained" color="primary" disabled={loading}>
+            {loading ? 'Adding…' : 'Add Resource'}
           </Button>
-          <Button
-            variant="outlined"
-            color="inherit"
-            onClick={() => router.push("/")}
-          >
+          <Button variant="outlined" color="inherit" onClick={() => router.push('/')}>
             Back
           </Button>
         </div>
@@ -164,7 +153,7 @@ const AddResource: React.FC = () => {
         <Alert
           onClose={() => setSnack((s) => ({ ...s, open: false }))}
           severity={snack.severity}
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {snack.message}
         </Alert>

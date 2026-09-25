@@ -18,7 +18,7 @@ export async function proxy(req: NextRequest) {
   if (url.pathname.includes('/load-jobs')) {
     return;
   }
-  if (url.pathname.includes('/assign-order')) {
+  if (url.pathname.includes('/assign-order') || url.pathname.includes('/add-resource')) {
     try {
       const response = await fetch(
         `${req.nextUrl.origin}/api/authorize-permission?path=${url.pathname}`,

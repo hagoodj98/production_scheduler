@@ -4,19 +4,12 @@ import { Employee } from './app/components/types';
 import { generateEmployee } from './utils/generateEmployeeMeta';
 import { permission } from './lib/repositories';
 import { userPermission } from './lib/repositories/UserPermission';
-
+import PERMISSIONS from './utils/Permissions';
 async function seedAdminAuth() {
   try {
     const insertEmployees: Employee[] = [];
     const insertUserPermission: { userId: number; permissionId: number }[] = [];
-    const insertPermission: { name: string }[] = [
-      { name: 'READ_ONLY' },
-      { name: 'ADD_RESOURCE' },
-      { name: 'ASSIGN_TASKS' },
-      { name: 'ALL_ACCESS_TO_TASKS' },
-      { name: 'RESCHEDULE_TASKS' },
-      { name: 'DELETE_TASKS' },
-    ];
+
     // Seed initial admin and worker employees with their permissions
     insertEmployees.push(
       generateEmployee(
@@ -31,7 +24,7 @@ async function seedAdminAuth() {
     // Assign 'read' permission to the first user (John Doe)
     insertUserPermission.push({
       userId: 1,
-      permissionId: insertPermission.findIndex((p) => p.name === 'read') + 1,
+      permissionId: Object.keys(PERMISSIONS).indexOf('view') + 1,
     });
     insertEmployees.push(
       generateEmployee(
@@ -46,11 +39,11 @@ async function seedAdminAuth() {
     // Assign 'CREATE_RESOURCE' and 'ASSIGN_TASK' permissions to the second user (Jane Smith)
     insertUserPermission.push({
       userId: 2,
-      permissionId: insertPermission.findIndex((p) => p.name === 'CREATE_RESOURCE') + 1,
+      permissionId: Object.keys(PERMISSIONS).indexOf('add') + 1,
     });
     insertUserPermission.push({
       userId: 2,
-      permissionId: insertPermission.findIndex((p) => p.name === 'ASSIGN_TASK') + 1,
+      permissionId: Object.keys(PERMISSIONS).indexOf('assign') + 1,
     });
     insertEmployees.push(
       generateEmployee(
@@ -65,7 +58,7 @@ async function seedAdminAuth() {
     // Assign 'ALL_ACCESS' permission to the third user (Michael Johnson)
     insertUserPermission.push({
       userId: 3,
-      permissionId: insertPermission.findIndex((p) => p.name === 'ALL_ACCESS') + 1,
+      permissionId: Object.keys(PERMISSIONS).indexOf('all_access') + 1,
     });
     insertEmployees.push(
       generateEmployee(
@@ -77,10 +70,10 @@ async function seedAdminAuth() {
         'worker',
       ),
     );
-    // Assign 'read' permission to the fifth user (William Brown)
+    // Assign 'READ_ONLY' permission to the fifth user (William Brown)
     insertUserPermission.push({
-      userId: 5,
-      permissionId: insertPermission.findIndex((p) => p.name === 'read') + 1,
+      userId: 4,
+      permissionId: Object.keys(PERMISSIONS).indexOf('view') + 1,
     });
     insertEmployees.push(
       generateEmployee(
@@ -92,14 +85,14 @@ async function seedAdminAuth() {
         'admin',
       ),
     );
-    // Assign 'RESCHEDULE_TASK' and 'DELETE_TASK' permissions to the fourth user (Emily Davis)
+    // Assign 'RESCHEDULE_TASKS' and 'DELETE_TASKS' permissions to the fourth user (Emily Davis)
     insertUserPermission.push({
-      userId: 4,
-      permissionId: insertPermission.findIndex((p) => p.name === 'RESCHEDULE_TASK') + 1,
+      userId: 5,
+      permissionId: Object.keys(PERMISSIONS).indexOf('reschedule') + 1,
     });
     insertUserPermission.push({
-      userId: 4,
-      permissionId: insertPermission.findIndex((p) => p.name === 'DELETE_TASK') + 1,
+      userId: 5,
+      permissionId: Object.keys(PERMISSIONS).indexOf('delete') + 1,
     });
     insertEmployees.push(
       generateEmployee(
@@ -111,14 +104,20 @@ async function seedAdminAuth() {
         'worker',
       ),
     );
-    // Assign 'read' permission to the sixth user (Olivia Wilson)
+    // Assign 'READ_ONLY' permission to the sixth user (Olivia Wilson)
     insertUserPermission.push({
       userId: 6,
-      permissionId: insertPermission.findIndex((p) => p.name === 'read') + 1,
+      permissionId: Object.keys(PERMISSIONS).indexOf('view') + 1,
+    });
+
+    const permissionRecords: { name: string }[] = [];
+    //
+    Object.values(PERMISSIONS).forEach((p) => {
+      permissionRecords.push({ name: p.name });
     });
 
     // Add your seeding logic here
-    await permission.createMany(insertPermission);
+    await permission.createMany(permissionRecords);
     await user.createMany(insertEmployees);
     await userPermission.createMany(insertUserPermission);
     console.log('Seeding employees and permissions in appropriate tables');

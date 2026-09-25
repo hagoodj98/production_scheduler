@@ -1,10 +1,10 @@
 import dayjs from 'dayjs';
 import { CustomError } from '@/utils/CustomErrors';
 import { DayMonthYear, TimeRange } from '../components/types';
+
 // This function validates the start and end times of a production order. It checks if the start time is in the future and if the end time is after the start time. If any of these conditions are not met, it throws a CustomError with an appropriate message and status code.
 export const timeScheduleValidator = (dayMonthYear: DayMonthYear, timeRange: TimeRange) => {
   try {
-    
     const startDateTime = dayjs()
       .year(dayMonthYear.year || 0)
       .month((dayMonthYear.month || 1) - 1)

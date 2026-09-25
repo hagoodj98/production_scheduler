@@ -25,7 +25,7 @@ export default async function Home() {
           />
           <NavButton
             // isAdminUserAuthenticated={isAdminUserAuthenticated}
-            pageNav="/assign-resource"
+            pageNav="/assign-order"
             resourceLabel="Create Order"
           />
         </div>

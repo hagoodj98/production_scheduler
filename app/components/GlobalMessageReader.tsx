@@ -32,7 +32,7 @@ const GlobalMessageReader = () => {
 
   return (
     <Notifier
-      severity={Severity.info}
+      severity={Severity.error}
       message={decodeURIComponent(searchParams.get('msg') || '')}
       onClose={handleClose}
       open={open}

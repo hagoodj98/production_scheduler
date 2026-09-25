@@ -3,25 +3,19 @@
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { Resource } from './types';
-import { useResourcesContext } from '../context';
+import { useAuthenticatedAdminUserContext, useResourcesContext } from '../context';
 import { useEffect, useState } from 'react';
 import AdminAccessForm from './AdminAccessForm';
 
 interface NavProps {
   resourceLabel: string;
   pageNav: string;
-  isAdminUserAuthenticated?: boolean;
   allPossibleResources?: Resource[];
 }
 
-const NavButton: React.FC<NavProps> = ({
-  resourceLabel,
-  allPossibleResources,
-  isAdminUserAuthenticated,
-  pageNav,
-}) => {
+const NavButton = ({ resourceLabel, allPossibleResources, pageNav }: NavProps) => {
   const { setResourceData } = useResourcesContext();
-  //const { isAuthenticated } = useAuthenticatedAdminUser();
+  const { userIsAuthenticated } = useAuthenticatedAdminUserContext();
   const [showAdminAccessForm, setShowAdminAccessForm] = useState(false);
   useEffect(() => {
     //Once the nav button to add resources is rendered we want to shoot the data over to the AddResources client component.
@@ -36,7 +30,7 @@ const NavButton: React.FC<NavProps> = ({
 
   return (
     <div className="inline-block">
-      {!isAdminUserAuthenticated ? (
+      {!userIsAuthenticated.name ? (
         <Button size="small" variant="contained" disableElevation onClick={handleAdminAccess}>
           {resourceLabel}
         </Button>

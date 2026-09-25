@@ -67,7 +67,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       resource_name: pendingOrder?.resourceName ?? null,
     },
 
-    orderId: pendingOrder?.id ?? null,
+    orderId: pendingOrder?.id ?? 0,
   };
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -167,13 +167,23 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
 
     try {
       setSubmitting(true);
-      await fetch('/api/assign-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productionOrder }),
-      });
+      if (pendingOrder) {
+        await fetch('/api/reschedule-order', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productionOrder }),
+        });
+      } else {
+        await fetch('/api/schedule-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productionOrder }),
+        });
+      }
       setNotifierMessage('Order created');
       setNotifierSeverity(Severity.success);
       setOpenNotifier(true);
@@ -493,7 +503,13 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
 
         <div className="md:col-span-2 flex items-center gap-3">
           <Button type="submit" variant="contained" disabled={submitting}>
-            {submitting ? 'Creating…' : 'Create Order'}
+            {submitting && !pendingOrder
+              ? 'Creating…'
+              : pendingOrder
+                ? 'Update'
+                : submitting && pendingOrder
+                  ? 'Updating…'
+                  : 'Create Order'}
           </Button>
           <Button variant="outlined" onClick={() => router.push('/')}>
             Cancel

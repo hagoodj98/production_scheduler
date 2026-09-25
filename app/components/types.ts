@@ -62,7 +62,7 @@ export type ProductionOrder = {
   dayMonthYear: DayMonthYear;
   timeRange: TimeRange;
   resource: ClientResource;
-  orderId?: number | null; // Production order ID for tracking pending → processing transition
+  orderId: number; // Production order ID for tracking pending → processing transition
 };
 export type AvailableSlotPair = {
   name: ClientResource;

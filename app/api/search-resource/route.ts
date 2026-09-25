@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resource } from '@/lib/repositories';
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
+import PERMISSIONS from '@/utils/Permissions';
 
 export async function GET(request: NextRequest) {
   try {
-    await checkAuthMetaData('add');
+    await checkAuthMetaData(PERMISSIONS.add?.name);
     const { searchParams } = new URL(request.url);
     const name = searchParams.get('name') || '';
 

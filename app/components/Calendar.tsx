@@ -79,26 +79,8 @@ const MyCalendar = () => {
         <button
           type="button"
           className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white px-2  rounded mr-2"
-          onClick={async () => {
-            try {
-              const response = await fetch(`/api/reschedule-order?orderId=${event.id}`, {
-                method: 'PATCH',
-              });
-              if (!response.ok) {
-                const data = await response.json();
-                setOpenNotifier(true);
-                setNotifierMessage(data.error);
-                setNotifierSeverity(Severity.error);
-                return;
-              }
-              // If the response is OK, navigate to the assign resource page
-              navigate.push(`/assign-order/${event.id}`);
-            } catch (error) {
-              console.error('Error fetching order details:', error);
-              setNotifierMessage('Error fetching order details');
-              setOpenNotifier(true);
-              setNotifierSeverity(Severity.error);
-            }
+          onClick={() => {
+            navigate.push(`/assign-order/${event.id}`);
           }}
         >
           Edit
