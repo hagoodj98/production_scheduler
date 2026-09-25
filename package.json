@@ -14,7 +14,7 @@
     "db:up": "docker-compose up -d",
     "db:down": "docker-compose down",
     "db:logs": "docker-compose logs -f db",
-    "db:seed": "prisma db seed",
+    "db:seed": "tsx seed-resources-users-script.ts",
     "db:show": "prisma studio",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -24,9 +24,7 @@
     "test:api": "vitest run --config vitest.config.ts tests/api",
     "test:components": "vitest run --config vitest.config.ts tests/components",
     "test:zod": "vitest run --config vitest.config.ts tests/zod",
-    "test:e2e": "playwright test",
-    "prisma:seed": "tsx prisma/seeds/seed.ts",
-    "seed:employee": "tsx seed-employee-auth-script.ts"
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

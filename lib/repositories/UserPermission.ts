@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/database';
+import prisma from './../../prisma/client';
 
 const createMany = (data: { userId: number; permissionId: number }[]) => {
   return prisma.userPermission.createMany({

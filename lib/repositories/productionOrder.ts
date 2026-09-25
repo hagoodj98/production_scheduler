@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/database';
+import prisma from './../../prisma/client';
 
 type ProductionOrderWriteInput = {
   dayMonthYear: Date;

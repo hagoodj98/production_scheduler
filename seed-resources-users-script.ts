@@ -5,6 +5,9 @@ import { generateEmployee } from './utils/generateEmployeeMeta';
 import { permission } from './lib/repositories';
 import { userPermission } from './lib/repositories/UserPermission';
 import PERMISSIONS from './utils/Permissions';
+import seedResources from './prisma/seeds/0_resources';
+import prisma from './prisma/client';
+
 async function seedAdminAuth() {
   try {
     const insertEmployees: Employee[] = [];
@@ -117,14 +120,19 @@ async function seedAdminAuth() {
     });
 
     // Add your seeding logic here
+    await seedResources();
     await permission.createMany(permissionRecords);
     await user.createMany(insertEmployees);
     await userPermission.createMany(insertUserPermission);
+
     console.log('Seeding employees and permissions in appropriate tables');
 
     //    console.log(envVariables.POSTGRES_URL);
   } catch (error) {
     console.error('Error seeding employee auth:', error);
+  } finally {
+    console.log('Finished seeding employee auth');
+    prisma.$disconnect();
   }
 }
 

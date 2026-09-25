@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/database';
+import prisma from './../../prisma/client';
 
 const findAll = () => {
   return prisma.resource.findMany();
@@ -17,7 +17,15 @@ const findByNamePrefix = (name: string) => {
   });
 };
 
+const upsert = (resource_name: string) => {
+  return prisma.resource.upsert({
+    where: { resource_name },
+    create: { resource_name },
+    update: {},
+  });
+};
 export const resource = {
   findAll,
   findByNamePrefix,
+  upsert,
 };

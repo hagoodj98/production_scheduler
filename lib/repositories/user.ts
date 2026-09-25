@@ -1,5 +1,5 @@
 import { Employee } from '@/app/components/types';
-import { prisma } from '@/lib/database';
+import prisma from './../../prisma/client';
 
 const createMany = (data: Employee[]) => {
   return prisma.user.createMany({

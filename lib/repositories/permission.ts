@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/database';
+import prisma from './../../prisma/client';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 
 // Repository for managing permissions in the database. Provides a method to create new permissions.

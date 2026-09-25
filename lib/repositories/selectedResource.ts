@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/database';
+import prisma from './../../prisma/client';
 
 const findAllWithOrders = () => {
   return prisma.selectedResource.findMany({

@@ -1,15 +1,15 @@
-import type { PrismaClient } from "../../app/generated/prisma/client";
-import { parse } from "csv-parse/sync";
-import fs from "fs";
-import path from "path";
+import { resource } from '../../lib/repositories/resource';
+import { parse } from 'csv-parse/sync';
+import fs from 'fs';
+import path from 'path';
 
 type ResourceRow = {
   resource_name: string;
 };
-const seedResources = async (prisma: PrismaClient) => {
+const seedResources = async () => {
   //Load CSV file
-  const csvPath = path.join(process.cwd(), "prisma", "data", "resources.csv");
-  const file = fs.readFileSync(csvPath, "utf8");
+  const csvPath = path.join(process.cwd(), 'prisma', 'data', 'resources.csv');
+  const file = fs.readFileSync(csvPath, 'utf8');
 
   //Parse CSV
   const records = parse<ResourceRow>(file, {
@@ -18,13 +18,7 @@ const seedResources = async (prisma: PrismaClient) => {
   });
   //Insert resources/jobs one by one
   for (const row of records) {
-    await prisma.resource.upsert({
-      where: { resource_name: row.resource_name },
-      create: {
-        resource_name: row.resource_name,
-      },
-      update: {},
-    });
+    await resource.upsert(row.resource_name);
   }
 };
 export default seedResources;
