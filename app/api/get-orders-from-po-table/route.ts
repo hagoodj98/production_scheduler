@@ -1,8 +1,13 @@
-import { productionOrderRepository } from "@/lib/repositories";
-import { NextResponse } from "next/server";
+import { handleError } from '@/utils/ErrorHandlingHelper';
+import { productionOrder } from '@/lib/repositories';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const resources = await productionOrderRepository.findAll();
-
-  return NextResponse.json({ resources });
+  try {
+    const resources = await productionOrder.findAll();
+    return NextResponse.json({ resources });
+  } catch (error) {
+    console.error(error);
+    return handleError(error);
+  }
 }

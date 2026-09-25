@@ -1,38 +1,28 @@
-import { productionOrderRepository } from "@/lib/repositories";
-import { NextRequest, NextResponse } from "next/server";
-
+import { productionOrder } from '@/lib/repositories';
+import { NextRequest, NextResponse } from 'next/server';
+import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
+import { handleError } from '@/utils/ErrorHandlingHelper';
+import PERMISSIONS from '@/utils/Permissions';
 // Deletes orders matching resourceId AND startTime.
 // We use deleteMany because resourceId+startTime is not a unique constraint.
-export async function POST(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { orderId } = body as { orderId?: number };
+    await checkAuthMetaData(PERMISSIONS.delete?.name);
+
+    const params = req.nextUrl.searchParams;
+    const orderId = params.get('orderId');
 
     if (!orderId) {
-      return NextResponse.json(
-        { error: "orderId is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
     }
-
-    const result = await productionOrderRepository.remove(orderId);
+    const result = await productionOrder.remove(Number(orderId));
 
     if (!result) {
-      return NextResponse.json(
-        { message: "No matching order found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: 'No matching order found' }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { message: "Order deleted successfully" },
-      { status: 200 },
-    );
+    return NextResponse.json({ message: 'Order deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error("Delete order failed", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return handleError(error);
   }
 }

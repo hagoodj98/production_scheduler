@@ -2,9 +2,9 @@ name: Production Scheduler CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
   pull_request:
-    branches: ["main"]
+    branches: ['main']
   workflow_dispatch:
 
 permissions:
@@ -20,6 +20,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+      SESSION_SECRET: ci-only-session-secret-for-playwright-tests-32-bytes
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
@@ -49,6 +64,12 @@ jobs:
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed E2E resources and user accounts
+        run: npm run db:seed
 
       - name: Run e2e tests
         run: npm run test:e2e

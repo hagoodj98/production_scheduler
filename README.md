@@ -26,14 +26,17 @@ npm install
 
 ### 2) Configure environment variables
 
-Create/update `.env` with at least:
+Create/update `.env` with the database settings and session secret:
 
 ```env
 DATABASE_URL="postgresql://<user>:<password>@localhost:5433/<db>?schema=public"
 POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<password>
 POSTGRES_DB=<db>
+SESSION_SECRET=<strong-random-secret>
 ```
+
+Generate a session secret with `openssl rand -base64 32`. Keep it private and use a different value outside local development.
 
 Example:
 
@@ -42,6 +45,27 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5433/production_orders?sc
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=production_orders
+SESSION_SECRET=<paste-generated-secret-here>
+```
+
+The seed script has local fallback credentials. Set the following optional variables in `.env` before running `npm run db:seed` to override them; use unique, secure values and do not commit `.env`:
+
+```env
+JOHN_ADMIN_EMAIL=
+JOHN_ADMIN_PASSWORD=
+JANE_ADMIN_EMAIL=
+JANE_ADMIN_PASSWORD=
+CREATE_ASSIGN_ADMIN_ACCESS_KEY=
+MICHAEL_ADMIN_EMAIL=
+MICHAEL_ADMIN_PASSWORD=
+ALL_ACCESS_ADMIN_ACCESS_KEY=
+WILLIAM_ADMIN_EMAIL=
+WILLIAM_ADMIN_PASSWORD=
+EMILY_ADMIN_EMAIL=
+EMILY_ADMIN_PASSWORD=
+RESCHEDULE_TASK_ADMIN_ACCESS_KEY=
+OLIVIA_ADMIN_EMAIL=
+OLIVIA_ADMIN_PASSWORD=
 ```
 
 ### 3) Start the database
@@ -57,11 +81,13 @@ npm run prisma:migrate
 npm run prisma:generate
 ```
 
-### 5) Seed initial resource data (optional but recommended)
+### 5) Seed resources, users, and permissions
 
 ```bash
 npm run db:seed
 ```
+
+Run this after migrations on a fresh database. This single command runs `seed-resources-users-script.ts`, which seeds the resource data from `prisma/data/resources.csv`, permission records, the initial user accounts, and their permission assignments. The script reads optional account passwords and access keys from environment variables; configure those before seeding if you do not want to use the script's local defaults. Seed the database once rather than rerunning against existing records.
 
 ### 6) Run the app
 
@@ -112,7 +138,7 @@ npm run test:e2e
 - API route tests for key handlers in `tests/api/*.spec.ts` with repository mocking.
 - Component tests for rendering and interaction behavior in `tests/components/*.spec.tsx`.
 - Scheduler task status-transition tests in `tests/task/schedulerTask.spec.ts`.
-- Playwright e2e coverage for core home/add-resource/notifier flows in `tests/e2e/home.spec.ts`.
+- Playwright e2e coverage for permission-based access, protected pages, and core scheduler flows in `tests/e2e/`.
 - Type safety checks via TypeScript (`npm run type-check`).
 - Lint checks for code quality and consistency (`npm run lint`).
 
@@ -136,7 +162,7 @@ npm run type-check
 - **Zod validation**: centralized input validation for order/resource payloads.
 - **React context**: lightweight shared state for selected resources and scheduling UI state.
 - **MUI + Tailwind**: used together for fast component composition and utility-first layout styling.
-- **Seed pipeline**: CSV-driven seed process for reproducible local setup.
+- **Seed pipeline**: one command seeds CSV resources, user accounts, permissions, and user-permission assignments.
 
 ## Architecture (High-level)
 
@@ -161,15 +187,15 @@ npm run type-check
 
 ## Known Issues / Limitations
 
-- No authentication/authorization yet; all flows assume a trusted user.
-- Current e2e coverage is smoke-level and can be expanded for full multi-step workflows.
+- Authentication and permission checks are implemented; password handling and session lifecycle can be further hardened.
+- E2E coverage exercises permission boundaries and core workflows, with broader multi-step scheduling scenarios still possible.
 - Scheduling/status logic is functional but can be further hardened for timezone edge cases and concurrency.
 - Some UX polish opportunities remain (form feedback consistency, loading/error states across all screens).
 - Error boundaries and observability/monitoring are minimal in current scope.
 
 ## Bonus Features
 
-- CSV-based Prisma seed workflow (`npm run db:seed`).
+- Consolidated database seed script for resources, users, and permissions (`npm run db:seed`).
 - Background cron process launched with dev server for automated status handling.
 - Data visualization widgets (calendar + chart) to improve operational visibility.
 
@@ -180,6 +206,6 @@ npm run type-check
 
 ## Next Steps
 
-- Add authentication (Auth.js/NextAuth + Prisma adapter).
-- Introduce role-based access (admin/operator/view-only).
-- Expand tests to include API route integration and critical user flows.
+- Further harden password storage and session security.
+- save hashed passwords to database instead of the password
+- Expand end-to-end coverage for complete scheduling and status-transition workflows.

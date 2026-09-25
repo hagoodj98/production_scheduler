@@ -1,23 +1,22 @@
-"use client";
+'use client';
 
-import Button from "@mui/material/Button";
-import Link from "next/link";
-import { Resource } from "./types";
-import { useResourcesContext } from "../context";
-import { useEffect } from "react";
+import Button from '@mui/material/Button';
+import Link from 'next/link';
+import { Resource } from './types';
+import { useAuthenticatedAdminUserContext, useResourcesContext } from '../context';
+import { useEffect, useState } from 'react';
+import AdminAccessForm from './AdminAccessForm';
 
 interface NavProps {
   resourceLabel: string;
-  pageNav?: string;
+  pageNav: string;
   allPossibleResources?: Resource[];
 }
 
-const NavButton: React.FC<NavProps> = ({
-  resourceLabel,
-  pageNav,
-  allPossibleResources,
-}) => {
+const NavButton = ({ resourceLabel, allPossibleResources, pageNav }: NavProps) => {
   const { setResourceData } = useResourcesContext();
+  const { userIsAuthenticated } = useAuthenticatedAdminUserContext();
+  const [showAdminAccessForm, setShowAdminAccessForm] = useState(false);
   useEffect(() => {
     //Once the nav button to add resources is rendered we want to shoot the data over to the AddResources client component.
     if (allPossibleResources) {
@@ -25,14 +24,28 @@ const NavButton: React.FC<NavProps> = ({
       setResourceData(resourcesFromDatabase);
     }
   }, [allPossibleResources, setResourceData]);
+  const handleAdminAccess = () => {
+    setShowAdminAccessForm(true);
+  };
 
   return (
     <div className="inline-block">
-      <Link href={pageNav ?? "#"} aria-label={`Navigate to ${resourceLabel}`}>
-        <Button size="small" variant="contained" disableElevation>
+      {!userIsAuthenticated.name ? (
+        <Button size="small" variant="contained" disableElevation onClick={handleAdminAccess}>
           {resourceLabel}
         </Button>
-      </Link>
+      ) : (
+        <Link href={pageNav} aria-label={`Navigate to ${resourceLabel}`}>
+          <Button size="small" variant="contained" disableElevation onClick={() => {}}>
+            {resourceLabel}
+          </Button>
+        </Link>
+      )}
+      <AdminAccessForm
+        open={showAdminAccessForm}
+        redirectPath={pageNav}
+        onClose={() => setShowAdminAccessForm(false)}
+      />
     </div>
   );
 };

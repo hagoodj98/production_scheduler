@@ -12,7 +12,13 @@ export type Resource = {
   id: number;
   resource_name: string | null;
 };
-
+export type PayloadSession = {
+  employee_id: string;
+  role: string;
+  expiresAt: Date;
+  name: string;
+  permissions: string[];
+};
 export type TimeSlots = {
   id: number;
   slot: StartEndTime;
@@ -56,13 +62,25 @@ export type ProductionOrder = {
   dayMonthYear: DayMonthYear;
   timeRange: TimeRange;
   resource: ClientResource;
-  orderId?: number | null; // Production order ID for tracking pending → processing transition
+  orderId: number; // Production order ID for tracking pending → processing transition
 };
 export type AvailableSlotPair = {
   name: ClientResource;
   value: number;
 };
-
+export type AuthData = {
+  username: string;
+  password: string;
+};
+export type Employee = {
+  employeeId: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  admin_key?: string | null;
+  userPermissions?: string[];
+};
 export type Slot = {
   id: {
     row: string;

@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev\" \"npm run start:cron\"",
+    "dev:next": "next dev",
+    "dev:debug": "concurrently \"node --inspect=9229 node_modules/next/dist/bin/next dev\" \"npm run start:cron\"",
     "start:cron": "node node_cron/cron.mjs",
     "build": "next build",
     "start": "next start",
@@ -12,21 +14,23 @@
     "db:up": "docker-compose up -d",
     "db:down": "docker-compose down",
     "db:logs": "docker-compose logs -f db",
-    "db:seed": "prisma db seed",
+    "db:seed": "tsx seed-resources-users-script.ts",
+    "db:show": "prisma studio",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:api": "vitest run --config vitest.config.ts tests/api",
     "test:components": "vitest run --config vitest.config.ts tests/components",
     "test:zod": "vitest run --config vitest.config.ts tests/zod",
-    "test:e2e": "playwright test",
-    "prisma:seed": "tsx prisma/seeds/seed.ts"
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.8",
+    "@mui/icons-material": "^7.3.11",
+    "@mui/material": "^7.3.11",
     "@mui/x-date-pickers": "^8.27.2",
     "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.4.1",
@@ -34,6 +38,7 @@
     "csv-parse": "^6.1.0",
     "dayjs": "^1.11.19",
     "dotenv": "^17.3.1",
+    "jose": "^6.2.12",
     "next": "16.1.6",
     "node-cron": "^4.2.1",
     "react": "19.2.3",
@@ -44,7 +49,7 @@
     "swr": "^2.4.0",
     "vite": "^7.3.1",
     "vitest": "^4.0.18",
-    "zod": "^4.3.6"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
@@ -62,7 +67,7 @@
     "jsdom": "^28.1.0",
     "prisma": "^7.4.1",
     "tailwindcss": "^4",
-    "tsx": "^4.21.0",
+    "tsx": "^4.23.13",
     "typescript": "5.9.3"
   },
   "overrides": {

@@ -1,69 +1,63 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { NextRequest } from 'next/server';
 
-const { productionOrderRepository } = vi.hoisted(() => ({
-  productionOrderRepository: {
+const { productionOrder, checkAuthMetaData } = vi.hoisted(() => ({
+  productionOrder: {
     remove: vi.fn(),
   },
+  checkAuthMetaData: vi.fn(),
 }));
 
-vi.mock("@/lib/repositories", () => ({
-  productionOrderRepository,
+vi.mock('@/lib/repositories', () => ({
+  productionOrder,
 }));
+vi.mock('@/utils/CheckAuthHelper', () => ({ checkAuthMetaData }));
 
-import { POST } from "@/app/api/delete-order/route";
+import { DELETE } from '@/app/api/delete-order/route';
 
-describe("POST /api/delete-order", () => {
+describe('DELETE /api/delete-order', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    checkAuthMetaData.mockResolvedValue('Delete Admin');
   });
 
-  it("returns 400 when orderId is missing", async () => {
-    const req = new Request("http://localhost/api/delete-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
-    });
+  it('returns 400 when orderId is missing', async () => {
+    const req = new NextRequest('http://localhost/api/delete-order', { method: 'DELETE' });
 
-    const res = await POST(req as never);
+    const res = await DELETE(req as never);
     const body = await res.json();
 
     expect(res.status).toBe(400);
-    expect(body).toEqual({ error: "orderId is required" });
-    expect(productionOrderRepository.remove).not.toHaveBeenCalled();
+    expect(body).toEqual({ error: 'orderId is required' });
+    expect(productionOrder.remove).not.toHaveBeenCalled();
   });
 
-  it("deletes an order and returns 200", async () => {
-    productionOrderRepository.remove.mockResolvedValueOnce({ id: 11 });
+  it('deletes an order and returns 200', async () => {
+    productionOrder.remove.mockResolvedValueOnce({ id: 11 });
 
-    const req = new Request("http://localhost/api/delete-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId: 11 }),
+    const req = new NextRequest('http://localhost/api/delete-order?orderId=11', {
+      method: 'DELETE',
     });
 
-    const res = await POST(req as never);
+    const res = await DELETE(req as never);
     const body = await res.json();
 
-    expect(productionOrderRepository.remove).toHaveBeenCalledWith(11);
+    expect(productionOrder.remove).toHaveBeenCalledWith(11);
     expect(res.status).toBe(200);
-    expect(body).toEqual({ message: "Order deleted successfully" });
+    expect(body).toEqual({ message: 'Order deleted successfully' });
   });
 
-  it("returns 500 when repository remove throws", async () => {
-    productionOrderRepository.remove.mockRejectedValueOnce(
-      new Error("delete failed"),
-    );
+  it('returns 500 when repository remove throws', async () => {
+    productionOrder.remove.mockRejectedValueOnce(new Error('delete failed'));
 
-    const req = new Request("http://localhost/api/delete-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId: 11 }),
+    const req = new NextRequest('http://localhost/api/delete-order?orderId=11', {
+      method: 'DELETE',
     });
 
-    const res = await POST(req as never);
+    const res = await DELETE(req as never);
     const body = await res.json();
 
     expect(res.status).toBe(500);
-    expect(body).toEqual({ error: "Internal server error" });
+    expect(body).toEqual({ error: 'delete failed' });
   });
 });

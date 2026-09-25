@@ -1,39 +1,44 @@
-import Recharts from "./components/Recharts";
-import NavButton from "./components/NavButton";
-import Calendar from "./components/Calendar";
+import Recharts from './components/Recharts';
+import NavButton from './components/NavButton';
+import Calendar from './components/Calendar';
+import LockBox from './components/lockBox';
+import Header from './components/Header';
+import CheckAuth from './components/CheckAuth';
 
 export default async function Home() {
-  // Load resources and production orders on the server
-
+  // Check if the admin user is authenticated
   return (
     <div className="p-6">
+      <CheckAuth />
       {/* Header */}
-
-      <h2 className="text-[#FFBB28] text-2xl">Production Scheduler</h2>
-
-      <div className=" top-0 z-20  bg-white py-4 flex justify-center  gap-4">
-        <div className="flex ml-1 mr-1 md:ml-4 md:mr-4">
+      <Header />
+      <div className=" top-0 z-20  bg-white py-4 flex  gap-4">
+        <LockBox />
+        <div className="flex ml-1 mr-1 w-1/3 md:ml-4 md:mr-4">
           <Recharts compact />
         </div>
-        <div className=" flex items-center gap-3">
-          <a
-            href="/add-resource"
-            className="rounded bg-yellow-400 text-black px-3 py-2 text-sm hover:bg-yellow-500"
-          >
-            + Add Resource
-          </a>
-          <NavButton pageNav="/assign-resource" resourceLabel="Create Order" />
+        <div className=" flex items-center w-1/3 gap-3">
+          <NavButton
+            //isAdminUserAuthenticated={isAdminUserAuthenticated}
+            pageNav="/add-resource"
+            resourceLabel="Add Resource"
+          />
+          <NavButton
+            // isAdminUserAuthenticated={isAdminUserAuthenticated}
+            pageNav="/assign-order"
+            resourceLabel="Create Order"
+          />
         </div>
       </div>
 
       {/* Main layout */}
-      <div>
-        <main className="md:col-span-9">
+      <main className="md:col-span-9">
+        <div>
           <div className="bg-white p-4 rounded shadow-sm min-h-[60vh]">
             <Calendar />
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
