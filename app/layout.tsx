@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import {
@@ -37,7 +38,9 @@ export default function RootLayout({
             <GetAllSelectedResourcesWrapper>{children}</GetAllSelectedResourcesWrapper>
           </ResourceWrapper>
         </AuthenticatedAdminUserWrapper>
-        <GlobalMessageReader />
+        <Suspense fallback={null}>
+          <GlobalMessageReader />
+        </Suspense>
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import Notifier, { Severity } from './ui/snackbar';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
@@ -31,14 +31,12 @@ const GlobalMessageReader = () => {
   }, [searchParams, router]);
 
   return (
-    <Suspense fallback={null}>
-      <Notifier
-        severity={Severity.error}
-        message={decodeURIComponent(searchParams.get('msg') || '')}
-        onClose={handleClose}
-        open={open}
-      />
-    </Suspense>
+    <Notifier
+      severity={Severity.error}
+      message={decodeURIComponent(searchParams.get('msg') || '')}
+      onClose={handleClose}
+      open={open}
+    />
   );
 };
 
