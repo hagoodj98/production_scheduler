@@ -1,16 +1,16 @@
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
-import { CustomError } from '@/utils/CustomErrors';
-import { NextResponse, NextRequest } from 'next/server';
-export async function GET(req: NextRequest) {
-  // Implement the logic to fetch the authentication status here
+import { handleError } from '@/utils/ErrorHandlingHelper';
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  // API route for checking the authentication status of the user
   try {
+    // Check the authentication status of the user
     const userName = await checkAuthMetaData();
+    // Return the authentication status as a JSON response
     return NextResponse.json({ userName });
   } catch (error) {
-    console.error(error);
-    if (error instanceof CustomError) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
-    }
-    return NextResponse.json({ error: 'Failed to fetch auth status' }, { status: 500 });
+    // Log the error for debugging purposes
+    handleError(error);
   }
 }

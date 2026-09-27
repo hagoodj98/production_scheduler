@@ -8,18 +8,20 @@ import PERMISSIONS from '@/utils/Permissions';
 
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
-//validating data before use
-//This handler takes care of the pending state. This route is only called when the data is valid.
+// Validating data before use
+// This handler takes care of the pending state. This route is only called when the data is valid.
 export async function POST(req: NextRequest) {
   try {
+    // Check if the user has the necessary permission to assign a production order
     await checkAuthMetaData(PERMISSIONS.assign?.name);
 
     const rawData = await req.json();
     if (!rawData) {
       throw new CustomError('Missing input information', 404);
     }
+    // Parse and validate the incoming request data against the schema
     const { order, existingOrder } = await markPendingRequestSchema.parseAsync(rawData);
-    //Getting data out of rawData so we can push clean and clarified data to database
+    // Getting data out of rawData so we can push clean and clarified data to database
     const year = order.dayMonthYear.year;
     const month = order.dayMonthYear.month;
     const day = order.dayMonthYear.day;
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest) {
     const getIdOfSelectedResource = await selectedResource.findByNameOrThrow(resourceName);
     const retrievedId = getIdOfSelectedResource.id;
 
+    // At this point, we have all the necessary information to either create a new production order or update an existing one
     if (!existingOrder) {
       // Best practice: convert to JS Date when saving with Prisma
       const createdOrder = await productionOrder.create({
@@ -52,7 +55,7 @@ export async function POST(req: NextRequest) {
         resourceId: retrievedId,
         resourceStatus: 'Pending',
       });
-
+      // Return a success response with the ID of the newly created order
       return NextResponse.json(
         {
           message: 'succeed',
@@ -61,6 +64,7 @@ export async function POST(req: NextRequest) {
         { status: 200 },
       );
     } else {
+      // If an existing order is provided, update it with the new details
       const updatedOrder = await productionOrder.update(order.orderId!, {
         dayMonthYear: date.toDate(), // Prisma DateTime
         startTime: startTime.toDate(),
@@ -68,6 +72,7 @@ export async function POST(req: NextRequest) {
         resourceId: retrievedId,
         resourceStatus: 'Pending',
       });
+      // Return a success response with the ID of the updated order
       return NextResponse.json(
         {
           message: 'succeed',

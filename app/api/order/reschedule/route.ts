@@ -55,6 +55,7 @@ export async function PATCH(req: NextRequest) {
     if (!getIdOfSelectedResource) {
       return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
     }
+    // Update the production order with the new schedule and set its status to 'Processing'
     await productionOrder.update(orderId, {
       dayMonthYear: date.toDate(),
       startTime: startTime.toDate(),
@@ -72,6 +73,4 @@ export async function PATCH(req: NextRequest) {
   } catch (error) {
     return handleError(error);
   }
-
-  // Perform your update logic here, e.g., update the order in the database
 }

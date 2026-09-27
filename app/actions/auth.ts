@@ -1,53 +1,45 @@
 'use server';
 
 import { adminAccessValidationSchema } from '../../utils/validationSchema';
-import { z } from 'zod';
 import { user, userPermission } from '../../lib/repositories';
 import { createSession, deleteSession } from '../../lib/session';
+import { handleError } from '../../utils/ErrorHandlingHelper';
 
+// Authentication actions: login and logout
 export async function login(state: unknown, formData: FormData) {
   try {
+    // Validate the admin access form data using Zod schema
     const { employee_id, password, admin_key } = await adminAccessValidationSchema.parseAsync({
       employee_id: formData.get('employee_id'),
       password: formData.get('password'),
       admin_key: formData.get('admin_key'),
     });
-
+    // Authenticate the user with the provided credentials
     const authenticateUser = await user.login(employee_id);
     if (!authenticateUser) {
       throw new Error('Invalid employee ID');
     }
+    //Kind of want to keep this section error ambiguous to not reveal which part failed
+
     if (authenticateUser.password !== password || authenticateUser.admin_key !== admin_key) {
-      //Kind of want to keep this section error ambiguous to not reveal which part failed
       throw new Error('Invalid password or admin key');
     }
-    const userPermissions = await userPermission.find(authenticateUser.id);
     // Extract the permission names from the userPermissions array
+    const userPermissions = await userPermission.find(authenticateUser.id);
     const permissions = userPermissions.map((up) => up.permission.name);
-
+    // Prepare the session payload with user information and permissions
     const payloadSession = {
       employee_id: authenticateUser.employeeId,
       role: authenticateUser.role,
       permissions: permissions,
       name: authenticateUser.name,
     };
-
+    // Create the session with the prepared payload
     await createSession(payloadSession);
     return { name: authenticateUser.name, login_success: true };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error(error.issues.map((err) => err.message).join(', '));
-      return {
-        fields: error.issues.map((err) => err.path.join('.')),
-        errors: error.issues.map((err) => err.message),
-      };
-    }
-
-    console.error(error);
-    return {
-      fields: ['form'],
-      errors: [error instanceof Error ? error.message : 'Unknown error'],
-    };
+    // Handle any errors that occur during the login process
+    handleError(error);
   }
 }
 export async function logout() {
