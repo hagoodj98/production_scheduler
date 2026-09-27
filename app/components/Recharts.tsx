@@ -42,7 +42,7 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
     refreshInterval: 5000, // poll every 5 seconds
   });
   // compute flattened orders and counts by status
-  const { chartData, total } = useMemo(() => {
+  const calculateProductionOrders = () => {
     const flattened = (fetchedData?.ResourceProductionOrders ?? []).flatMap(
       (r: LoadJob) =>
         r.productionOrders?.map((p) => ({
@@ -56,7 +56,7 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
     }));
     const total = counts.reduce((acc, c) => acc + c.value, 0);
     return { chartData: counts, total };
-  }, [fetchedData?.ResourceProductionOrders]);
+  };
 
   // keep selectedResourceData up to date for other components
   useEffect(() => {
@@ -77,6 +77,7 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
     }
   };
 
+  const { chartData, total } = calculateProductionOrders();
   if (!chartData) return <div>Loading chart...</div>;
 
   const width = compact ? 160 : 320;
