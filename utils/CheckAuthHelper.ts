@@ -7,8 +7,9 @@ import PERMISSIONS from './Permissions';
 export const checkAuthMetaData = async (permission?: string, path?: string | null) => {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session')?.value;
-  if (!sessionCookie) {
-    throw new CustomError('No session cookie found', 401);
+  // Check if the session cookie exists and is valid
+  if (!sessionCookie || sessionCookie === 'undefined') {
+    throw new CustomError('No session found', 401);
   }
   const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
   // Check if the user has the required permission in their session payload

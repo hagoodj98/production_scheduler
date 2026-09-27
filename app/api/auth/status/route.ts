@@ -11,6 +11,6 @@ export async function GET() {
     return NextResponse.json({ userName });
   } catch (error) {
     // Log the error for debugging purposes
-    handleError(error);
+    return handleError(error);
   }
 }

@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 export async function proxy(req: NextRequest) {
-  if (req.nextUrl.pathname === '/api/authorize-permission') {
+  const pathname = req.nextUrl.pathname;
+
+  if (pathname === '/api/authorize-permission' || pathname === '/') {
     return NextResponse.next();
   }
 
   const session = req.cookies.get('session')?.value;
-  /*
-  if (!session) {
-    const redirectUrl = new URL('/', req.url);
-    return NextResponse.redirect(redirectUrl);
-  }
-    */
+
   const url = new URL(req.url);
 
   // Skip authorization for load-jobs endpoint
