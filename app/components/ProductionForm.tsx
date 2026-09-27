@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useReducer } from 'react';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
@@ -15,26 +15,13 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
-import Notifier, { Severity } from './ui/snackbar';
-import { ProductionOrder } from './types';
+import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
+import { ProductionOrder, OrderType } from './types';
 import type { ErrorMessage } from './types';
 import * as z from 'zod/v4';
 import { CustomError } from '@/utils/CustomErrors';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { timeScheduleValidator } from '../validation/timeScheduleValidator';
-
-type PendingOrder = {
-  id: number;
-  dayMonthYear: Date;
-  resourceStatus: string;
-  resourceId: number;
-  startTime: Date;
-  endTime: Date;
-  resourceName: string;
-};
-type OrderType = {
-  pendingOrder?: PendingOrder;
-};
 
 const ProductionForm = ({ pendingOrder }: OrderType) => {
   /* build initial state using dayjs and conditional checks */
@@ -71,9 +58,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
   };
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  const [openNotifier, setOpenNotifier] = useState(false);
-  const [notifierSeverity, setNotifierSeverity] = useState<Severity>();
-  const [notifierMessage, setNotifierMessage] = useState('');
+  const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
   const markhasRun = useRef(false);
   const [errors, setErrors] = useState<ErrorMessage[] | CustomError[]>([]);
   const { selectedResourceData } = useGetAllSelectedResourcesContext();
@@ -184,9 +169,9 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ productionOrder }),
         });
       }
-      setNotifierMessage('Order created');
-      setNotifierSeverity(Severity.success);
-      setOpenNotifier(true);
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Order created' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.success });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
       setSubmitting(false);
       router.push('/');
     } catch (error) {
@@ -204,9 +189,9 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         return;
       }
       console.error('Submission error:', error);
-      setNotifierMessage('Could not create order');
-      setNotifierSeverity(Severity.error);
-      setOpenNotifier(true);
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Could not create order' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
       setSubmitting(false);
     }
   };
@@ -517,10 +502,10 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         </div>
       </form>
       <Notifier
-        open={openNotifier}
-        onClose={() => setOpenNotifier(false)}
-        severity={notifierSeverity}
-        message={notifierMessage}
+        open={notifierState.openNotifier}
+        onClose={() => dispatchNotifier({ type: 'setOpenNotifier', value: false })}
+        severity={notifierState.notifierSeverity}
+        message={notifierState.notifierMessage}
       />
     </div>
   );

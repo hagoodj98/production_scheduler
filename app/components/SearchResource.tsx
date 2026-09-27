@@ -1,15 +1,14 @@
 'use client';
 
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useReducer, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import { useRouter } from 'next/navigation';
 import { useResourcesContext } from '../context';
+import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
 
 interface AllPossibleResource {
   id: number;
@@ -22,21 +21,15 @@ const SearchResource: React.FC = () => {
   const [resourceName, setResourceName] = useState('');
   const [allPossibleResources, setAllPossibleResources] = useState<AllPossibleResource[]>([]);
   const [loading, setLoading] = useState(false);
-  const [snack, setSnack] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({ open: false, message: '', severity: 'success' });
+  const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
     if (!resourceName || resourceName.trim().length < 2) {
-      setSnack({
-        open: true,
-        message: 'Please enter a valid resource name',
-        severity: 'error',
-      });
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Please enter a valid resource name' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
       return;
     }
 
@@ -58,11 +51,9 @@ const SearchResource: React.FC = () => {
 
       setResourceData((prev) => [newResource, ...prev]);
 
-      setSnack({
-        open: true,
-        message: 'Resource added. Redirecting...',
-        severity: 'success',
-      });
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Resource added. Redirecting...' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.success });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
       setTimeout(() => {
         router.push('/');
       }, 3000);
@@ -71,11 +62,9 @@ const SearchResource: React.FC = () => {
     } catch (error) {
       console.error(error);
       setLoading(false);
-      setSnack({
-        open: true,
-        message: 'Could not add resource',
-        severity: 'error',
-      });
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Could not add resource' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
     }
   };
   useEffect(() => {
@@ -145,19 +134,12 @@ const SearchResource: React.FC = () => {
         </div>
       </form>
 
-      <Snackbar
-        open={snack.open}
-        autoHideDuration={3500}
-        onClose={() => setSnack((s) => ({ ...s, open: false }))}
-      >
-        <Alert
-          onClose={() => setSnack((s) => ({ ...s, open: false }))}
-          severity={snack.severity}
-          sx={{ width: '100%' }}
-        >
-          {snack.message}
-        </Alert>
-      </Snackbar>
+      <Notifier
+        open={notifierState.openNotifier}
+        message={notifierState.notifierMessage}
+        severity={notifierState.notifierSeverity}
+        onClose={() => dispatchNotifier({ type: 'setOpenNotifier', value: false })}
+      />
     </div>
   );
 };

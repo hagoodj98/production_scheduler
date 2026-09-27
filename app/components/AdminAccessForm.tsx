@@ -2,10 +2,11 @@
 import CustomModal from './ui/modal';
 import TextInput from './ui/input';
 import Button from '@mui/material/Button';
-import { useState, useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useReducer } from 'react';
 import { login } from '../actions/auth';
 import { useAuthenticatedAdminUserContext } from '../context';
 import { useRouter } from 'next/navigation';
+import { AdminFormAction, AdminFormState } from './types';
 
 interface AdminAccessFormProps {
   open: boolean;
@@ -13,12 +14,47 @@ interface AdminAccessFormProps {
   redirectPath?: string;
 }
 
+const reducer = (adminFormState: AdminFormState, action: AdminFormAction) => {
+  switch (action.type) {
+    case 'setEmployee_id':
+      return {
+        ...adminFormState,
+        formData: {
+          ...adminFormState.formData,
+          employee_id: action.value,
+        },
+      };
+    case 'setPassword':
+      return {
+        ...adminFormState,
+        formData: {
+          ...adminFormState.formData,
+          password: action.value,
+        },
+      };
+    case 'setAdmin_key':
+      return {
+        ...adminFormState,
+        formData: {
+          ...adminFormState.formData,
+          admin_key: action.value,
+        },
+      };
+
+    default:
+      return adminFormState;
+  }
+};
+
 const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) => {
-  const [formData, setFormData] = useState({
-    employee_id: '',
-    password: '',
-    admin_key: '',
+  const [adminFormState, dispatch] = useReducer(reducer, {
+    formData: {
+      employee_id: '',
+      password: '',
+      admin_key: '',
+    },
   });
+
   const router = useRouter();
   const { setUserIsAuthenticated, userIsAuthenticated } = useAuthenticatedAdminUserContext();
   const [state, formAction, pending] = useActionState(login, undefined);
@@ -43,16 +79,16 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
         action={() => {
           // Convert the formData state into a FormData object for submission
           const data = new FormData();
-          data.append('employee_id', formData.employee_id);
-          data.append('password', formData.password);
-          data.append('admin_key', formData.admin_key);
+          data.append('employee_id', adminFormState.formData.employee_id);
+          data.append('password', adminFormState.formData.password);
+          data.append('admin_key', adminFormState.formData.admin_key);
           formAction(data);
         }}
       >
         <TextInput
           label="Employee ID"
-          value={formData.employee_id}
-          onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
+          value={adminFormState.formData.employee_id}
+          onChange={(e) => dispatch({ type: 'setEmployee_id', value: e.target.value })}
           name="employee_id"
           type="text"
         />
@@ -61,8 +97,8 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
         )}
         <TextInput
           label="Password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          value={adminFormState.formData.password}
+          onChange={(e) => dispatch({ type: 'setPassword', value: e.target.value })}
           name="password"
           type="password"
         />
@@ -71,8 +107,8 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
         )}
         <TextInput
           label="Admin Key"
-          value={formData.admin_key}
-          onChange={(e) => setFormData({ ...formData, admin_key: e.target.value })}
+          value={adminFormState.formData.admin_key}
+          onChange={(e) => dispatch({ type: 'setAdmin_key', value: e.target.value })}
           name="admin_key"
           type="text"
         />

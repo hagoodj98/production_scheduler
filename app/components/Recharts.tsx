@@ -3,7 +3,7 @@
 import { Cell, Pie, PieChart, Tooltip, ResponsiveContainer } from 'recharts';
 import type { ClientResource } from './types';
 import { useEffect, useMemo } from 'react';
-
+import type { LoadJob } from './types';
 import { useGetAllSelectedResourcesContext, useResourcesContext } from '../context';
 import useSWR from 'swr';
 
@@ -16,10 +16,6 @@ const STATUS_COLORS: Record<string, string> = {
   Completed: '#2ecc71',
 };
 
-type LoadJob = {
-  resource_name: string;
-  productionOrders?: Array<{ resourceStatus: string } & Record<string, unknown>>;
-};
 interface OrderProps {
   id: number;
   resource_name: string;

@@ -1,11 +1,11 @@
 'use client';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useReducer } from 'react';
 import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
 import { useResourcesContext } from '../context';
-import Notifier, { Severity } from './ui/snackbar';
+import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -22,7 +22,7 @@ interface OrderProps {
   }[];
 }
 
-interface CalendarEvent {
+export interface CalendarEvent {
   id: number;
   title: string;
   start: Date;
@@ -33,24 +33,22 @@ interface CalendarEvent {
   [key: string]: unknown;
 }
 
-//
 const MyCalendar = () => {
   const fetcher = async (url: string) => {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`API ${url} failed: ${res.status}`);
     return await res.json();
   };
-
   const { data: fetchedData } = useSWR<{
     ResourceProductionOrders: OrderProps[];
   }>('/api/order/load', fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
-  const { selectedResourceIds, selectedStatus } = useResourcesContext();
-  const [openNotifier, setOpenNotifier] = useState(false);
+  const [notifierState, notififierDispatcher] = useReducer(notifierReducer, initialNotifierState);
   const navigate = useRouter();
-  const [notifierSeverity, setNotifierSeverity] = useState<Severity>();
-  const [notifierMessage, setNotifierMessage] = useState('');
+
+  const { selectedResourceIds, selectedStatus } = useResourcesContext();
+
   const events = fetchedData?.ResourceProductionOrders.flatMap((order) =>
     order.productionOrders.map((job) => ({
       title: `${order.resource_name} at ${dayjs(job.startTime).format('h:mm A')}`,
@@ -96,19 +94,22 @@ const MyCalendar = () => {
               });
               if (!response.ok) {
                 const data = await response.json();
-                setOpenNotifier(true);
-                setNotifierMessage(data.error);
-                setNotifierSeverity(Severity.error);
+                notififierDispatcher({ type: 'setOpenNotifier', value: true });
+                notififierDispatcher({ type: 'setNotifierMessage', value: data.error });
+                notififierDispatcher({ type: 'setNotifierSeverity', value: Severity.error });
                 return;
               }
-              setNotifierMessage('Order deleted successfully');
-              setOpenNotifier(true);
-              setNotifierSeverity(Severity.success);
+              notififierDispatcher({
+                type: 'setNotifierMessage',
+                value: 'Order deleted successfully',
+              });
+              notififierDispatcher({ type: 'setOpenNotifier', value: true });
+              notififierDispatcher({ type: 'setNotifierSeverity', value: Severity.success });
             } catch (error) {
               console.error('Error deleting order:', error);
-              setNotifierMessage('Error deleting order');
-              setOpenNotifier(true);
-              setNotifierSeverity(Severity.error);
+              notififierDispatcher({ type: 'setNotifierMessage', value: 'Error deleting order' });
+              notififierDispatcher({ type: 'setOpenNotifier', value: true });
+              notififierDispatcher({ type: 'setNotifierSeverity', value: Severity.error });
             }
           }}
         >
@@ -182,10 +183,10 @@ const MyCalendar = () => {
         components={{ event: EventComponent }}
       />
       <Notifier
-        open={openNotifier}
-        onClose={() => setOpenNotifier(false)}
-        severity={notifierSeverity}
-        message={notifierMessage}
+        open={notifierState.openNotifier}
+        onClose={() => notififierDispatcher({ type: 'setOpenNotifier', value: false })}
+        severity={notifierState.notifierSeverity}
+        message={notifierState.notifierMessage}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useReducer } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import AdminAccessForm from './AdminAccessForm';
@@ -8,6 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { logout } from '../actions/auth';
 import { useRouter } from 'next/navigation';
 import { useAuthenticatedAdminUserContext } from '../context';
+
 const Header = () => {
   const router = useRouter();
   const { userIsAuthenticated, setUserIsAuthenticated } = useAuthenticatedAdminUserContext();

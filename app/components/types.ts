@@ -1,5 +1,6 @@
 import { Prisma } from '../generated/prisma/client';
 import React from 'react';
+import { Severity } from './ui/snackbar';
 
 export type SlotStatus = 'Pending' | 'Available' | 'Scheduled' | 'Busy';
 
@@ -7,6 +8,45 @@ export type CellID = {
   row: string;
   column: string;
 };
+export type NotifierState = {
+  openNotifier: boolean;
+  notifierMessage: string;
+  notifierSeverity: Severity | undefined;
+};
+
+export type AdminFormState = {
+  formData: {
+    employee_id: string;
+    password: string;
+    admin_key: string;
+  };
+};
+export type LoadJob = {
+  resource_name: string;
+  productionOrders?: Array<{ resourceStatus: string } & Record<string, unknown>>;
+};
+export type PendingOrder = {
+  id: number;
+  dayMonthYear: Date;
+  resourceStatus: string;
+  resourceId: number;
+  startTime: Date;
+  endTime: Date;
+  resourceName: string;
+};
+export type OrderType = {
+  pendingOrder?: PendingOrder;
+};
+
+export type AdminFormAction =
+  | { type: 'setEmployee_id'; value: string }
+  | { type: 'setPassword'; value: string }
+  | { type: 'setAdmin_key'; value: string };
+
+export type NotifierAction =
+  | { type: 'setOpenNotifier'; value: boolean }
+  | { type: 'setNotifierMessage'; value: string }
+  | { type: 'setNotifierSeverity'; value: Severity | undefined };
 
 export type Resource = {
   id: number;
