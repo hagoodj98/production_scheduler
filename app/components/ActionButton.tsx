@@ -4,9 +4,8 @@ import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { Resource } from './types';
 import { useAuthenticatedAdminUserContext, useResourcesContext } from '../context';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminAccessForm from './AdminAccessForm';
 
 interface NavProps {
   resourceLabel: string;
@@ -14,7 +13,7 @@ interface NavProps {
   allPossibleResources?: Resource[];
 }
 
-const NavButton = ({ resourceLabel, allPossibleResources, pageNav }: NavProps) => {
+const ActionButton = ({ resourceLabel, allPossibleResources, pageNav }: NavProps) => {
   const { setResourceData } = useResourcesContext();
   const navigate = useRouter();
 
@@ -45,6 +44,7 @@ const NavButton = ({ resourceLabel, allPossibleResources, pageNav }: NavProps) =
           <Button
             size="small"
             variant="contained"
+            sx={{ backgroundColor: '#FFBB28' }}
             disableElevation
             onClick={() => {
               navigate.push(pageNav);
@@ -58,4 +58,4 @@ const NavButton = ({ resourceLabel, allPossibleResources, pageNav }: NavProps) =
   );
 };
 
-export default NavButton;
+export default ActionButton;

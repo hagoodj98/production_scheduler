@@ -77,7 +77,14 @@ const Header = () => {
               },
             }}
           >
-            <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
+            <MenuItem
+              sx={{
+                backgroundColor: '#FFBB28',
+              }}
+              onClick={handleLogoutClick}
+            >
+              Logout
+            </MenuItem>
           </Menu>
         </div>
       ) : (
