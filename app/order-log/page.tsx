@@ -5,11 +5,14 @@ const page = async () => {
     <div>
       <h1>Order Log</h1>
       <ul>
-        {logs.map((log) => (
-          <li
-            key={log.id}
-          >{`Order ID: ${log.orderId}, Created At: ${log.order.creationDate}, Employee: ${log.employee.name}`}</li>
-        ))}
+        {logs.map((log) => {
+          const time = new Date(log.order.creationDate).toLocaleString();
+          return (
+            <li
+              key={log.id}
+            >{`Order ID: ${log.orderId}, Created At: ${time}, Employee: ${log.employee.name}`}</li>
+          );
+        })}
       </ul>
     </div>
   );

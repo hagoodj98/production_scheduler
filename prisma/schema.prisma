@@ -28,6 +28,8 @@ model ProductionOrder {
   creationDate   DateTime @default(now())
   updatedAt     DateTime @updatedAt 
   orderLogs      OrderLog[]
+  employeeAssigned    String
+  employee       User       @relation(fields: [employeeAssigned], references: [employeeId])
   resource       SelectedResource @relation(fields: [resourceId], references: [id])
 }
 
@@ -47,6 +49,7 @@ model User {
   admin_key String?
   userPermissions UserPermission[]
   orderLogs      OrderLog[]
+  productionOrders ProductionOrder[]
 }
 
 model UserPermission {
