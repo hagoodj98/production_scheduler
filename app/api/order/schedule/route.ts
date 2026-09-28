@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
-import { selectedResource, productionOrder } from '@/lib/repositories';
+import { selectedResource, productionOrder, orderLog } from '@/lib/repositories';
 import dayjs from 'dayjs';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 import PERMISSIONS from '@/utils/Permissions';
@@ -10,7 +10,7 @@ import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 export async function POST(req: NextRequest) {
   try {
     // Check if the user has the necessary permission to assign a production order
-    await checkAuthMetaData(PERMISSIONS.assign?.name);
+    const { employeeId } = await checkAuthMetaData(PERMISSIONS.assign?.name);
 
     // Parse and validate the incoming request data against the schema
     const rawData = await req.json();
@@ -50,15 +50,18 @@ export async function POST(req: NextRequest) {
     const date = dayjs(`${year}-${month}-${day}`);
     const getIdOfSelectedResource = await selectedResource.findByNameOrThrow(resourceName);
     const retrievedId = getIdOfSelectedResource.id;
-
     // Update the existing pending order with the new schedule and set its status to 'Processing'
-    const createdOrder = await productionOrder.update(orderId, {
-      dayMonthYear: date.toDate(),
-      startTime: startTime.toDate(),
-      endTime: endTime.toDate(),
-      resourceId: retrievedId,
-      resourceStatus: 'Processing',
-    });
+    const [createdOrder] = await Promise.all([
+      productionOrder.update(orderId, {
+        dayMonthYear: date.toDate(),
+        startTime: startTime.toDate(),
+        endTime: endTime.toDate(),
+        resourceId: retrievedId,
+        resourceStatus: 'Processing',
+      }),
+      orderLog.createOrderLog(orderId, employeeId),
+    ]);
+
     return NextResponse.json(
       {
         message: `Updated order ${createdOrder.id} to Processing status`,

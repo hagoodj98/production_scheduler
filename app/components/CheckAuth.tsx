@@ -26,7 +26,7 @@ export const CheckAuth = () => {
         if (userIsAuthenticated.state !== 'authenticated') {
           setUserIsAuthenticated({
             state: 'authenticated',
-            name: data.userName,
+            name: data.adminName,
           });
         }
       } catch (error) {

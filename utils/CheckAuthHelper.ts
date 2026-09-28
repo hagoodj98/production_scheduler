@@ -34,5 +34,5 @@ export const checkAuthMetaData = async (permission?: string, path?: string | nul
     }
     throw new CustomError(`You are unauthorized to ${permission} this resource`, 403);
   }
-  return payloadSession.name;
+  return { adminName: payloadSession.name, employeeId: payloadSession.employee_id };
 };

@@ -161,13 +161,16 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ productionOrder }),
         });
       } else {
-        await fetch('/api/order/schedule', {
+        const response = await fetch('/api/order/schedule', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ productionOrder }),
         });
+        if (!response.ok) {
+          throw new CustomError('Failed to create order', 400);
+        }
       }
       dispatchNotifier({ type: 'setNotifierMessage', value: 'Order is created! Redirecting...' });
       dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.success });
