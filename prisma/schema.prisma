@@ -25,6 +25,8 @@ model ProductionOrder {
   endTime        DateTime
   resourceStatus String
   resourceId     Int
+  creationDate   DateTime @default(now())
+  orderLogs      OrderLog[]
   resource       SelectedResource @relation(fields: [resourceId], references: [id])
 }
 
@@ -57,4 +59,11 @@ model Permission {
   id       Int    @id @default(autoincrement())
   name     String @unique
   userPermissions UserPermission[]
+}
+
+model OrderLog {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     ProductionOrder @relation(fields: [orderId], references: [id])
+  createdAt DateTime @default(now())
 }
