@@ -9,7 +9,7 @@ export const checkAuthMetaData = async (permission?: string, path?: string | nul
   const sessionCookie = cookieStore.get('session')?.value;
   // Check if the session cookie exists and is valid
   if (!sessionCookie || sessionCookie === 'undefined') {
-    throw new CustomError('No session found', 401);
+    throw new CustomError('You are unauthenticated', 401);
   }
   const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
   // Check if the user has the required permission in their session payload

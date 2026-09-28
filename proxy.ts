@@ -3,7 +3,7 @@ import { handleError } from '@/utils/ErrorHandlingHelper';
 export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  if (pathname === '/api/authorize-permission' || pathname === '/') {
+  if (pathname === '/api/authorize-permission') {
     return NextResponse.next();
   }
 
