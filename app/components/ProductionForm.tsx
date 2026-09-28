@@ -310,10 +310,11 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         }
       };
       response();
-    }
-    if (!markhasRun.current) {
+    } else {
+      // if (!markhasRun.current) {
       sendPendingStatus();
-      markhasRun.current = true;
+      //markhasRun.current = true;
+      // }
     }
   }, [pendingOrder, productionOrder, validate]);
 
