@@ -15,17 +15,10 @@ export default async function Home() {
         <div className="flex ml-1 mr-1 w-1/3 md:ml-4 md:mr-4">
           <Recharts compact />
         </div>
-        <div className=" flex items-center w-1/3 gap-3">
-          <ActionButton
-            //isAdminUserAuthenticated={isAdminUserAuthenticated}
-            pageNav="/add-resource"
-            resourceLabel="Add Resource"
-          />
-          <ActionButton
-            // isAdminUserAuthenticated={isAdminUserAuthenticated}
-            pageNav="/assign-order"
-            resourceLabel="Create Order"
-          />
+        <div className=" flex items-center  gap-2">
+          <ActionButton pageNav="/add-resource" resourceLabel="Add Resource" />
+          <ActionButton pageNav="/assign-order" resourceLabel="Create Order" />
+          <ActionButton pageNav="/order-log" resourceLabel="Order Log" />
         </div>
       </div>
 
