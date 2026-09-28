@@ -169,11 +169,13 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ productionOrder }),
         });
       }
-      dispatchNotifier({ type: 'setNotifierMessage', value: 'Order created' });
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Order is created! Redirecting...' });
       dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.success });
       dispatchNotifier({ type: 'setOpenNotifier', value: true });
       setSubmitting(false);
-      router.push('/');
+      setTimeout(() => {
+        router.push('/');
+      }, 3000);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: ErrorMessage[] = error.issues.map((issue) => ({
