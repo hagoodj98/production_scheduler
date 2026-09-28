@@ -1,12 +1,5 @@
 import prisma from './../../prisma/client';
-
-type ProductionOrderWriteInput = {
-  dayMonthYear: Date;
-  startTime: Date;
-  endTime: Date;
-  resourceId: number;
-  resourceStatus: string;
-};
+import type { ProductionOrderWriteInput } from '../../app/components/types';
 
 const findAll = () => {
   return prisma.productionOrder.findMany({

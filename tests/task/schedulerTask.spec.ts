@@ -15,11 +15,6 @@ vi.mock("@/lib/database", () => ({
 
 import { loopThroughScheduledJobs } from "@/task/schedulerTask";
 
-const flushAsync = async () => {
-  await Promise.resolve();
-  await Promise.resolve();
-};
-
 type TestOrder = {
   id: number;
   dayMonthYear: Date;
@@ -53,8 +48,7 @@ describe("schedulerTask status transitions", () => {
       resourceStatus: "Pending",
     });
 
-    loopThroughScheduledJobs([makeOrder({})] as never);
-    await flushAsync();
+    await loopThroughScheduledJobs([makeOrder({})] as never);
 
     expect(prismaMock.productionOrder.update).not.toHaveBeenCalled();
   });
@@ -66,8 +60,7 @@ describe("schedulerTask status transitions", () => {
     });
     prismaMock.productionOrder.update.mockResolvedValueOnce({});
 
-    loopThroughScheduledJobs([makeOrder({})] as never);
-    await flushAsync();
+    await loopThroughScheduledJobs([makeOrder({})] as never);
 
     expect(prismaMock.productionOrder.update).toHaveBeenCalledWith({
       where: { id: 1 },
@@ -82,8 +75,7 @@ describe("schedulerTask status transitions", () => {
     });
     prismaMock.productionOrder.update.mockResolvedValueOnce({});
 
-    loopThroughScheduledJobs([makeOrder({})] as never);
-    await flushAsync();
+    await loopThroughScheduledJobs([makeOrder({})] as never);
 
     expect(prismaMock.productionOrder.update).toHaveBeenCalledWith({
       where: { id: 1 },
@@ -98,8 +90,7 @@ describe("schedulerTask status transitions", () => {
     });
     prismaMock.productionOrder.update.mockResolvedValueOnce({});
 
-    loopThroughScheduledJobs([makeOrder({})] as never);
-    await flushAsync();
+    await loopThroughScheduledJobs([makeOrder({})] as never);
 
     expect(prismaMock.productionOrder.update).toHaveBeenCalledWith({
       where: { id: 1 },

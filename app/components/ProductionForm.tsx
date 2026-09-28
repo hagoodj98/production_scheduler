@@ -249,7 +249,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           setErrors([{ message: 'An unknown error occurred' }]);
           return;
         }
-
+        // Send the request to mark the order as pending
         const response = await fetch('/api/order/mark-pending', {
           method: 'POST',
           headers: {
@@ -259,13 +259,13 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         });
         if (!response.ok) {
           const responseError = await response.json();
-
+          // Handle the error response from the server
           setErrors([{ message: responseError.error }]);
           console.error('Failed to mark order as pending:', responseError.error);
           return;
         }
+        // Update the local state with the new order ID returned from the server
         const responseData = await response.json();
-
         setProductionOrder((prev) => ({
           ...prev,
           orderId: responseData.orderId,
@@ -311,10 +311,9 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       };
       response();
     } else {
-      // if (!markhasRun.current) {
-      sendPendingStatus();
-      //markhasRun.current = true;
-      // }
+      if (!productionOrder.orderId) {
+        sendPendingStatus();
+      }
     }
   }, [pendingOrder, productionOrder, validate]);
 

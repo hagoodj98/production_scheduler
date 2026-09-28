@@ -4,18 +4,15 @@ import { prisma } from "@/lib/database";
 import { CustomError } from "@/utils/CustomErrors";
 import dayjs from "dayjs";
 
-export const loopThroughScheduledJobs = (
+export const loopThroughScheduledJobs = async (
   ordersArray: RequestScheduledJobs[],
-): void => {
+): Promise<void> => {
   try {
     if (!ordersArray) {
       throw new CustomError("Cannot find array or array is empty", 404);
     }
 
-    for (let i = 0; i < ordersArray.length; i++) {
-      const checkThroughOrders = ordersArray[i]; //this is an object but we want to tap into the keys of slots not id or name or row.
-      changeStatuses(checkThroughOrders);
-    }
+    await Promise.all(ordersArray.map((order) => changeStatuses(order)));
   } catch (error) {
     if (error instanceof CustomError) {
       throw error;

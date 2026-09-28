@@ -26,7 +26,7 @@ export type LoadJob = {
   productionOrders?: Array<{ resourceStatus: string } & Record<string, unknown>>;
 };
 export type PendingOrder = {
-  id: number;
+  id: number | null;
   dayMonthYear: Date;
   resourceStatus: string;
   resourceId: number;
@@ -92,7 +92,13 @@ export type TimeRange = {
   startTimeSlot: Pick<TimeSlot, 'hour' | 'minute'>;
   endTimeSlot: Pick<TimeSlot, 'hour' | 'minute'>;
 };
-
+export type ProductionOrderWriteInput = {
+  dayMonthYear: Date;
+  startTime: Date;
+  endTime: Date;
+  resourceId: number;
+  resourceStatus: string;
+};
 export type DayMonthYear = {
   month: number | null;
   day: number | null;
