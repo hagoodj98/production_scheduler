@@ -17,15 +17,9 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
     }
     // Attempt to delete the production order and create an order log simultaneously
-    const [result] = await Promise.all([
-      productionOrder.remove(Number(orderId)),
-      orderLog.createOrderLog(Number(orderId), employeeId),
-    ]);
 
-    if (!result) {
-      return NextResponse.json({ message: 'No matching order found' }, { status: 404 });
-    }
-
+    await orderLog.createOrderLog(Number(orderId), employeeId);
+    await productionOrder.softRemove(Number(orderId));
     return NextResponse.json({ message: 'Order deleted successfully' }, { status: 200 });
   } catch (error) {
     // Handle any errors that occur during the deletion process

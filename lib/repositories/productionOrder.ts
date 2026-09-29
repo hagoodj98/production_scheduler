@@ -39,9 +39,10 @@ const update = (id: number, data: ProductionOrderWriteInput) => {
   });
 };
 
-const remove = (id: number) => {
-  return prisma.productionOrder.delete({
+const softRemove = (id: number) => {
+  return prisma.productionOrder.update({
     where: { id },
+    data: { deletedAt: new Date() },
   });
 };
 
@@ -51,5 +52,5 @@ export const productionOrder = {
   findByIdOrThrow,
   create,
   update,
-  remove,
+  softRemove,
 };

@@ -28,6 +28,7 @@ model ProductionOrder {
   creationDate   DateTime @default(now())
   updatedAt     DateTime @updatedAt 
   orderLogs      OrderLog[]
+  deletedAt     DateTime?
   employeeAssigneeID String
   employee       User       @relation(fields: [employeeAssigneeID], references: [employeeId])
   resource       SelectedResource @relation(fields: [resourceId], references: [id])

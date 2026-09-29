@@ -6,8 +6,15 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     // Fetch all selected resources along with their associated production orders from the repository
-    const ResourceProductionOrders = await selectedResource.findAllWithOrders();
-    return NextResponse.json({ ResourceProductionOrders }, { status: 200 });
+    const orders = await selectedResource.findAllWithOrders();
+    // Filter out resources that have no active production orders (i.e., orders that are not marked deleted)
+    const productionOrders = orders.filter((resource) => {
+      return (
+        resource.productionOrders.length > 0 &&
+        resource.productionOrders.some((order) => !order.deletedAt)
+      );
+    });
+    return NextResponse.json({ ResourceProductionOrders: productionOrders }, { status: 200 });
   } catch (error) {
     return handleError(error);
   }

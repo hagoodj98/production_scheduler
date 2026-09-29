@@ -13,6 +13,7 @@ const findAllWithOrders = () => {
           endTime: true,
           resourceStatus: true,
           resourceId: true,
+          deletedAt: true,
         },
       },
     },
