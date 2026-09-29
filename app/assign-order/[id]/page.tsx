@@ -6,7 +6,7 @@ export default async function EditOrderForm({ params }: { params: Promise<{ id: 
   const pendingOrder = await productionOrder.findByIdOrThrow(parseInt(id));
   const getResourceName = await selectedResource.findByIdOrThrow(pendingOrder.resourceId);
   const employeeAssigneeID = pendingOrder.employeeAssigneeID;
-  const previousOrder = {
+  const previousOrderMeta = {
     ...pendingOrder,
     resourceName: getResourceName.resource_name,
     employeeAssigneeID,
@@ -14,7 +14,7 @@ export default async function EditOrderForm({ params }: { params: Promise<{ id: 
 
   return (
     <div>
-      <ProductionForm pendingOrder={previousOrder} />
+      <ProductionForm pendingOrder={previousOrderMeta} />
     </div>
   );
 }

@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const endHour = order.timeRange?.endTimeSlot?.hour;
     const endMinute = order.timeRange?.endTimeSlot?.minute;
     const resourceName = order.resource?.resource_name;
-
+    const employeeAssigneeID = order.assignedEmployeeId;
     if (
       [year, month, day, startHour, startMinute, endHour, endMinute, resourceName].some(
         (v) => v === null || v === undefined || v === '',
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         endTime: endTime.toDate(),
         resourceId: retrievedId,
         resourceStatus: 'Processing',
-        employeeAssigneeID: employeeId,
+        employeeAssigneeID: employeeAssigneeID,
       }),
       orderLog.createOrderLog(orderId, employeeId),
     ]);
