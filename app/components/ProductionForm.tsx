@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState, useReducer } from 'react';
+import React, { useCallback, useEffect, useState, useReducer } from 'react';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
@@ -24,7 +24,11 @@ import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { timeScheduleValidator } from '../validation/timeScheduleValidator';
 
 const ProductionForm = ({ pendingOrder }: OrderType) => {
-  /* build initial state using dayjs and conditional checks */
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+  const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
+  const [errors, setErrors] = useState<ErrorMessage[] | CustomError[]>([]);
+  const { selectedResourceData } = useGetAllSelectedResourcesContext();
   const initialProductionOrder: ProductionOrder = {
     dayMonthYear: pendingOrder
       ? {
@@ -49,21 +53,26 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           }
         : { hour: null, minute: null },
     },
-
+    assignedEmployeeId: pendingOrder?.employeeAssigneeID ?? '',
     resource: {
       resource_name: pendingOrder?.resourceName ?? null,
     },
 
     orderId: pendingOrder?.id ?? 0,
   };
-  const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
-  const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
-  const markhasRun = useRef(false);
-  const [errors, setErrors] = useState<ErrorMessage[] | CustomError[]>([]);
-  const { selectedResourceData } = useGetAllSelectedResourcesContext();
-  const [productionOrder, setProductionOrder] = useState<ProductionOrder>(initialProductionOrder);
 
+  const [productionOrder, setProductionOrder] = useState<ProductionOrder>(initialProductionOrder);
+  const [workers, setWorkers] = useState<{ employeeId: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const res = await fetch('/api/order/employee');
+      const data: { employeeId: string; name: string }[] = await res.json();
+
+      setWorkers(data);
+    };
+    fetchEmployees();
+  }, []);
   const handleTimeAcceptOnStart = (value: PickerValue) => {
     if (value && dayjs.isDayjs(value)) {
       const hour = value.hour();
@@ -200,7 +209,14 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       setSubmitting(false);
     }
   };
+  const handleEmployeeChange = (event: SelectChangeEvent) => {
+    const employeeId = event.target.value;
 
+    setProductionOrder((prev) => ({
+      ...prev,
+      assignedEmployeeId: employeeId,
+    }));
+  };
   const handleStartTimeChange = (value: PickerValue) => {
     if (value && dayjs.isDayjs(value)) {
       const hour = value.hour();
@@ -236,6 +252,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         timeRange: { ...productionOrder.timeRange },
         resource: { ...productionOrder.resource },
         orderId: productionOrder.orderId,
+        assignedEmployeeId: productionOrder.assignedEmployeeId,
       };
       try {
         // Before sending the request, validate the data again to ensure that any changes made after the initial validation are also checked. This is important because the user might have changed some fields after the first validation, and we want to catch any new errors before making the API call.
@@ -280,8 +297,9 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       }
     };
 
+    // Check if the form is complete before allowing submission
     const isFormComplete = () => {
-      const { dayMonthYear, timeRange, resource } = productionOrder;
+      const { dayMonthYear, timeRange, resource, assignedEmployeeId } = productionOrder;
       return (
         dayMonthYear.day !== null &&
         dayMonthYear.month !== null &&
@@ -290,14 +308,14 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         timeRange.startTimeSlot.minute !== null &&
         timeRange.endTimeSlot.hour !== null &&
         timeRange.endTimeSlot.minute !== null &&
-        resource.resource_name !== null
+        resource.resource_name !== null &&
+        assignedEmployeeId !== null
       );
     };
 
     if (!isFormComplete()) return;
 
     if (pendingOrder) {
-      markhasRun.current = true;
       const response = async () => {
         try {
           await fetch('/api/order/mark-pending', {
@@ -328,7 +346,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       {Array.isArray(errors) && errors.find((err) => 'message' in err) && (
         <div className=" text-red-600 my-2">{errors.find((err) => 'message' in err)?.message}</div>
       )}
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="">
         <div>
           <FormControl fullWidth sx={{ minWidth: 120 }}>
             <InputLabel id="demo-simple-select-autowidth-label">Resource</InputLabel>
@@ -346,6 +364,26 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
               {selectedResourceData.map((chosenResource, index) => (
                 <MenuItem key={index} value={chosenResource.resource_name ?? ''}>
                   {chosenResource.resource_name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth sx={{ minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-autowidth-label">Assigned Employee</InputLabel>
+            <Select
+              labelId="demo-simple-select-autowidth-label"
+              id="demo-simple-select-autowidth"
+              value={productionOrder.assignedEmployeeId ?? ''}
+              onChange={handleEmployeeChange}
+              autoWidth
+              label="Assigned Employee"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {workers.map((worker, index) => (
+                <MenuItem key={index} value={worker.employeeId ?? ''}>
+                  {worker.name}
                 </MenuItem>
               ))}
             </Select>

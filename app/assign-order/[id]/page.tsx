@@ -5,9 +5,11 @@ export default async function EditOrderForm({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const pendingOrder = await productionOrder.findByIdOrThrow(parseInt(id));
   const getResourceName = await selectedResource.findByIdOrThrow(pendingOrder.resourceId);
+  const employeeAssigneeID = pendingOrder.employeeAssigneeID;
   const previousOrder = {
     ...pendingOrder,
     resourceName: getResourceName.resource_name,
+    employeeAssigneeID,
   };
 
   return (

@@ -33,6 +33,7 @@ export type PendingOrder = {
   startTime: Date;
   endTime: Date;
   resourceName: string;
+  employeeAssigneeID: string;
 };
 export type OrderType = {
   pendingOrder?: PendingOrder;
@@ -98,6 +99,7 @@ export type ProductionOrderWriteInput = {
   endTime: Date;
   resourceId: number;
   resourceStatus: string;
+  employeeAssigneeID: string;
 };
 export type DayMonthYear = {
   month: number | null;
@@ -109,6 +111,7 @@ export type ProductionOrder = {
   timeRange: TimeRange;
   resource: ClientResource;
   orderId: number; // Production order ID for tracking pending → processing transition
+  assignedEmployeeId: string;
 };
 export type AvailableSlotPair = {
   name: ClientResource;

@@ -10,7 +10,7 @@ import { selectedResource } from '@/lib/repositories/selectedResource';
 export async function PATCH(req: NextRequest) {
   try {
     //First check if the user has the required permission to reschedule orders before processing data
-    await checkAuthMetaData(PERMISSIONS.reschedule?.name);
+    const { employeeId } = await checkAuthMetaData(PERMISSIONS.reschedule?.name);
 
     const rawData = await req.json();
     const order = productionOrderSchema.parse(rawData.productionOrder ?? rawData.order);
@@ -62,6 +62,7 @@ export async function PATCH(req: NextRequest) {
       endTime: endTime.toDate(),
       resourceId: getIdOfSelectedResource.id,
       resourceStatus: 'Processing',
+      employeeAssigneeID: employeeId,
     });
     return NextResponse.json(
       {

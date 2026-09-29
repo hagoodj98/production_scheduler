@@ -18,8 +18,21 @@ const login = async (employeeId: string) => {
     where: { employeeId },
   });
 };
+const getAll = async () => {
+  return await prisma.user.findMany({
+    where: { role: 'worker' },
+    omit: {
+      password: true,
+      email: true,
+      admin_key: true,
+      id: true,
+      role: true,
+    },
+  });
+};
 
 export const user = {
   createMany,
   login,
+  getAll,
 };

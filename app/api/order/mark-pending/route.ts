@@ -21,6 +21,9 @@ export async function POST(req: NextRequest) {
     }
     // Parse and validate the incoming request data against the schema
     const { order, existingOrder } = await markPendingRequestSchema.parseAsync(rawData);
+    if (!order || order.orderId === undefined || order.orderId === null) {
+      throw new CustomError('Invalid order data', 404);
+    }
     // Getting data out of rawData so we can push clean and clarified data to database
     const year = order.dayMonthYear.year;
     const month = order.dayMonthYear.month;
@@ -30,6 +33,8 @@ export async function POST(req: NextRequest) {
     const endHour = order.timeRange.endTimeSlot.hour;
     const endMinute = order.timeRange.endTimeSlot.minute;
     const resourceName = order.resource.resource_name;
+    const assignedEmployeeId = order.assignedEmployeeId;
+
     const startTime = dayjs(
       `${year}-${month}-${day} ${startHour}:${startMinute}:00`,
       'YYYY-M-D HH:mm:ss',
@@ -54,6 +59,7 @@ export async function POST(req: NextRequest) {
         endTime: endTime.toDate(),
         resourceId: retrievedId,
         resourceStatus: 'Pending',
+        employeeAssigneeID: assignedEmployeeId,
       });
       // Return a success response with the ID of the newly created order
       return NextResponse.json(
@@ -65,12 +71,13 @@ export async function POST(req: NextRequest) {
       );
     } else {
       // If an existing order is provided, update it with the new details
-      const updatedOrder = await productionOrder.update(order.orderId!, {
+      const updatedOrder = await productionOrder.update(order.orderId, {
         dayMonthYear: date.toDate(), // Prisma DateTime
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
         resourceId: retrievedId,
         resourceStatus: 'Pending',
+        employeeAssigneeID: assignedEmployeeId,
       });
       // Return a success response with the ID of the updated order
       return NextResponse.json(

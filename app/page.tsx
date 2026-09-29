@@ -5,7 +5,6 @@ import Header from './components/Header';
 import CheckAuth from './components/CheckAuth';
 
 export default async function Home() {
-  // Check if the admin user is authenticated
   return (
     <div>
       <CheckAuth />

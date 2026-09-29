@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
         endTime: endTime.toDate(),
         resourceId: retrievedId,
         resourceStatus: 'Processing',
+        employeeAssigneeID: employeeId,
       }),
       orderLog.createOrderLog(orderId, employeeId),
     ]);
