@@ -31,6 +31,9 @@ const findAllForStatusCheck = () => {
 const findByIdOrThrow = (id: number) => {
   return prisma.productionOrder.findUniqueOrThrow({
     where: { id },
+    include: {
+      resource: true,
+    },
   });
 };
 

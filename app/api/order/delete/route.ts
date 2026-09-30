@@ -8,10 +8,15 @@ import { PERMISSIONS } from '@/utils/GlobalVar';
 export async function DELETE(req: NextRequest) {
   try {
     // Check if the user has the necessary permission to delete a production order
-    const { employeeId } = await checkAuthMetaData(PERMISSIONS.delete?.name);
-    // Extract the orderId from the query parameters for further processing
     const params = req.nextUrl.searchParams;
     const orderId = params.get('orderId');
+
+    const { employeeId } = await checkAuthMetaData(
+      PERMISSIONS.delete?.name,
+      undefined,
+      Number(orderId),
+    );
+    // Extract the orderId from the query parameters for further processing
 
     if (!orderId) {
       return NextResponse.json({ error: 'orderId is required' }, { status: 400 });

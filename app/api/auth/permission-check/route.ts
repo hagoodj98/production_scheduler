@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       action = PERMISSIONS.reschedule?.name;
     }
     // Check if the action is determined before proceeding with authorization
-    await checkAuthMetaData(action, path);
+    await checkAuthMetaData(action, path, undefined);
 
     return NextResponse.json({ message: 'Authorized' }, { status: 200 });
   } catch (error) {
