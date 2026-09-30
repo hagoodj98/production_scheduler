@@ -6,34 +6,12 @@ import dayjs from 'dayjs';
 import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
 import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
+import { CalendarEvent } from './types';
 
+// Initialize the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
 
-interface OrderProps {
-  id: number;
-  resource_name: string;
-  productionOrders: {
-    id: number;
-    dayMonthYear: Date;
-    startTime: Date;
-    endTime: Date;
-    resourceStatus: string;
-    resourceId: number;
-  }[];
-}
-
-export type CalendarEvent = {
-  id: number;
-  title: string;
-  start: Date;
-  end: Date;
-  resourceStatus: string;
-  resource_name?: string;
-  resourceId?: number;
-  [key: string]: unknown;
-};
-
-const CalendarComponent = ({}) => {
+const CalendarComponent = () => {
   const { data: fetchedData } = useSWR('/api/order/load', fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
@@ -50,16 +28,7 @@ const CalendarComponent = ({}) => {
       resourceId: job.resourceId,
       id: job.id,
     })),
-  ); /* ?.filter((e) => {
-    // Only filter by resource selection; status selection will highlight instead of filtering
-    if (
-      selectedResourceIds &&
-      selectedResourceIds.length > 0 &&
-      !selectedResourceIds.includes(e.resourceId as number)
-    )
-      return false;
-    return true;
-  }); */
+  );
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => {
     const [hover, setHover] = useState(false);

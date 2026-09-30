@@ -1,8 +1,8 @@
 'use client';
-import { useAuthenticatedAdminUserContext } from '../context';
+import { useAdminUserContext } from '../context';
 import { useEffect } from 'react';
 export const CheckAuth = () => {
-  const { userIsAuthenticated, setUserIsAuthenticated } = useAuthenticatedAdminUserContext();
+  const { userIsAuthenticated, setUserIsAuthenticated } = useAdminUserContext();
 
   useEffect(() => {
     const checkAuth = async () => {

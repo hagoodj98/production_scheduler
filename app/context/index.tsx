@@ -3,26 +3,24 @@
 import React, { createContext, useContext, useState } from 'react';
 import { AuthContextType } from '../components/types';
 
-const authenticatedAdminUser = createContext<AuthContextType | undefined>(undefined);
+const AdminUserContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthenticatedAdminUserWrapper({ children }: { children: React.ReactNode }) {
+export function AdminUserContextWrapper({ children }: { children: React.ReactNode }) {
   const [userIsAuthenticated, setUserIsAuthenticated] = useState<{
     name: string | null;
     state: 'idle' | 'checking' | 'authenticated' | 'unauthenticated';
   }>({ name: null, state: 'idle' });
   return (
-    <authenticatedAdminUser.Provider value={{ userIsAuthenticated, setUserIsAuthenticated }}>
+    <AdminUserContext.Provider value={{ userIsAuthenticated, setUserIsAuthenticated }}>
       {children}
-    </authenticatedAdminUser.Provider>
+    </AdminUserContext.Provider>
   );
 }
 
-export function useAuthenticatedAdminUserContext() {
-  const context = useContext(authenticatedAdminUser);
+export function useAdminUserContext() {
+  const context = useContext(AdminUserContext);
   if (context === undefined) {
-    throw new Error(
-      'useAuthenticatedAdminUserContext must be used within an AuthenticatedAdminUserWrapper',
-    );
+    throw new Error('useAdminUserContext must be used within an AdminUserContextWrapper');
   }
   return context;
 }

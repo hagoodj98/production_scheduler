@@ -3,8 +3,7 @@
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { Resource } from './types';
-import { useAuthenticatedAdminUserContext } from '../context';
-import { useEffect } from 'react';
+import { useAdminUserContext } from '../context';
 import { useRouter } from 'next/navigation';
 
 interface NavProps {
@@ -17,7 +16,7 @@ const ActionButton = ({ resourceLabel, pageNav }: NavProps) => {
   // const { setResourceData } = useResourcesContext();
   const navigate = useRouter();
 
-  const { userIsAuthenticated } = useAuthenticatedAdminUserContext();
+  const { userIsAuthenticated } = useAdminUserContext();
 
   return (
     <div className="inline-block">

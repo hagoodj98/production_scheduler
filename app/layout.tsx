@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import { AuthenticatedAdminUserWrapper } from './context';
+import { AdminUserContextWrapper } from './context';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import GlobalMessageReader from './components/GlobalMessageReader';
 const geistSans = Geist({
@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {' '}
-        <AuthenticatedAdminUserWrapper>{children}</AuthenticatedAdminUserWrapper>
+        <AdminUserContextWrapper>{children}</AdminUserContextWrapper>
         <Suspense fallback={null}>
           <GlobalMessageReader />
         </Suspense>

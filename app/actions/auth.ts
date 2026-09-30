@@ -39,7 +39,7 @@ export async function login(state: unknown, formData: FormData) {
     return { name: authenticateUser.name, login_success: true };
   } catch (error) {
     // Handle any errors that occur during the login process
-    handleError(error);
+    return handleError(error);
   }
 }
 export async function logout() {

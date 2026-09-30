@@ -13,19 +13,6 @@ export type NotifierState = {
   notifierMessage: string;
   notifierSeverity: Severity | undefined;
 };
-
-export type AdminFormState = {
-  formData: {
-    employee_id: string;
-    password: string;
-    admin_key: string;
-  };
-};
-export type LoadJob = {
-  resource_name: string;
-  productionOrders?: Array<{ resourceStatus: string } & Record<string, unknown>>;
-};
-
 export type OrderProps = {
   id: number;
   resource_name: string;
@@ -38,6 +25,32 @@ export type OrderProps = {
     resourceId: number;
   }[];
 };
+export type AllPossibleResource = {
+  id: number;
+  resource_name: string;
+};
+export type CalendarEvent = {
+  id: number;
+  title: string;
+  start: Date;
+  end: Date;
+  resourceStatus: string;
+  resource_name?: string;
+  resourceId?: number;
+  [key: string]: unknown;
+};
+export type AdminFormState = {
+  formData: {
+    employee_id: string;
+    password: string;
+    admin_key: string;
+  };
+};
+export type LoadJob = {
+  resource_name: string;
+  productionOrders?: Array<{ resourceStatus: string } & Record<string, unknown>>;
+};
+
 export type PendingOrder = {
   id: number | null;
   dayMonthYear: Date;

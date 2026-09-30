@@ -1,5 +1,5 @@
 'use client';
-import { useState, useReducer } from 'react';
+import { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import { deepOrange } from '@mui/material/colors';
 import Button from '@mui/material/Button';
@@ -7,14 +7,12 @@ import AdminAccessForm from './AdminAccessForm';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { logout } from '../actions/auth';
-import { useRouter } from 'next/navigation';
-import { useAuthenticatedAdminUserContext } from '../context';
+import { useAdminUserContext } from '../context';
 import Tooltip from '@mui/material/Tooltip';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
 const Header = () => {
-  const router = useRouter();
-  const { userIsAuthenticated, setUserIsAuthenticated } = useAuthenticatedAdminUserContext();
+  const { userIsAuthenticated, setUserIsAuthenticated } = useAdminUserContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showAdminAccessForm, setShowAdminAccessForm] = useState(false);
 

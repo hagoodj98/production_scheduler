@@ -42,17 +42,6 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   // handle selection of a status slice in the chart
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
-  /*  
-  // keep selectedResourceData up to date for other components
-  useEffect(() => {
-    const onlyName: ClientResource[] | undefined =
-      fetchedData?.jobs?.map((job) => ({
-        resource_name: job.resource_name,
-      })) ?? [];
-    // setSelectedResourceData(onlyName ?? []);
-  }, [fetchedData?.jobs /* setSelectedResourceData ]);
-  */
-
   const onSliceClick = (name: string) => {
     // toggle selection of the clicked status
     if (selectedStatus === name) {

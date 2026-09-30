@@ -4,7 +4,7 @@ import TextInput from './ui/input';
 import Button from '@mui/material/Button';
 import { useActionState, useEffect, useReducer } from 'react';
 import { login } from '../actions/auth';
-import { useAuthenticatedAdminUserContext } from '../context';
+import { useAdminUserContext } from '../context';
 import { useRouter } from 'next/navigation';
 import { AdminFormAction, AdminFormState } from './types';
 
@@ -56,7 +56,7 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
   });
 
   const router = useRouter();
-  const { setUserIsAuthenticated, userIsAuthenticated } = useAuthenticatedAdminUserContext();
+  const { setUserIsAuthenticated, userIsAuthenticated } = useAdminUserContext();
   const [state, formAction, pending] = useActionState(login, undefined);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { FormEvent, useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState, SubmitEvent } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import List from '@mui/material/List';
@@ -8,11 +8,7 @@ import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import { useRouter } from 'next/navigation';
 import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
-
-interface AllPossibleResource {
-  id: number;
-  resource_name: string;
-}
+import { AllPossibleResource } from './types';
 
 const SearchResource: React.FC = () => {
   const router = useRouter();
@@ -21,7 +17,7 @@ const SearchResource: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!resourceName || resourceName.trim().length < 2) {
@@ -41,7 +37,11 @@ const SearchResource: React.FC = () => {
         body: JSON.stringify({ resource_name: resourceName.trim() }),
       });
       if (!response.ok) {
-        throw new Error('Failed to add resource');
+        dispatchNotifier({ type: 'setNotifierMessage', value: 'Failed to add resource' });
+        dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+        dispatchNotifier({ type: 'setOpenNotifier', value: true });
+        setLoading(false);
+        return;
       }
 
       dispatchNotifier({ type: 'setNotifierMessage', value: 'Resource added. Redirecting...' });
@@ -69,6 +69,10 @@ const SearchResource: React.FC = () => {
         const response = await fetch(
           `/api/resource/search?name=${encodeURIComponent(resourceName)}`,
         );
+        if (!response.ok) {
+          console.error('Failed to search resources');
+          return;
+        }
         const data = await response.json();
         setAllPossibleResources(data.resources);
       };
