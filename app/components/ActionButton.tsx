@@ -3,7 +3,7 @@
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { Resource } from './types';
-import { useAuthenticatedAdminUserContext, useResourcesContext } from '../context';
+import { useAuthenticatedAdminUserContext } from '../context';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -13,18 +13,11 @@ interface NavProps {
   allPossibleResources?: Resource[];
 }
 
-const ActionButton = ({ resourceLabel, allPossibleResources, pageNav }: NavProps) => {
-  const { setResourceData } = useResourcesContext();
+const ActionButton = ({ resourceLabel, pageNav }: NavProps) => {
+  // const { setResourceData } = useResourcesContext();
   const navigate = useRouter();
 
   const { userIsAuthenticated } = useAuthenticatedAdminUserContext();
-  useEffect(() => {
-    //Once the nav button to add resources is rendered we want to shoot the data over to the AddResources client component.
-    if (allPossibleResources) {
-      const resourcesFromDatabase = allPossibleResources;
-      setResourceData(resourcesFromDatabase);
-    }
-  }, [allPossibleResources, setResourceData]);
 
   return (
     <div className="inline-block">

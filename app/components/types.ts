@@ -25,6 +25,19 @@ export type LoadJob = {
   resource_name: string;
   productionOrders?: Array<{ resourceStatus: string } & Record<string, unknown>>;
 };
+
+export type OrderProps = {
+  id: number;
+  resource_name: string;
+  productionOrders: {
+    id: number;
+    dayMonthYear: Date;
+    startTime: Date;
+    endTime: Date;
+    resourceStatus: string;
+    resourceId: number;
+  }[];
+};
 export type PendingOrder = {
   id: number | null;
   dayMonthYear: Date;
@@ -166,9 +179,17 @@ export type ResourcesContextType = {
 
 export type ClientResource = Omit<Resource, 'id' | 'status'>;
 
-export type GetAllSelectedResourcesContextType = {
-  selectedResourceData: ClientResource[];
-  setSelectedResourceData: React.Dispatch<React.SetStateAction<ClientResource[]>>;
+export type AuthContextType = {
+  userIsAuthenticated: {
+    name: string | null;
+    state: 'idle' | 'checking' | 'authenticated' | 'unauthenticated';
+  };
+  setUserIsAuthenticated: React.Dispatch<
+    React.SetStateAction<{
+      name: string | null;
+      state: 'idle' | 'checking' | 'authenticated' | 'unauthenticated';
+    }>
+  >;
 };
 
 export type ErrorMessage = {

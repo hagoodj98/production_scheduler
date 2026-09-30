@@ -8,7 +8,6 @@ import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { PickerValue } from '@mui/x-date-pickers/internals';
-import { useGetAllSelectedResourcesContext } from '../context';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
@@ -28,7 +27,6 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
   const [submitting, setSubmitting] = useState(false);
   const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
   const [errors, setErrors] = useState<ErrorMessage[] | CustomError[]>([]);
-  const { selectedResourceData } = useGetAllSelectedResourcesContext();
   const initialProductionOrder: ProductionOrder = {
     dayMonthYear: pendingOrder
       ? {
@@ -63,15 +61,22 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
 
   const [productionOrder, setProductionOrder] = useState<ProductionOrder>(initialProductionOrder);
   const [workers, setWorkers] = useState<{ employeeId: string; name: string }[]>([]);
-
+  const [resources, setResources] = useState<{ resource_name: string }[]>([]);
   useEffect(() => {
     const fetchEmployees = async () => {
       const res = await fetch('/api/order/employee');
       const data: { employeeId: string; name: string }[] = await res.json();
-
       setWorkers(data);
     };
+    const fetchResources = async () => {
+      const res = await fetch('/api/resource/load');
+      const data = await res.json();
+      // Assuming you have a context or state to store the resources
+      setResources(data.Resources);
+    };
+
     fetchEmployees();
+    fetchResources();
   }, []);
   const handleTimeAcceptOnStart = (value: PickerValue) => {
     if (value && dayjs.isDayjs(value)) {
@@ -361,9 +366,9 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
               <MenuItem value="">
                 <em>None</em>
               </MenuItem>
-              {selectedResourceData.map((chosenResource, index) => (
-                <MenuItem key={index} value={chosenResource.resource_name ?? ''}>
-                  {chosenResource.resource_name}
+              {resources.map((resource, index) => (
+                <MenuItem key={index} value={resource.resource_name ?? ''}>
+                  {resource.resource_name}
                 </MenuItem>
               ))}
             </Select>

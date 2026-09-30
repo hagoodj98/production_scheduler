@@ -1,10 +1,10 @@
 'use client';
 import React, { useCallback, useState, useReducer } from 'react';
+import fetcher from '../../utils/fetcher';
 import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
-import { useResourcesContext } from '../context';
 import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
 
 const localizer = dayjsLocalizer(dayjs);
@@ -22,7 +22,7 @@ interface OrderProps {
   }[];
 }
 
-export interface CalendarEvent {
+export type CalendarEvent = {
   id: number;
   title: string;
   start: Date;
@@ -31,25 +31,16 @@ export interface CalendarEvent {
   resource_name?: string;
   resourceId?: number;
   [key: string]: unknown;
-}
+};
 
-const MyCalendar = () => {
-  const fetcher = async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`API ${url} failed: ${res.status}`);
-    return await res.json();
-  };
-  const { data: fetchedData } = useSWR<{
-    ResourceProductionOrders: OrderProps[];
-  }>('/api/order/load', fetcher, {
+const CalendarComponent = ({}) => {
+  const { data: fetchedData } = useSWR('/api/order/load', fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
   const [notifierState, notififierDispatcher] = useReducer(notifierReducer, initialNotifierState);
   const navigate = useRouter();
 
-  const { selectedResourceIds, selectedStatus } = useResourcesContext();
-
-  const events = fetchedData?.ResourceProductionOrders.flatMap((order) =>
+  const events = fetchedData?.jobs?.flatMap((order) =>
     order.productionOrders.map((job) => ({
       title: `${order.resource_name} at ${dayjs(job.startTime).format('h:mm A')}`,
       start: dayjs(job.startTime).toDate(),
@@ -59,7 +50,7 @@ const MyCalendar = () => {
       resourceId: job.resourceId,
       id: job.id,
     })),
-  )?.filter((e) => {
+  ); /* ?.filter((e) => {
     // Only filter by resource selection; status selection will highlight instead of filtering
     if (
       selectedResourceIds &&
@@ -68,7 +59,7 @@ const MyCalendar = () => {
     )
       return false;
     return true;
-  });
+  }); */
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => {
     const [hover, setHover] = useState(false);
@@ -150,26 +141,11 @@ const MyCalendar = () => {
         transition: 'opacity 200ms ease, box-shadow 200ms ease, transform 150ms ease',
       };
 
-      if (selectedStatus) {
-        if (event.resourceStatus === selectedStatus) {
-          style.boxShadow = '0 0 0 3px rgba(0,0,0,0.12)';
-          style.opacity = 1;
-          style.transform = 'scale(1.02)';
-        } else {
-          style.opacity = 0.25;
-          style.transform = 'none';
-          style.boxShadow = 'none';
-        }
-      } else {
-        style.opacity = 1;
-        style.transform = 'none';
-      }
-
       return {
         style,
       };
     };
-  }, [selectedStatus]);
+  }, []);
 
   return (
     <div className="w-full h-full">
@@ -192,4 +168,4 @@ const MyCalendar = () => {
   );
 };
 
-export default MyCalendar;
+export default CalendarComponent;

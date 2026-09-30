@@ -7,7 +7,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import { useRouter } from 'next/navigation';
-import { useResourcesContext } from '../context';
 import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
 
 interface AllPossibleResource {
@@ -17,7 +16,6 @@ interface AllPossibleResource {
 
 const SearchResource: React.FC = () => {
   const router = useRouter();
-  const { setResourceData } = useResourcesContext();
   const [resourceName, setResourceName] = useState('');
   const [allPossibleResources, setAllPossibleResources] = useState<AllPossibleResource[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,14 +40,9 @@ const SearchResource: React.FC = () => {
         },
         body: JSON.stringify({ resource_name: resourceName.trim() }),
       });
-      const data = await response.json();
-      // Optimistically update UI
-      const newResource = data.resource || {
-        id: Date.now(),
-        resource_name: resourceName.trim(),
-      };
-
-      setResourceData((prev) => [newResource, ...prev]);
+      if (!response.ok) {
+        throw new Error('Failed to add resource');
+      }
 
       dispatchNotifier({ type: 'setNotifierMessage', value: 'Resource added. Redirecting...' });
       dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.success });

@@ -38,9 +38,14 @@ const create = (resource_name: string) => {
   });
 };
 
+const findAll = () => {
+  return prisma.selectedResource.findMany();
+};
+
 export const selectedResource = {
   findAllWithOrders,
   findByNameOrThrow,
   findByIdOrThrow,
   create,
+  findAll,
 };
