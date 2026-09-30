@@ -92,8 +92,10 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
           name="employee_id"
           type="text"
         />
-        {state?.fields?.includes('employee_id') && (
-          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('employee_id')]}</p>
+        {state?.fields?.find((field) => field.path === 'employee_id') && (
+          <p style={{ color: 'red' }}>
+            {state.fields.find((field) => field.path === 'employee_id')?.message}
+          </p>
         )}
         <TextInput
           label="Password"
@@ -102,8 +104,10 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
           name="password"
           type="password"
         />
-        {state?.fields?.includes('password') && (
-          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('password')]}</p>
+        {state?.fields?.find((field) => field.path === 'password') && (
+          <p style={{ color: 'red' }}>
+            {state.fields.find((field) => field.path === 'password')?.message}
+          </p>
         )}
         <TextInput
           label="Admin Key"
@@ -112,8 +116,10 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
           name="admin_key"
           type="text"
         />
-        {state?.fields?.includes('admin_key') && (
-          <p style={{ color: 'red' }}>{state.errors[state.fields.indexOf('admin_key')]}</p>
+        {state?.fields?.find((field) => field.path === 'admin_key') && (
+          <p style={{ color: 'red' }}>
+            {state.fields.find((field) => field.path === 'admin_key')?.message}
+          </p>
         )}
 
         <Button disabled={pending} variant="contained" type="submit">

@@ -4,15 +4,14 @@ import { prisma } from '@/lib/database';
 import { CustomError } from '@/utils/CustomErrors';
 import dayjs from 'dayjs';
 import { STATUSES } from '@/utils/GlobalVar';
-export const loopThroughScheduledJobs = async (
-  ordersArray: RequestScheduledJobs[],
-): Promise<void> => {
+
+export const updateOrderStatuses = async (ordersArray: RequestScheduledJobs[]): Promise<void> => {
   try {
     if (!ordersArray) {
       throw new CustomError('Cannot find array or array is empty', 404);
     }
 
-    await Promise.all(ordersArray.map((order) => changeStatuses(order)));
+    await Promise.all(ordersArray.map((order) => changeStatus(order)));
   } catch (error) {
     if (error instanceof CustomError) {
       throw error;
@@ -21,7 +20,7 @@ export const loopThroughScheduledJobs = async (
   }
 };
 //This function is called for every job with a Scheduled Status inside the pendingJobs array I created. I want the job object and the slotKey from the loopThroughPendingJobs function. SlotKey is a string that I can parse and use to compare timing. If the current time is before or after the slotKeys, then change the statuses according.
-async function changeStatuses(order: RequestScheduledJobs) {
+async function changeStatus(order: RequestScheduledJobs) {
   try {
     if (!order) {
       throw new CustomError('Missing information to process the times for status changes', 404);

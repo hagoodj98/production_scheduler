@@ -4,7 +4,9 @@ import { adminAccessValidationSchema } from '../../utils/validationSchema';
 import { user, userPermission } from '../../lib/repositories';
 import { createSession, deleteSession } from '../../lib/session';
 import { handleError } from '../../utils/ErrorHandlingHelper';
-
+import { CustomError } from '../../utils/CustomErrors';
+import { z } from 'zod';
+import { IssueCount } from 'next/dist/next-devtools/dev-overlay/menu/dev-overlay-menu';
 // Authentication actions: login and logout
 export async function login(state: unknown, formData: FormData) {
   try {
@@ -39,7 +41,21 @@ export async function login(state: unknown, formData: FormData) {
     return { name: authenticateUser.name, login_success: true };
   } catch (error) {
     // Handle any errors that occur during the login process
-    return handleError(error);
+    if (error instanceof z.ZodError) {
+      return {
+        fields: error.issues.map((issue) => ({
+          path: issue.path.join(''),
+          message: issue.message,
+        })),
+      };
+    }
+    if (error instanceof CustomError) {
+      return { error: error.message, status: error.statusCode };
+    }
+    if (error instanceof Error) {
+      return { error: error.message, status: 500 };
+    }
+    return { error: 'There was an internal error. Try again later', status: 500 };
   }
 }
 export async function logout() {
