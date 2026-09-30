@@ -4,7 +4,7 @@ import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { selectedResource, productionOrder, orderLog } from '@/lib/repositories';
 import dayjs from 'dayjs';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
-import PERMISSIONS from '@/utils/Permissions';
+import { PERMISSIONS, STATUSES } from '@/utils/GlobalVar';
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 
 export async function POST(req: NextRequest) {
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
         resourceId: retrievedId,
-        resourceStatus: 'Processing',
+        resourceStatus: STATUSES.processing,
         employeeAssigneeID: employeeAssigneeID,
       }),
       orderLog.createOrderLog(orderId, employeeId),

@@ -9,6 +9,7 @@ import Divider from '@mui/material/Divider';
 import { useRouter } from 'next/navigation';
 import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
 import { AllPossibleResource } from './types';
+import { API_ENDPOINTS } from '../config/api';
 
 const SearchResource: React.FC = () => {
   const router = useRouter();
@@ -29,7 +30,7 @@ const SearchResource: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/resource/add', {
+      const response = await fetch(API_ENDPOINTS.ADD_RESOURCE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +68,7 @@ const SearchResource: React.FC = () => {
     try {
       const searchResources = async () => {
         const response = await fetch(
-          `/api/resource/search?name=${encodeURIComponent(resourceName)}`,
+          `${API_ENDPOINTS.SEARCH_RESOURCES}?name=${encodeURIComponent(resourceName)}`,
         );
         if (!response.ok) {
           console.error('Failed to search resources');

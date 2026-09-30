@@ -7,5 +7,12 @@ const PERMISSIONS = {
   view: { name: 'view' },
   all_access: { name: 'all_access' },
 };
+const STATUSES = {
+  processing: 'Processing',
+  pending: 'Pending',
+  scheduled: 'Scheduled',
+  busy: 'Busy',
+  completed: 'Completed',
+};
 
-export default PERMISSIONS;
+export { PERMISSIONS, STATUSES };

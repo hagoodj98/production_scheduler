@@ -4,7 +4,7 @@ import { Employee } from './app/components/types';
 import { generateEmployee } from './utils/generateEmployeeMeta';
 import { permission } from './lib/repositories';
 import { userPermission } from './lib/repositories/UserPermission';
-import PERMISSIONS from './utils/Permissions';
+import { PERMISSIONS } from './utils/GlobalVar';
 import seedResources from './prisma/seeds/0_resources';
 import prisma from './prisma/client';
 

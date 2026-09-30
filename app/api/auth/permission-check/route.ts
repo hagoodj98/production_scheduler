@@ -1,7 +1,7 @@
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { NextRequest, NextResponse } from 'next/server';
 import { handleError } from '@/utils/ErrorHandlingHelper';
-import PERMISSIONS from '@/utils/Permissions';
+import { PERMISSIONS } from '@/utils/GlobalVar';
 // API route for checking user permissions
 export async function GET(req: NextRequest) {
   try {

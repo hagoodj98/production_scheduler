@@ -3,20 +3,21 @@
 import { Cell, Pie, PieChart, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState } from 'react';
 import { OrderProps } from './types';
+import { STATUSES } from '../../utils/GlobalVar';
+import { API_ENDPOINTS } from '../config/api';
 import useSWR from 'swr';
 import fetcher from '../../utils/fetcher';
 
-export const STATUSES = ['Processing', 'Pending', 'Scheduled', 'Busy', 'Completed'];
 const STATUS_COLORS: Record<string, string> = {
-  Processing: '#cccccc',
-  Pending: '#FFBB28',
-  Scheduled: '#007bff',
-  Busy: '#DB441A',
-  Completed: '#2ecc71',
+  [STATUSES.processing]: '#cccccc',
+  [STATUSES.pending]: '#FFBB28',
+  [STATUSES.scheduled]: '#007bff',
+  [STATUSES.busy]: '#DB441A',
+  [STATUSES.completed]: '#2ecc71',
 };
 
 const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
-  const { data: fetchedData } = useSWR('/api/order/load', fetcher, {
+  const { data: fetchedData } = useSWR(API_ENDPOINTS.LOAD_ORDERS, fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
   // compute flattened orders and counts by status
@@ -31,7 +32,7 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
     );
     // calculate counts of production orders by status.
     //Recharts expects the data in the format of an array of objects with 'name' and 'value' properties.
-    const statusCounts = STATUSES.map((s) => ({
+    const statusCounts = Object.values(STATUSES).map((s) => ({
       name: s,
       value: flattened.filter((p) => p.resourceStatus === s).length,
     }));

@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
-import PERMISSIONS from '@/utils/Permissions';
+import { PERMISSIONS, STATUSES } from '@/utils/GlobalVar';
 import { productionOrder } from '@/lib/repositories/productionOrder';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import dayjs from 'dayjs';
@@ -61,7 +61,7 @@ export async function PATCH(req: NextRequest) {
       startTime: startTime.toDate(),
       endTime: endTime.toDate(),
       resourceId: getIdOfSelectedResource.id,
-      resourceStatus: 'Processing',
+      resourceStatus: STATUSES.processing,
       employeeAssigneeID: employeeId,
     });
     return NextResponse.json(

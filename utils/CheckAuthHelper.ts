@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { decrypt } from '../lib/session';
 import type { PayloadSession } from '../app/components/types';
 import { CustomError } from './CustomErrors';
-import PERMISSIONS from './Permissions';
+import { PERMISSIONS, STATUSES } from './GlobalVar';
 import { productionOrder } from '@/lib/repositories';
 // Helper function to check if the user has the required permission before proceeding
 export const checkAuthMetaData = async (permission?: string, path?: string | null) => {
@@ -30,7 +30,7 @@ export const checkAuthMetaData = async (permission?: string, path?: string | nul
       throw new CustomError(`You are unauthorized to ${permission} a resource`, 403);
     }
     // Check if the user is trying to assign an order without the appropriate permission
-    if (path?.includes('assign-order') && permission !== 'reschedule') {
+    if (path?.includes('assign-order') && permission !== PERMISSIONS.reschedule.name) {
       throw new CustomError(`You are unauthorized to assign an order`, 403);
     }
     throw new CustomError(`You are unauthorized to ${permission} this resource`, 403);
@@ -39,7 +39,7 @@ export const checkAuthMetaData = async (permission?: string, path?: string | nul
   const orderID = path?.split('/').pop();
   if (orderID) {
     const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderID))).resourceStatus;
-    if (orderStatus === 'Completed' || orderStatus === 'Busy') {
+    if (orderStatus === STATUSES.completed || orderStatus === STATUSES.busy) {
       throw new CustomError(`You cannot modify an order that is ${orderStatus}`, 403);
     }
   }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resource } from '@/lib/repositories';
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
-import PERMISSIONS from '@/utils/Permissions';
+import { PERMISSIONS } from '@/utils/GlobalVar';
 
 // API route to search for resources by name prefix
 export async function GET(request: NextRequest) {

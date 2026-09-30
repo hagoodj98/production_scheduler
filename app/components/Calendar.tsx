@@ -7,12 +7,12 @@ import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
 import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
 import { CalendarEvent } from './types';
-
+import { API_ENDPOINTS } from '../config/api';
 // Initialize the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
 
 const CalendarComponent = () => {
-  const { data: fetchedData } = useSWR('/api/order/load', fetcher, {
+  const { data: fetchedData } = useSWR(API_ENDPOINTS.LOAD_ORDERS, fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
   const [notifierState, notififierDispatcher] = useReducer(notifierReducer, initialNotifierState);
@@ -49,7 +49,7 @@ const CalendarComponent = () => {
           className="w-1/2 cursor-pointer bg-red-500 hover:bg-red-600 text-white px-2  rounded"
           onClick={async () => {
             try {
-              const response = await fetch(`/api/order/delete?orderId=${event.id}`, {
+              const response = await fetch(`${API_ENDPOINTS.DELETE_ORDER}?orderId=${event.id}`, {
                 method: 'DELETE',
               });
               if (!response.ok) {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { selectedResource } from '@/lib/repositories';
 import { resourceSchema } from '@/app/validation/resourceSchemas';
 import { handleError } from '@/utils/ErrorHandlingHelper';
-import PERMISSIONS from '@/utils/Permissions';
+import { PERMISSIONS } from '@/utils/GlobalVar';
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 // API route to add a new resource
 export async function POST(req: NextRequest) {

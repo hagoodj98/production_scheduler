@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { orderLog } from '@/lib/repositories/orderLog';
 import { handleError } from '@/utils/ErrorHandlingHelper';
-import PERMISSIONS from '@/utils/Permissions';
+import { PERMISSIONS } from '@/utils/GlobalVar';
 // API route for deleting a production order by orderId.
 export async function DELETE(req: NextRequest) {
   try {

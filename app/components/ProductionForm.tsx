@@ -21,7 +21,7 @@ import * as z from 'zod/v4';
 import { CustomError } from '@/utils/CustomErrors';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { timeScheduleValidator } from '../validation/timeScheduleValidator';
-
+import { API_ENDPOINTS } from '../config/api';
 const ProductionForm = ({ pendingOrder }: OrderType) => {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -64,12 +64,12 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
   const [resources, setResources] = useState<{ resource_name: string }[]>([]);
   useEffect(() => {
     const fetchEmployees = async () => {
-      const res = await fetch('/api/order/employee');
+      const res = await fetch(API_ENDPOINTS.LOAD_EMPLOYEES);
       const data: { employeeId: string; name: string }[] = await res.json();
       setWorkers(data);
     };
     const fetchResources = async () => {
-      const res = await fetch('/api/resource/load');
+      const res = await fetch(API_ENDPOINTS.LOAD_RESOURCES);
       const data = await res.json();
       // Assuming you have a context or state to store the resources
       setResources(data.Resources);
@@ -167,7 +167,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
     try {
       setSubmitting(true);
       if (pendingOrder) {
-        await fetch('/api/order/reschedule', {
+        await fetch(API_ENDPOINTS.RESCHEDULE_ORDER, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ productionOrder }),
         });
       } else {
-        const response = await fetch('/api/order/schedule', {
+        const response = await fetch(API_ENDPOINTS.SCHEDULE_ORDER, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -277,7 +277,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           return;
         }
         // Send the request to mark the order as pending
-        const response = await fetch('/api/order/mark-pending', {
+        const response = await fetch(API_ENDPOINTS.MARK_PENDING, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
     if (pendingOrder) {
       const response = async () => {
         try {
-          await fetch('/api/order/mark-pending', {
+          await fetch(API_ENDPOINTS.MARK_PENDING, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

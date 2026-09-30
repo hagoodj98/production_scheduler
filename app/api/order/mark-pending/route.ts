@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { markPendingRequestSchema } from '@/app/validation/productionOrderSchemas';
 import { selectedResource, productionOrder } from '@/lib/repositories';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
-import PERMISSIONS from '@/utils/Permissions';
+import { PERMISSIONS, STATUSES } from '@/utils/GlobalVar';
 
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
         resourceId: retrievedId,
-        resourceStatus: 'Pending',
+        resourceStatus: STATUSES.pending,
         employeeAssigneeID: assignedEmployeeId,
       });
       // Return a success response with the ID of the newly created order
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
         resourceId: retrievedId,
-        resourceStatus: 'Pending',
+        resourceStatus: STATUSES.pending,
         employeeAssigneeID: assignedEmployeeId,
       });
       // Return a success response with the ID of the updated order
