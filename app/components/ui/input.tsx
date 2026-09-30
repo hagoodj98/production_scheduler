@@ -19,6 +19,7 @@ const TextInput = ({ label, value, onChange, name, type, sx }: TextInputProps) =
       type={type}
       variant="outlined"
       fullWidth
+      autoComplete="off"
       sx={sx}
     />
   );

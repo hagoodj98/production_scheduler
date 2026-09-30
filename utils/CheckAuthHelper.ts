@@ -37,7 +37,7 @@ export const checkAuthMetaData = async (permission?: string, path?: string | nul
   }
   // If the user has passed all checks, they are authorized to proceed but prevent if status is completed or busy
   const orderID = path?.split('/').pop();
-  if (orderID) {
+  if (Number(orderID)) {
     const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderID))).resourceStatus;
     if (orderStatus === STATUSES.completed || orderStatus === STATUSES.busy) {
       throw new CustomError(`You cannot modify an order that is ${orderStatus}`, 403);

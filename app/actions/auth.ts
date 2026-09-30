@@ -1,12 +1,10 @@
 'use server';
 
-import { adminAccessValidationSchema } from '../../utils/validationSchema';
+import { adminAccessValidationSchema } from '../validation/validationSchema';
 import { user, userPermission } from '../../lib/repositories';
 import { createSession, deleteSession } from '../../lib/session';
-import { handleError } from '../../utils/ErrorHandlingHelper';
 import { CustomError } from '../../utils/CustomErrors';
 import { z } from 'zod';
-import { IssueCount } from 'next/dist/next-devtools/dev-overlay/menu/dev-overlay-menu';
 // Authentication actions: login and logout
 export async function login(state: unknown, formData: FormData) {
   try {

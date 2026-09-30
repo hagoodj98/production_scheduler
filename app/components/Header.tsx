@@ -86,6 +86,9 @@ const Header = () => {
         </div>
       ) : (
         <Button onClick={handleLoginClick}>
+          <Tooltip title="Access Denied">
+            <LockIcon color="error" />
+          </Tooltip>
           <span className="text-[#FFBB28]">Login</span>
         </Button>
       )}

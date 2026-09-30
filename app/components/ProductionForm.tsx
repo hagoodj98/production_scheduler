@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useState, useReducer } from 'react';
+import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
@@ -15,6 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
 import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
+import FormHeader from './ui/FormHeader';
 import { ProductionOrder, OrderType } from './types';
 import type { ErrorMessage } from './types';
 import * as z from 'zod/v4';
@@ -22,6 +23,7 @@ import { CustomError } from '@/utils/CustomErrors';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { timeScheduleValidator } from '../validation/timeScheduleValidator';
 import { API_ENDPOINTS } from '../config/api';
+
 const ProductionForm = ({ pendingOrder }: OrderType) => {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -346,208 +348,211 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
   }, [pendingOrder, productionOrder, validate]);
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-lg font-semibold mb-4">Create Order</h2>
-      {Array.isArray(errors) && errors.find((err) => 'message' in err) && (
-        <div className=" text-red-600 my-2">{errors.find((err) => 'message' in err)?.message}</div>
-      )}
-      <form onSubmit={handleSubmit} className="">
-        <div>
-          <FormControl fullWidth sx={{ minWidth: 120 }}>
-            <InputLabel id="demo-simple-select-autowidth-label">Resource</InputLabel>
-            <Select
-              labelId="demo-simple-select-autowidth-label"
-              id="demo-simple-select-autowidth"
-              value={productionOrder.resource.resource_name ?? ''}
-              onChange={handleChange}
-              autoWidth
-              label="Resource"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {resources.map((resource, index) => (
-                <MenuItem key={index} value={resource.resource_name ?? ''}>
-                  {resource.resource_name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth sx={{ minWidth: 120 }}>
-            <InputLabel id="demo-simple-select-autowidth-label">Assigned Employee</InputLabel>
-            <Select
-              labelId="demo-simple-select-autowidth-label"
-              id="demo-simple-select-autowidth"
-              value={productionOrder.assignedEmployeeId ?? ''}
-              onChange={handleEmployeeChange}
-              autoWidth
-              label="Assigned Employee"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {workers.map((worker, index) => (
-                <MenuItem key={index} value={worker.employeeId ?? ''}>
-                  {worker.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {Array.isArray(errors) &&
-            errors.find((err) => 'field' in err && err.field === 'resource.resource_name') && (
-              <div className=" text-red-600">
-                {
-                  errors.find((err) => 'field' in err && err.field === 'resource.resource_name')
-                    ?.message
-                }
+    <div className="mx-auto w-full max-w-3xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      <FormHeader
+        icon={<EventNoteOutlinedIcon />}
+        eyebrow="Production scheduler"
+        title={pendingOrder ? 'Update production order' : 'Schedule production'}
+        description={
+          pendingOrder
+            ? 'Adjust the assignment and timing for this order.'
+            : 'Choose a resource, an employee, and a production window.'
+        }
+        titleAs="h1"
+        className="border-b border-slate-200 border-l-4 border-l-emerald-600 bg-slate-50 px-6 py-5"
+        badge={
+          pendingOrder && (
+            <span className="shrink-0 rounded border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900">
+              Editing order
+            </span>
+          )
+        }
+      />
+
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-6 px-6 py-6">
+          <section aria-labelledby="assignment-heading">
+            <div className="mb-4">
+              <h2 id="assignment-heading" className="text-base font-semibold text-slate-900">
+                Assignment
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Select the resource and employee for this order.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <FormControl fullWidth>
+                  <InputLabel id="resource-label">Resource</InputLabel>
+                  <Select
+                    labelId="resource-label"
+                    id="resource-select"
+                    value={productionOrder.resource.resource_name ?? ''}
+                    onChange={handleChange}
+                    label="Resource"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {resources.map((resource, index) => (
+                      <MenuItem key={index} value={resource.resource_name ?? ''}>
+                        {resource.resource_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {Array.isArray(errors) &&
+                  errors.find(
+                    (err) => 'field' in err && err.field === 'resource.resource_name',
+                  ) && (
+                    <p className="mt-1 text-sm text-red-700">
+                      {
+                        errors.find(
+                          (err) => 'field' in err && err.field === 'resource.resource_name',
+                        )?.message
+                      }
+                    </p>
+                  )}
               </div>
-            )}
-          <div className="mt-3">
+              <div>
+                <FormControl fullWidth>
+                  <InputLabel id="employee-label">Assign employee</InputLabel>
+                  <Select
+                    labelId="employee-label"
+                    id="employee-select"
+                    value={productionOrder.assignedEmployeeId ?? ''}
+                    onChange={handleEmployeeChange}
+                    label="Assigned employee"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {workers.map((worker, index) => (
+                      <MenuItem key={index} value={worker.employeeId ?? ''}>
+                        {worker.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {Array.isArray(errors) &&
+                  errors.find((err) => 'field' in err && err.field === 'assignedEmployeeId') && (
+                    <p className="mt-1 text-sm text-red-700">
+                      {
+                        errors.find((err) => 'field' in err && err.field === 'assignedEmployeeId')
+                          ?.message
+                      }
+                    </p>
+                  )}
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="schedule-heading" className="border-t border-slate-200 pt-6">
+            <div className="mb-4">
+              <h2 id="schedule-heading" className="text-base font-semibold text-slate-900">
+                Production window
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">Set the date and start and end times.</p>
+            </div>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={['DatePicker']}>
-                <DatePicker
-                  name="calendar"
-                  onAccept={handleDayAccept}
-                  label="Pick Date"
-                  value={
-                    productionOrder.dayMonthYear.month
-                      ? dayjs()
-                          .year(productionOrder.dayMonthYear.year ?? dayjs().year())
-                          .month((productionOrder.dayMonthYear.month ?? 1) - 1)
-                          .date(productionOrder.dayMonthYear.day ?? 1)
-                      : null
-                  }
-                />
-                {Array.isArray(errors) &&
-                  errors.find((err) => {
-                    return 'field' in err && err.field === 'dayMonthYear.month';
-                  }) && (
-                    <div className=" text-red-600">
-                      {
-                        errors.find((err) => 'field' in err && err.field === 'dayMonthYear.month')
-                          ?.message
-                      }
-                    </div>
-                  )}
-                {Array.isArray(errors) &&
-                  errors.find((err) => 'field' in err && err.field === 'dayMonthYear.day') && (
-                    <div className=" text-red-600">
-                      {
-                        errors.find((err) => 'field' in err && err.field === 'dayMonthYear.day')
-                          ?.message
-                      }
-                    </div>
-                  )}
-                {Array.isArray(errors) &&
-                  errors.find((err) => 'field' in err && err.field === 'dayMonthYear.year') && (
-                    <div className=" text-red-600">
-                      {
-                        errors.find((err) => 'field' in err && err.field === 'dayMonthYear.year')
-                          ?.message
-                      }
-                    </div>
-                  )}
-              </DemoContainer>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="min-w-0">
+                  <DatePicker
+                    name="calendar"
+                    onAccept={handleDayAccept}
+                    label="Production date"
+                    value={
+                      productionOrder.dayMonthYear.month
+                        ? dayjs()
+                            .year(productionOrder.dayMonthYear.year ?? dayjs().year())
+                            .month((productionOrder.dayMonthYear.month ?? 1) - 1)
+                            .date(productionOrder.dayMonthYear.day ?? 1)
+                        : null
+                    }
+                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                  />
+                  {(['month', 'day', 'year'] as const).map((part) => {
+                    const message = errors.find(
+                      (err) => 'field' in err && err.field === `dayMonthYear.${part}`,
+                    )?.message;
+                    return message ? (
+                      <p key={part} className="mt-1 text-sm text-red-700">
+                        {message}
+                      </p>
+                    ) : null;
+                  })}
+                </div>
+                <div className="min-w-0">
+                  <TimePicker
+                    onAccept={handleTimeAcceptOnStart}
+                    label="Start time"
+                    onChange={handleStartTimeChange}
+                    value={
+                      productionOrder.timeRange.startTimeSlot.hour !== null &&
+                      productionOrder.timeRange.startTimeSlot.minute !== null
+                        ? dayjs()
+                            .hour(productionOrder.timeRange.startTimeSlot.hour)
+                            .minute(productionOrder.timeRange.startTimeSlot.minute)
+                        : null
+                    }
+                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                  />
+                  {(['hour', 'minute'] as const).map((part) => {
+                    const message = errors.find(
+                      (err) => 'field' in err && err.field === `timeRange.startTimeSlot.${part}`,
+                    )?.message;
+                    return message ? (
+                      <p key={part} className="mt-1 text-sm text-red-700">
+                        {message}
+                      </p>
+                    ) : null;
+                  })}
+                </div>
+                <div className="min-w-0">
+                  <TimePicker
+                    onAccept={handleTimeAcceptOnEnd}
+                    label="End time"
+                    onChange={handleEndTimeChange}
+                    value={
+                      productionOrder.timeRange.endTimeSlot.hour !== null &&
+                      productionOrder.timeRange.endTimeSlot.minute !== null
+                        ? dayjs()
+                            .hour(productionOrder.timeRange.endTimeSlot.hour)
+                            .minute(productionOrder.timeRange.endTimeSlot.minute)
+                        : null
+                    }
+                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                  />
+                  {(['hour', 'minute'] as const).map((part) => {
+                    const message = errors.find(
+                      (err) => 'field' in err && err.field === `timeRange.endTimeSlot.${part}`,
+                    )?.message;
+                    return message ? (
+                      <p key={part} className="mt-1 text-sm text-red-700">
+                        {message}
+                      </p>
+                    ) : null;
+                  })}
+                </div>
+              </div>
             </LocalizationProvider>
-          </div>
-        </div>
-        <div>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <div>
-              <TimePicker
-                onAccept={handleTimeAcceptOnStart}
-                label="Start time"
-                onChange={handleStartTimeChange}
-                value={
-                  productionOrder.timeRange.startTimeSlot.hour !== null &&
-                  productionOrder.timeRange.startTimeSlot.minute !== null
-                    ? dayjs()
-                        .hour(productionOrder.timeRange.startTimeSlot.hour)
-                        .minute(productionOrder.timeRange.startTimeSlot.minute)
-                    : null
-                }
-              />
-              {Array.isArray(errors) &&
-                errors.find(
-                  (err) => 'field' in err && err.field === 'timeRange.startTimeSlot.hour',
-                ) && (
-                  <div className=" text-red-600">
-                    {
-                      errors.find(
-                        (err) => 'field' in err && err.field === 'timeRange.startTimeSlot.hour',
-                      )?.message
-                    }
-                  </div>
-                )}
-              {Array.isArray(errors) &&
-                errors.find(
-                  (err) => 'field' in err && err.field === 'timeRange.startTimeSlot.minute',
-                ) && (
-                  <div className=" text-red-600">
-                    {
-                      errors.find(
-                        (err) => 'field' in err && err.field === 'timeRange.startTimeSlot.minute',
-                      )?.message
-                    }
-                  </div>
-                )}
-            </div>
-            <div>
-              <TimePicker
-                onAccept={handleTimeAcceptOnEnd}
-                label="End time"
-                onChange={handleEndTimeChange}
-                value={
-                  productionOrder.timeRange.endTimeSlot.hour !== null &&
-                  productionOrder.timeRange.endTimeSlot.minute !== null
-                    ? dayjs()
-                        .hour(productionOrder.timeRange.endTimeSlot.hour)
-                        .minute(productionOrder.timeRange.endTimeSlot.minute)
-                    : null
-                }
-              />
-              {Array.isArray(errors) &&
-                errors.find(
-                  (err) => 'field' in err && err.field === 'timeRange.endTimeSlot.hour',
-                ) && (
-                  <div className=" text-red-600">
-                    {
-                      errors.find(
-                        (err) => 'field' in err && err.field === 'timeRange.endTimeSlot.hour',
-                      )?.message
-                    }
-                  </div>
-                )}
-              {Array.isArray(errors) &&
-                errors.find(
-                  (err) => 'field' in err && err.field === 'timeRange.endTimeSlot.minute',
-                ) && (
-                  <div className=" text-red-600">
-                    {
-                      errors.find(
-                        (err) => 'field' in err && err.field === 'timeRange.endTimeSlot.minute',
-                      )?.message
-                    }
-                  </div>
-                )}
-            </div>
-          </LocalizationProvider>
+          </section>
         </div>
 
-        <div className="md:col-span-2 flex items-center gap-3">
-          <Button type="submit" variant="contained" disabled={submitting}>
-            {submitting && !pendingOrder
-              ? 'Creating…'
-              : pendingOrder
-                ? 'Update'
-                : submitting && pendingOrder
-                  ? 'Updating…'
-                  : 'Create Order'}
-          </Button>
-          <Button variant="outlined" onClick={() => router.push('/')}>
+        <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outlined" onClick={() => router.push('/')}>
             Cancel
           </Button>
-        </div>
+          <Button type="submit" variant="contained" disabled={submitting}>
+            {submitting
+              ? pendingOrder
+                ? 'Updating…'
+                : 'Creating…'
+              : pendingOrder
+                ? 'Update order'
+                : 'Create order'}
+          </Button>
+        </footer>
       </form>
       <Notifier
         open={notifierState.openNotifier}
