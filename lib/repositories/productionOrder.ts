@@ -16,8 +16,14 @@ const findAllForStatusCheck = () => {
       dayMonthYear: true,
       startTime: true,
       endTime: true,
+      employee: {
+        select: {
+          employeeId: true,
+          name: true,
+        },
+      },
       resourceStatus: true,
-      resourceId: false,
+      resourceId: true,
     },
   });
 };
@@ -31,7 +37,6 @@ const findByIdOrThrow = (id: number) => {
 const create = (data: ProductionOrderWriteInput) => {
   return prisma.productionOrder.create({ data });
 };
-
 const update = (id: number, data: ProductionOrderWriteInput) => {
   return prisma.productionOrder.update({
     where: { id },

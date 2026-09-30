@@ -29,18 +29,26 @@ async function changeStatus(order: RequestScheduledJobs) {
     const startTime = dayjs(order.startTime); //In order to compare start and end times, I used a function that would convert the military time(string) into an actual date object
     const endTime = dayjs(order.endTime);
     const now = dayjs();
-
-    const isPending = await prisma.productionOrder.findUniqueOrThrow({
-      where: {
-        id: order.id,
-      },
-      select: {
-        resourceStatus: true,
-      },
+    // Check the current status of the order before making any changes
+    const orderFromDb = await prisma.productionOrder.findUniqueOrThrow({
+      where: { id: order.id },
     });
+    // Custom block to check if the order is pending and if any relevant fields have changed
+    customBlockCheck: {
+      if (order.resourceStatus === STATUSES.pending) {
+        //if pending, check to see if any field changed, starttime endtime, employee,resource etc. if not then change back to scheduled or click out of this block
+        const match =
+          orderFromDb.dayMonthYear.getTime() === order.dayMonthYear.getTime() &&
+          orderFromDb.startTime.getTime() === order.startTime.getTime() &&
+          orderFromDb.endTime.getTime() === order.endTime.getTime() &&
+          orderFromDb.resourceId === order.resourceId;
 
-    if (isPending.resourceStatus === STATUSES.pending) {
-      return;
+        if (match) {
+          break customBlockCheck;
+        }
+        // Skip the status change if the order changed after the status-check query.
+        return;
+      }
     }
 
     if (now.isAfter(startTime) && now.isBefore(endTime)) {

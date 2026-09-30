@@ -171,6 +171,7 @@ export type RequestScheduledJobs = Prisma.ProductionOrderGetPayload<{
     startTime: true;
     endTime: true;
     resourceStatus: true;
+    resourceId: true;
   };
 }>;
 
