@@ -2,6 +2,7 @@
 import CustomModal from './ui/modal';
 import TextInput from './ui/input';
 import Button from '@mui/material/Button';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useActionState, useEffect, useReducer } from 'react';
 import { login } from '../actions/auth';
 import { useAdminUserContext } from '../context';
@@ -73,8 +74,17 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
 
   return (
     <CustomModal open={open} onClose={onClose}>
-      <h3>Admin Access Required</h3>
-      <p>Please enter admin credentials to proceed.</p>
+      <div className="mb-5 flex items-start gap-3 border-b border-slate-200 pb-4 pr-8">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+          <LockOutlinedIcon fontSize="small" />
+        </span>
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase text-emerald-800">Secure sign-in</p>
+          <h2 className="text-xl font-semibold text-slate-900">Admin access required</h2>
+          <p className="mt-1 text-sm text-slate-600">Enter your credentials to continue.</p>
+        </div>
+      </div>
+      {state?.error && <p style={{ color: 'red' }}>{state.error}</p>}
       <form
         action={() => {
           // Convert the formData state into a FormData object for submission
@@ -91,6 +101,9 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
           onChange={(e) => dispatch({ type: 'setEmployee_id', value: e.target.value })}
           name="employee_id"
           type="text"
+          sx={{
+            marginTop: 2,
+          }}
         />
         {state?.fields?.find((field) => field.path === 'employee_id') && (
           <p style={{ color: 'red' }}>
@@ -102,6 +115,9 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
           value={adminFormState.formData.password}
           onChange={(e) => dispatch({ type: 'setPassword', value: e.target.value })}
           name="password"
+          sx={{
+            marginY: 2,
+          }}
           type="password"
         />
         {state?.fields?.find((field) => field.path === 'password') && (
@@ -115,6 +131,9 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
           onChange={(e) => dispatch({ type: 'setAdmin_key', value: e.target.value })}
           name="admin_key"
           type="text"
+          sx={{
+            marginBottom: 3,
+          }}
         />
         {state?.fields?.find((field) => field.path === 'admin_key') && (
           <p style={{ color: 'red' }}>
@@ -122,7 +141,7 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
           </p>
         )}
 
-        <Button disabled={pending} variant="contained" type="submit">
+        <Button disabled={pending} variant="contained" fullWidth type="submit">
           Submit
         </Button>
       </form>

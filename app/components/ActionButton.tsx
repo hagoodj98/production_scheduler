@@ -24,6 +24,12 @@ const ActionButton = ({ resourceLabel, pageNav }: NavProps) => {
         <Button
           size="small"
           variant="contained"
+          sx={{
+            backgroundColor: '#FFBB28',
+            ':hover': {
+              backgroundColor: '#FFA500',
+            },
+          }}
           disableElevation
           onClick={() => {
             navigate.push(pageNav);

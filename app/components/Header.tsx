@@ -32,7 +32,6 @@ const Header = () => {
       name: '',
     });
     handleMenuClose();
-    // router.push('/');
   };
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -86,7 +85,9 @@ const Header = () => {
           </Menu>
         </div>
       ) : (
-        <Button onClick={handleLoginClick}>Login</Button>
+        <Button onClick={handleLoginClick}>
+          <span className="text-[#FFBB28]">Login</span>
+        </Button>
       )}
       {showAdminAccessForm && (
         <AdminAccessForm open={showAdminAccessForm} onClose={() => setShowAdminAccessForm(false)} />
