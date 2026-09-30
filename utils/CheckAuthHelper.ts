@@ -3,6 +3,7 @@ import { decrypt } from '../lib/session';
 import type { PayloadSession } from '../app/components/types';
 import { CustomError } from './CustomErrors';
 import PERMISSIONS from './Permissions';
+import { productionOrder } from '@/lib/repositories';
 // Helper function to check if the user has the required permission before proceeding
 export const checkAuthMetaData = async (permission?: string, path?: string | null) => {
   const cookieStore = await cookies();
@@ -34,5 +35,14 @@ export const checkAuthMetaData = async (permission?: string, path?: string | nul
     }
     throw new CustomError(`You are unauthorized to ${permission} this resource`, 403);
   }
+  // If the user has passed all checks, they are authorized to proceed but prevent if status is completed or busy
+  const orderID = path?.split('/').pop();
+  if (orderID) {
+    const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderID))).resourceStatus;
+    if (orderStatus === 'Completed' || orderStatus === 'Busy') {
+      throw new CustomError(`You cannot modify an order that is ${orderStatus}`, 403);
+    }
+  }
+
   return { adminName: payloadSession.name, employeeId: payloadSession.employee_id };
 };
