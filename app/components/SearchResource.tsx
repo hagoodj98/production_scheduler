@@ -70,7 +70,9 @@ const SearchResource: React.FC = () => {
           `${API_ENDPOINTS.SEARCH_RESOURCES}?name=${encodeURIComponent(resourceName)}`,
         );
         if (!response.ok) {
-          console.error('Failed to search resources');
+          dispatchNotifier({ type: 'setNotifierMessage', value: 'Could not search resources' });
+          dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+          dispatchNotifier({ type: 'setOpenNotifier', value: true });
           return;
         }
         const data = await response.json();

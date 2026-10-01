@@ -174,7 +174,28 @@ export type RequestScheduledJobs = Prisma.ProductionOrderGetPayload<{
     resourceId: true;
   };
 }>;
-
+export type OrderLogData = {
+  creationDate: Date;
+  description: string;
+  employee: {
+    employeeId: string;
+    name: string;
+    role: string;
+  };
+  employeeId: string;
+  id: number;
+  order: {
+    employee: {
+      name: string;
+      role: string;
+    };
+    resourceStatus: string;
+    resource: {
+      resource_name: string;
+    };
+  } | null;
+  orderId: number | null;
+};
 export type SlotContextType = {
   dataSlot: Slot;
   setDataSlot: React.Dispatch<React.SetStateAction<Slot>>;

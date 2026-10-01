@@ -7,6 +7,7 @@ import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import dayjs from 'dayjs';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 import { selectedResource } from '@/lib/repositories/selectedResource';
+import { orderLog } from '@/lib/repositories/orderLog';
 export async function PATCH(req: NextRequest) {
   try {
     //First check if the user has the required permission to reschedule orders before processing data
@@ -64,6 +65,11 @@ export async function PATCH(req: NextRequest) {
       resourceStatus: STATUSES.processing,
       employeeAssigneeID: employeeId,
     });
+    await orderLog.createOrderLog(
+      orderId,
+      employeeId,
+      `Rescheduled order ${orderId} to Processing status`,
+    );
     return NextResponse.json(
       {
         message: `Updated order ${orderId} to Processing status`,

@@ -51,17 +51,20 @@ export async function POST(req: NextRequest) {
     const getIdOfSelectedResource = await selectedResource.findByNameOrThrow(resourceName);
     const retrievedId = getIdOfSelectedResource.id;
     // Update the existing pending order with the new schedule and set its status to 'Processing'
-    const [createdOrder] = await Promise.all([
-      productionOrder.update(orderId, {
-        dayMonthYear: date.toDate(),
-        startTime: startTime.toDate(),
-        endTime: endTime.toDate(),
-        resourceId: retrievedId,
-        resourceStatus: STATUSES.processing,
-        employeeAssigneeID: employeeAssigneeID,
-      }),
-      orderLog.createOrderLog(orderId, employeeId),
-    ]);
+
+    const createdOrder = await productionOrder.update(orderId, {
+      dayMonthYear: date.toDate(),
+      startTime: startTime.toDate(),
+      endTime: endTime.toDate(),
+      resourceId: retrievedId,
+      resourceStatus: STATUSES.processing,
+      employeeAssigneeID: employeeAssigneeID,
+    });
+    await orderLog.createOrderLog(
+      orderId,
+      employeeId,
+      `Scheduled order ${orderId} to Processing status`,
+    );
 
     return NextResponse.json(
       {

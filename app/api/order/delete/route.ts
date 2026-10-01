@@ -22,9 +22,9 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
     }
     // Attempt to delete the production order and create an order log simultaneously
-
-    await orderLog.createOrderLog(Number(orderId), employeeId);
     await productionOrder.softRemove(Number(orderId));
+    await orderLog.createOrderLog(Number(orderId), employeeId, `Deleted order ${orderId}`);
+
     return NextResponse.json({ message: 'Order deleted successfully' }, { status: 200 });
   } catch (error) {
     // Handle any errors that occur during the deletion process

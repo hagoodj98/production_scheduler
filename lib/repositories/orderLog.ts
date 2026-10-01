@@ -1,10 +1,15 @@
 import prisma from './../../prisma/client';
 
-const createOrderLog = async (orderId: number, employeeId: string) => {
+const createOrderLog = async (
+  orderId: number | undefined,
+  employeeId: string,
+  description: string,
+) => {
   return await prisma.orderLog.create({
     data: {
       orderId,
       employeeId,
+      description,
     },
   });
 };
@@ -18,9 +23,35 @@ const getOrderLogsByOrderId = async (orderId: number) => {
 };
 const getAllOrderLogs = async () => {
   return await prisma.orderLog.findMany({
-    include: {
-      order: true,
-      employee: true,
+    select: {
+      id: true,
+      orderId: true,
+      employeeId: true,
+      employee: {
+        select: {
+          name: true,
+          role: true,
+          employeeId: true,
+        },
+      },
+      order: {
+        select: {
+          resourceStatus: true,
+          employee: {
+            select: {
+              name: true,
+              role: true,
+            },
+          },
+          resource: {
+            select: {
+              resource_name: true,
+            },
+          },
+        },
+      },
+      description: true,
+      creationDate: true,
     },
   });
 };
