@@ -27,6 +27,10 @@ export const checkAuthMetaData = async (
   if (isWorker) {
     throw new CustomError('Unauthorized access for worker role', 403);
   }
+  // Allow admin users to access the order log without further permission checks
+  if (path?.includes('order-log') && payloadSession.role === 'admin') {
+    return;
+  }
 
   // Check if the user has the required permission before proceeding
   if (permission && !hasPermission) {

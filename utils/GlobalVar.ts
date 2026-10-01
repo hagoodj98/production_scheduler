@@ -14,5 +14,12 @@ const STATUSES = {
   busy: 'Busy',
   completed: 'Completed',
 };
+const STATUS_COLORS: Record<string, string> = {
+  [STATUSES.processing]: '#cccccc',
+  [STATUSES.pending]: '#FFBB28',
+  [STATUSES.scheduled]: '#007bff',
+  [STATUSES.busy]: '#DB441A',
+  [STATUSES.completed]: '#2ecc71',
+};
 
-export { PERMISSIONS, STATUSES };
+export { PERMISSIONS, STATUSES, STATUS_COLORS };

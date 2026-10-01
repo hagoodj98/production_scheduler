@@ -3,18 +3,10 @@
 import { Cell, Pie, PieChart, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState } from 'react';
 import { OrderProps } from './types';
-import { STATUSES } from '../../utils/GlobalVar';
+import { STATUSES, STATUS_COLORS } from '../../utils/GlobalVar';
 import { API_ENDPOINTS } from '../config/api';
 import useSWR from 'swr';
 import fetcher from '../../utils/fetcher';
-
-const STATUS_COLORS: Record<string, string> = {
-  [STATUSES.processing]: '#cccccc',
-  [STATUSES.pending]: '#FFBB28',
-  [STATUSES.scheduled]: '#007bff',
-  [STATUSES.busy]: '#DB441A',
-  [STATUSES.completed]: '#2ecc71',
-};
 
 const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const { data: fetchedData } = useSWR(API_ENDPOINTS.LOAD_ORDERS, fetcher, {
@@ -23,7 +15,7 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   // compute flattened orders and counts by status
   const calculateProductionOrders = () => {
     // flatten all production orders from the fetched jobs
-    const flattened = (fetchedData?.jobs ?? []).flatMap(
+    const flattened = ((fetchedData as { jobs: OrderProps[] })?.jobs ?? []).flatMap(
       (job: OrderProps) =>
         job.productionOrders?.map((p) => ({
           ...p,

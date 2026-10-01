@@ -12,6 +12,8 @@ export async function GET(req: NextRequest) {
     const id = path?.split('/').pop();
     if (path?.includes('add-resource')) {
       action = PERMISSIONS.add?.name;
+    } else if (path?.includes('order-log')) {
+      action = 'admin-view';
     }
     // Determine the action based on the path and id
     if (path?.includes(PERMISSIONS.assign?.name) && !Number(id)) {

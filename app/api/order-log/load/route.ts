@@ -7,14 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     // Your logic to load the order log goes here
     const logs: OrderLogData[] = await orderLog.getAllOrderLogs();
-    const fetchProductionOrders = await productionOrder.findAllForStatusCheck();
 
-    logs.forEach((log) => {
-      const correspondingOrder = fetchProductionOrders.find((order) => order.id === log?.orderId);
-      if (correspondingOrder && log?.order) {
-        log.order.resourceStatus = correspondingOrder.resourceStatus;
-      }
-    });
     // You can now use fetchProductionOrders to get the status of production orders if needed
 
     return NextResponse.json({ message: 'Order log loaded successfully', logs });
