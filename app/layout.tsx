@@ -5,6 +5,7 @@ import './globals.css';
 import { AdminUserContextWrapper } from './context';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import GlobalMessageReader from './components/GlobalMessageReader';
+import CheckAuth from './components/CheckAuth';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -29,10 +30,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {' '}
-        <AdminUserContextWrapper>{children}</AdminUserContextWrapper>
-        <Suspense fallback={null}>
-          <GlobalMessageReader />
-        </Suspense>
+        <AdminUserContextWrapper>
+          <CheckAuth />
+          {children}
+          <Suspense fallback={null}>
+            <GlobalMessageReader />
+          </Suspense>
+        </AdminUserContextWrapper>
       </body>
     </html>
   );

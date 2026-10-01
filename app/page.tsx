@@ -2,12 +2,10 @@ import Recharts from './components/Recharts';
 import ActionButton from './components/ActionButton';
 import Calendar from './components/Calendar';
 import Header from './components/Header';
-import CheckAuth from './components/CheckAuth';
 
 export default async function Home() {
   return (
     <div>
-      <CheckAuth />
       {/* Header */}
       <Header />
       <div className="p-6 top-0 z-20  bg-white py-4 flex justify-around  gap-4">
