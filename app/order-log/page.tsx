@@ -1,12 +1,8 @@
-import { orderLog } from '@/lib/repositories/orderLog';
-import { OrderLogData } from '@/app/components/types';
 import Table from '../components/OrderLogTable';
 import Header from '../components/Header';
 import FormHeader from '../components//ui/FormHeader';
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 const page = async () => {
-  const logs: OrderLogData[] = await orderLog.getAllOrderLogs();
-
   return (
     <div>
       <Header />
@@ -23,7 +19,7 @@ const page = async () => {
         }
         className="border-b border-slate-200 border-l-4 border-l-emerald-600 bg-slate-50 px-6 py-5"
       />
-      <Table data={logs} />
+      <Table />
     </div>
   );
 };

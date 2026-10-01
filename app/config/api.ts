@@ -13,4 +13,5 @@ export const API_ENDPOINTS = {
   LOAD_RESOURCES: `${RESOURCE}/load`,
   ADD_RESOURCE: `${RESOURCE}/add`,
   SEARCH_RESOURCES: `${RESOURCE}/search`,
+  LOAD_ORDER_LOGS: `${ORDER}-log/load`,
 };

@@ -1,5 +1,5 @@
 import Recharts from './components/Recharts';
-import ActionButton from './components/ActionButton';
+import NavButton from './components/NavButton';
 import Calendar from './components/Calendar';
 import Header from './components/Header';
 
@@ -13,9 +13,9 @@ export default async function Home() {
           <Recharts compact />
         </div>
         <div className=" flex items-center  gap-2">
-          <ActionButton pageNav="/add-resource" resourceLabel="Add Resource" />
-          <ActionButton pageNav="/assign-order" resourceLabel="Create Order" />
-          <ActionButton pageNav="/order-log" resourceLabel="Order Log" />
+          <NavButton pageNav="/add-resource" resourceLabel="Add Resource" />
+          <NavButton pageNav="/assign-order" resourceLabel="Create Order" />
+          <NavButton pageNav="/order-log" resourceLabel="Order Log" />
         </div>
       </div>
 

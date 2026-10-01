@@ -1,12 +1,13 @@
 'use client';
+import Link from 'next/link';
 import React from 'react';
+import useSWR from 'swr';
 import { ColumnDef, createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table';
 import { OrderLogData } from '@/app/components/types';
 import { useTanStackTableDevtools } from '@tanstack/react-table-devtools/production';
-
-type TableData = {
-  data: OrderLogData[];
-};
+import NavButton from './NavButton';
+import fetcher from '@/utils/fetcher';
+import { API_ENDPOINTS } from '../config/api';
 
 const features = tableFeatures({});
 
@@ -49,40 +50,48 @@ const columns = columnHelper.columns([
     cell: (info) => info.getValue(),
   }),
 ]);
-const OrderLogTable = ({ data }: TableData) => {
-  //>{`Order ID: ${log.orderId}, Created At: ${time}, Employee: ${log.employee.name}, Description: ${log.description}, current status:`}</div>
+const OrderLogTable = () => {
+  const { data: fetchedData } = useSWR(API_ENDPOINTS.LOAD_ORDER_LOGS, fetcher, {
+    refreshInterval: 5000, // poll every 5 seconds
+  });
+
   const table = useTable({
-    key: 'users-table',
-    data,
+    //key: 'user-table',
+    data: (fetchedData as { logs: OrderLogData[] })?.logs ?? [],
     columns,
     features,
   });
-  // useTanStackTableDevtools(table, { enabled: false });
+
   return (
-    <table className="container mx-auto border-collapse border border-gray-200">
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <th className="px-4 py-2 border" key={header.id}>
-                {header.isPlaceholder ? null : <table.FlexRender header={header} />}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getAllCells().map((cell) => (
-              <td className="px-4 py-2 border text-center" key={cell.id}>
-                <table.FlexRender cell={cell} />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div>
+      <table className="container mx-auto border-collapse border border-gray-200">
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th className="px-4 py-2 border" key={header.id}>
+                  {header.isPlaceholder ? null : <table.FlexRender header={header} />}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getAllCells().map((cell) => (
+                <td className="px-4 py-2 border text-center" key={cell.id}>
+                  <table.FlexRender cell={cell} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="my-4 flex justify-center ">
+        <NavButton pageNav="/" resourceLabel="Back To Dashboard" />
+      </div>
+    </div>
   );
 };
 

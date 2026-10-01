@@ -4,7 +4,7 @@
 // Updated test file for ActionButton component
 
 import { render, screen } from '@testing-library/react';
-import ActionButton from '@/app/components/ActionButton';
+import ActionButton from '@/app/components/NavButton';
 import { withAppProviders } from './testUtils';
 import { describe, expect, it, vi } from 'vitest';
 

@@ -1,5 +1,6 @@
 'use client';
 import React, { useCallback, useState, useReducer } from 'react';
+import { OrderProps } from './types';
 import fetcher from '../../utils/fetcher';
 import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import dayjs from 'dayjs';
@@ -18,7 +19,7 @@ const CalendarComponent = () => {
   const [notifierState, notififierDispatcher] = useReducer(notifierReducer, initialNotifierState);
   const navigate = useRouter();
 
-  const events = fetchedData?.jobs?.flatMap((order) =>
+  const events = (fetchedData as { jobs: OrderProps[] })?.jobs?.flatMap((order) =>
     order.productionOrders.map((job) => ({
       title: `${order.resource_name} at ${dayjs(job.startTime).format('h:mm A')}`,
       start: dayjs(job.startTime).toDate(),
