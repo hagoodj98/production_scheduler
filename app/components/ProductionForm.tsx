@@ -23,6 +23,7 @@ import { CustomError } from '@/utils/CustomErrors';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { timeScheduleValidator } from '../validation/timeScheduleValidator';
 import { API_ENDPOINTS } from '../config/api';
+import { STATUSES } from '@/utils/GlobalVar';
 
 const ProductionForm = ({ pendingOrder }: OrderType) => {
   const router = useRouter();
@@ -169,7 +170,8 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
 
     try {
       setSubmitting(true);
-      if (pendingOrder) {
+      // If the pending order is already scheduled, we need to reschedule it
+      if (pendingOrder?.resourceStatus === STATUSES.scheduled) {
         await fetch(API_ENDPOINTS.RESCHEDULE_ORDER, {
           method: 'PATCH',
           headers: {

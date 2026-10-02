@@ -65,7 +65,7 @@ export async function PATCH(req: NextRequest) {
       endTime: endTime.toDate(),
       resourceId: getIdOfSelectedResource.id,
       resourceStatus: STATUSES.processing,
-      employeeAssigneeID: employeeId,
+      employeeAssigneeID: order.assignedEmployeeId,
     });
     await orderLog.createOrderLog(
       orderId,

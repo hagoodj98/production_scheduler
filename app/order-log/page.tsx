@@ -2,6 +2,7 @@ import Table from '../components/OrderLogTable';
 import Header from '../components/Header';
 import FormHeader from '../components//ui/FormHeader';
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
+import Legend from '../components/Legend';
 const page = async () => {
   return (
     <div>
@@ -19,6 +20,9 @@ const page = async () => {
         }
         className="border-b border-slate-200 border-l-4 border-l-emerald-600 bg-slate-50 px-6 py-5"
       />
+      <div className="container flex justify-end p-4">
+        <Legend />
+      </div>
       <Table />
     </div>
   );

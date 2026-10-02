@@ -6,7 +6,13 @@ import { productionOrder } from '@/lib/repositories/productionOrder';
 export async function GET(req: NextRequest) {
   try {
     // Your logic to load the order log goes here
-    const logs: OrderLogData[] = await orderLog.getAllOrderLogs();
+    const logs: OrderLogData[] = (await orderLog.getAllOrderLogs()).map((log) => {
+      if (log.description.includes('Deleted') && log.order) {
+        // Mark the resource status as 'Deleted' for this order
+        log.order.resourceStatus = 'Deleted';
+      }
+      return log;
+    });
 
     // You can now use fetchProductionOrders to get the status of production orders if needed
 

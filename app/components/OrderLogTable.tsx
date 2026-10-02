@@ -87,13 +87,17 @@ const OrderLogTable = () => {
                   ? 'bg-(--status-completed) text-white'
                   : row.getAllCells().some((cell) => cell.getValue() === STATUSES.busy)
                     ? 'bg-(--status-busy) text-white'
-                    : row.getAllCells().some((cell) => cell.getValue() === STATUSES.scheduled)
-                      ? 'bg-(--status-scheduled) text-white'
-                      : row.getAllCells().some((cell) => cell.getValue() === STATUSES.pending)
-                        ? 'bg-(--status-pending) text-white'
-                        : row.getAllCells().some((cell) => cell.getValue() === STATUSES.processing)
-                          ? 'bg-(--status-processing) text-white'
-                          : ''
+                    : row.getAllCells().some((cell) => cell.getValue() === STATUSES.deleted)
+                      ? 'bg-(--status-deleted) text-white'
+                      : row.getAllCells().some((cell) => cell.getValue() === STATUSES.scheduled)
+                        ? 'bg-(--status-scheduled) text-white'
+                        : row.getAllCells().some((cell) => cell.getValue() === STATUSES.pending)
+                          ? 'bg-(--status-pending) text-white'
+                          : row
+                                .getAllCells()
+                                .some((cell) => cell.getValue() === STATUSES.processing)
+                            ? 'bg-(--status-processing) text-white'
+                            : ''
               }`}
             >
               {row.getAllCells().map((cell) => (

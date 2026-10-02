@@ -12,6 +12,7 @@ const STATUSES = {
   pending: 'Pending',
   scheduled: 'Scheduled',
   busy: 'Busy',
+  deleted: 'Deleted',
   completed: 'Completed',
 };
 const STATUS_COLORS: Record<string, string> = {
@@ -19,6 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
   [STATUSES.pending]: '#FFBB28',
   [STATUSES.scheduled]: '#007bff',
   [STATUSES.busy]: '#DB441A',
+  [STATUSES.deleted]: '#092ec0',
   [STATUSES.completed]: '#2ecc71',
 };
 
