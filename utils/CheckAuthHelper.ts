@@ -17,6 +17,8 @@ export const checkAuthMetaData = async (
     throw new CustomError('You are unauthenticated', 401);
   }
 
+  const parsedOrderId = Number(orderId);
+  const hasOrderId = Number.isSafeInteger(parsedOrderId) && parsedOrderId > 0;
   const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
   // Check if the user has the required permission in their session payload
   const hasPermission = payloadSession.permissions.find(
@@ -29,7 +31,7 @@ export const checkAuthMetaData = async (
       if (
         p === PERMISSIONS.reschedule.name &&
         permission === PERMISSIONS.assign.name &&
-        Number(orderId)
+        hasOrderId
       ) {
         return true;
       }
@@ -59,16 +61,16 @@ export const checkAuthMetaData = async (
   }
   // If the user has passed all checks, they are authorized to proceed but prevent if status is completed or busy
 
-  if (Number(orderId)) {
-    const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderId))).resourceStatus;
-    if (orderStatus === STATUSES.completed || orderStatus === STATUSES.busy) {
-      throw new CustomError(`You cannot modify an order that is ${orderStatus}`, 403);
-    }
-  } else if (orderId) {
-    // Check the status of the order before allowing deletion
-    const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderId))).resourceStatus;
-    if (orderStatus === STATUSES.busy) {
+  if (hasOrderId) {
+    const orderStatus = (await productionOrder.findByIdOrThrow(parsedOrderId)).resourceStatus;
+    if (permission === PERMISSIONS.delete.name && orderStatus === STATUSES.busy) {
       throw new CustomError(`You cannot delete a busy order that is ${orderStatus}`, 403);
+    }
+    if (
+      permission !== PERMISSIONS.delete.name &&
+      (orderStatus === STATUSES.completed || orderStatus === STATUSES.busy)
+    ) {
+      throw new CustomError(`You cannot modify an order that is ${orderStatus}`, 403);
     }
   }
 

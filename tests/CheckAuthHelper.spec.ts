@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { cookiesMock, decryptMock } = vi.hoisted(() => ({
+const { cookiesMock, decryptMock, productionOrderMock } = vi.hoisted(() => ({
   cookiesMock: vi.fn(),
   decryptMock: vi.fn(),
+  productionOrderMock: {
+    findByIdOrThrow: vi.fn(),
+  },
 }));
 
 vi.mock('next/headers', () => ({ cookies: cookiesMock }));
 vi.mock('@/lib/session', () => ({ decrypt: decryptMock }));
+vi.mock('@/lib/repositories', () => ({ productionOrder: productionOrderMock }));
 
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 
@@ -58,5 +62,18 @@ describe('checkAuthMetaData', () => {
     await expect(checkAuthMetaData('add')).resolves.toMatchObject({
       adminName: 'All Access Admin',
     });
+  });
+
+  it('does not treat a nonnumeric path segment as an order ID', async () => {
+    decryptMock.mockResolvedValueOnce({
+      name: 'All Access Admin',
+      permissions: ['all_access'],
+      employee_id: 'EMP-1',
+    });
+
+    await expect(checkAuthMetaData('add', '/add-resource', 'add-resource')).resolves.toMatchObject({
+      adminName: 'All Access Admin',
+    });
+    expect(productionOrderMock.findByIdOrThrow).not.toHaveBeenCalled();
   });
 });
