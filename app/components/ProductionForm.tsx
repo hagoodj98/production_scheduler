@@ -338,16 +338,19 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
     if (pendingOrder) {
       const response = async () => {
         try {
-          const response = await fetch(API_ENDPOINTS.MARK_PENDING, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+          const response = await fetch(
+            `${API_ENDPOINTS.MARK_PENDING}?orderId=${productionOrder.orderId}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                order: productionOrder,
+                existingOrder: true,
+              }),
             },
-            body: JSON.stringify({
-              order: productionOrder,
-              existingOrder: true,
-            }),
-          });
+          );
           if (!response.ok) {
             const data = await response.json();
             setCustomError({ error: data.error });

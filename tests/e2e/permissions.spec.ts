@@ -39,18 +39,14 @@ const loginAs = async (page: Page, account: AdminAccount) => {
   await expect(page.getByRole('heading', { name: `Hello, ${account.name}` })).toBeVisible();
 };
 
-const callJsonApi = async (page: Page, path: string, method: string, body?: unknown) =>
-  page.evaluate(
-    async ({ path, method, body }) => {
-      const response = await fetch(path, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-      });
-      return { status: response.status, body: await response.json() };
-    },
-    { path, method, body },
-  );
+const callJsonApi = async (page: Page, path: string, method: string, body?: unknown) => {
+  const response = await page.context().request.fetch(new URL(path, page.url()).toString(), {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    ...(body === undefined ? {} : { data: body }),
+  });
+  return { status: response.status(), body: await response.json() };
+};
 
 const expectRedirectedHome = async (page: Page) => {
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
@@ -86,21 +82,66 @@ test.describe('permission-based access', () => {
     expect((await callJsonApi(page, '/api/order/delete?orderId=1', 'DELETE')).status).toBe(403);
   });
 
-  test('reschedule admins can access assignment via the temporary permission override', async ({
+  test('reschedule admins can reassign existing orders but cannot create new ones', async ({
     page,
   }) => {
+    await loginAs(page, allAccessAdmin);
+
+    const resourceName = `Permission test ${Date.now()}`;
+    const addResourceResponse = await callJsonApi(page, '/api/resource/add', 'POST', {
+      resource_name: resourceName,
+    });
+    expect(addResourceResponse.status).toBe(200);
+
+    const order = {
+      dayMonthYear: { month: 12, day: 31, year: 2099 },
+      timeRange: {
+        startTimeSlot: { hour: 9, minute: 0 },
+        endTimeSlot: { hour: 10, minute: 0 },
+      },
+      resource: { resource_name: resourceName },
+      orderId: 0,
+      assignedEmployeeId: 'EMP005',
+    };
+    const createPendingResponse = await callJsonApi(
+      page,
+      '/api/order/mark-pending',
+      'POST',
+      { order },
+    );
+    expect(createPendingResponse.status).toBe(200);
+    const existingOrderId = createPendingResponse.body.orderId as number;
+
+    await page.context().clearCookies();
     await loginAs(page, rescheduleDeleteAdmin);
 
     await page.goto('/add-resource');
     await expectRedirectedHome(page);
 
     await page.goto('/assign-order');
-    await expect(page).toHaveURL(/\/assign-order$/);
-    await expect(page.getByRole('heading', { name: 'Schedule production' })).toBeVisible();
+    await expectRedirectedHome(page);
 
     expect((await callJsonApi(page, '/api/order/reschedule', 'PATCH', {})).status).toBe(400);
     expect((await callJsonApi(page, '/api/order/delete', 'DELETE')).status).toBe(400);
-    expect((await callJsonApi(page, '/api/order/mark-pending', 'POST', {})).status).toBe(400);
+    expect(
+      (
+        await callJsonApi(page, '/api/order/mark-pending', 'POST', {
+          order,
+        })
+      ).status,
+    ).toBe(403);
+
+    await page.goto(`/assign-order/${existingOrderId}`);
+    await expect(page).toHaveURL(new RegExp(`/assign-order/${existingOrderId}$`));
+    await expect(page.getByRole('heading', { name: 'Update production order' })).toBeVisible();
+    expect(
+      (
+        await callJsonApi(page, `/api/order/mark-pending?orderId=${existingOrderId}`, 'POST', {
+          order: { ...order, orderId: existingOrderId },
+          existingOrder: true,
+        })
+      ).status,
+    ).toBe(200);
   });
 
   test('all-access admins can enter both protected pages and pass each API permission check', async ({
