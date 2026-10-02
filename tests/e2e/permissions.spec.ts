@@ -103,12 +103,9 @@ test.describe('permission-based access', () => {
       orderId: 0,
       assignedEmployeeId: 'EMP005',
     };
-    const createPendingResponse = await callJsonApi(
-      page,
-      '/api/order/mark-pending',
-      'POST',
-      { order },
-    );
+    const createPendingResponse = await callJsonApi(page, '/api/order/mark-pending', 'POST', {
+      order,
+    });
     expect(createPendingResponse.status).toBe(200);
     const existingOrderId = createPendingResponse.body.orderId as number;
 

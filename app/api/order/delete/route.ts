@@ -14,7 +14,7 @@ export async function DELETE(req: NextRequest) {
     const { employeeId } = (await checkAuthMetaData(
       PERMISSIONS.delete?.name,
       undefined,
-      Number(orderId),
+      orderId,
     )) as {
       employeeId: string;
     };

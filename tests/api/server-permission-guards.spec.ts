@@ -69,7 +69,7 @@ describe('server-side permission guards', () => {
 
     const response = await DELETE(request);
 
-    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('delete', undefined, 11);
+    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('delete', undefined, '11');
     expect(response.status).toBe(403);
     expect(productionOrderSoftRemoveMock).not.toHaveBeenCalled();
   });
@@ -95,7 +95,7 @@ describe('server-side permission guards', () => {
 
     const response = await createPendingOrder(request);
 
-    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('assign', '');
+    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('assign', undefined, null);
     expect(response.status).toBe(403);
     expect(productionOrderCreateMock).not.toHaveBeenCalled();
   });
