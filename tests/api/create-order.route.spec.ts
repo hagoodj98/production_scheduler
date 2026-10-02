@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { NextRequest } from 'next/server';
 
 const { selectedResource, productionOrder, checkAuthMetaData } = vi.hoisted(() => ({
   selectedResource: {
@@ -20,7 +21,7 @@ vi.mock('@/utils/CheckAuthHelper', () => ({ checkAuthMetaData }));
 import { POST } from '@/app/api/order/mark-pending/route';
 
 const makeRequest = (order: Record<string, unknown>) =>
-  new Request('http://localhost/api/order/mark-pending', {
+  new NextRequest('http://localhost/api/order/mark-pending', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ order }),
