@@ -7,19 +7,36 @@ import { userPermission } from './lib/repositories/UserPermission';
 import { PERMISSIONS } from './utils/GlobalVar';
 import seedResources from './prisma/seeds/0_resources';
 import prisma from './prisma/client';
+import crypto from 'crypto';
+import { hashPassword } from './utils/hashPassword';
 
 async function seedAdminAuth() {
   try {
     const insertEmployees: Employee[] = [];
     const insertUserPermission: { userId: number; permissionId: number }[] = [];
-
+    const johnAdminPassword = process.env.JOHN_ADMIN_PASSWORD;
+    const janeAdminPassword = process.env.JANE_ADMIN_PASSWORD;
+    const michaelAdminPassword = process.env.MICHAEL_ADMIN_PASSWORD;
+    const williamAdminPassword = process.env.WILLIAM_ADMIN_PASSWORD;
+    const emilyAdminPassword = process.env.EMILY_ADMIN_PASSWORD;
+    const oliviaAdminPassword = process.env.OLIVIA_ADMIN_PASSWORD;
+    if (
+      !johnAdminPassword ||
+      !janeAdminPassword ||
+      !michaelAdminPassword ||
+      !williamAdminPassword ||
+      !emilyAdminPassword ||
+      !oliviaAdminPassword
+    ) {
+      throw new Error('One or more admin passwords are not set in the environment variables');
+    }
     // Seed initial admin and worker employees with their permissions
     insertEmployees.push(
       generateEmployee(
         'John Doe',
         process.env.JOHN_ADMIN_EMAIL || 'john.doe@example.com',
         'EMP001',
-        process.env.JOHN_ADMIN_PASSWORD || 'password123',
+        hashPassword(johnAdminPassword),
         null,
         'worker',
       ),
@@ -34,7 +51,7 @@ async function seedAdminAuth() {
         'Jane Smith',
         process.env.JANE_ADMIN_EMAIL || 'jane.smith@example.com',
         'EMP002',
-        process.env.JANE_ADMIN_PASSWORD || 'password456',
+        hashPassword(janeAdminPassword),
         process.env.CREATE_ASSIGN_ADMIN_ACCESS_KEY || 'create_assign_admin_access_key',
         'admin',
       ),
@@ -53,7 +70,7 @@ async function seedAdminAuth() {
         'Michael Johnson',
         process.env.MICHAEL_ADMIN_EMAIL || 'michael.johnson@example.com',
         'EMP003',
-        process.env.MICHAEL_ADMIN_PASSWORD || 'password789',
+        hashPassword(michaelAdminPassword),
         process.env.ALL_ACCESS_ADMIN_ACCESS_KEY || 'all_access_admin_access_key',
         'admin',
       ),
@@ -68,7 +85,7 @@ async function seedAdminAuth() {
         'William Brown',
         process.env.WILLIAM_ADMIN_EMAIL || 'william.brown@example.com',
         'EMP005',
-        process.env.WILLIAM_ADMIN_PASSWORD || 'password202',
+        hashPassword(williamAdminPassword),
         null,
         'worker',
       ),
@@ -83,7 +100,7 @@ async function seedAdminAuth() {
         'Emily Davis',
         process.env.EMILY_ADMIN_EMAIL || 'emily.davis@example.com',
         'EMP004',
-        process.env.EMILY_ADMIN_PASSWORD || 'password101',
+        hashPassword(emilyAdminPassword),
         process.env.RESCHEDULE_TASK_ADMIN_ACCESS_KEY || 'reschedule_task_admin_access_key',
         'admin',
       ),
@@ -102,7 +119,7 @@ async function seedAdminAuth() {
         'Olivia Wilson',
         process.env.OLIVIA_ADMIN_EMAIL || 'olivia.wilson@example.com',
         'EMP006',
-        process.env.OLIVIA_ADMIN_PASSWORD || 'password303',
+        hashPassword(oliviaAdminPassword),
         null,
         'worker',
       ),

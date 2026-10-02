@@ -5,6 +5,7 @@ import { user, userPermission } from '../../lib/repositories';
 import { createSession, deleteSession } from '../../lib/session';
 import { CustomError } from '../../utils/CustomErrors';
 import { z } from 'zod';
+import { hashPassword } from '../../utils/hashPassword';
 // Authentication actions: login and logout
 export async function login(state: unknown, formData: FormData) {
   try {
@@ -21,7 +22,10 @@ export async function login(state: unknown, formData: FormData) {
     }
     //Kind of want to keep this section error ambiguous to not reveal which part failed
 
-    if (authenticateUser.password !== password || authenticateUser.admin_key !== admin_key) {
+    if (
+      authenticateUser.password !== hashPassword(password) ||
+      authenticateUser.admin_key !== admin_key
+    ) {
       throw new Error('Invalid password or admin key');
     }
     // Extract the permission names from the userPermissions array
