@@ -6,7 +6,9 @@ export async function GET() {
   // API route for checking the authentication status of the user
   try {
     // Check the authentication status of the user
-    const { adminName } = await checkAuthMetaData();
+    const { adminName } = (await checkAuthMetaData()) as {
+      adminName: string;
+    };
     // Return the authentication status as a JSON response
     return NextResponse.json({ adminName });
   } catch (error) {

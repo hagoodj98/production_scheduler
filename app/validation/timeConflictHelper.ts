@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { productionOrder } from '@/lib/repositories';
 import { CustomError } from '@/utils/CustomErrors';
-
+import { STATUSES } from '@/utils/GlobalVar';
 // This helper function checks for time conflicts for a given resource and employee. If a conflict is found, it throws a CustomError.
 export const checkTimeConflict = async (
   resourceId: number,
@@ -10,8 +10,10 @@ export const checkTimeConflict = async (
   endTime: dayjs.Dayjs,
   assignedEmployeeId: string,
 ): Promise<void> => {
-  // Fetch all existing production orders from the database to check for time conflicts.
-  const existingOrdersDB = await productionOrder.findAll();
+  // Fetch all existing production orders from the database and filter out deleted orders and those with a pending resource status.
+  const existingOrdersDB = (await productionOrder.findAll()).filter(
+    (order) => !order.deletedAt && order.resourceStatus !== STATUSES.pending,
+  );
   // Filter the existing orders to only include those for the specified resource.
   const existingOrdersFromResource = existingOrdersDB.filter(
     (order) => order.resourceId === resourceId,

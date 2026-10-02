@@ -10,7 +10,9 @@ import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 export async function POST(req: NextRequest) {
   try {
     // Check if the user has the necessary permission to assign a production order
-    const { employeeId } = await checkAuthMetaData(PERMISSIONS.assign?.name);
+    const { employeeId } = (await checkAuthMetaData(PERMISSIONS.assign?.name)) as {
+      employeeId: string;
+    };
 
     // Parse and validate the incoming request data against the schema
     const rawData = await req.json();

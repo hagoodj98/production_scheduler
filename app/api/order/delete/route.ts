@@ -11,11 +11,13 @@ export async function DELETE(req: NextRequest) {
     const params = req.nextUrl.searchParams;
     const orderId = params.get('orderId');
 
-    const { employeeId } = await checkAuthMetaData(
+    const { employeeId } = (await checkAuthMetaData(
       PERMISSIONS.delete?.name,
       undefined,
       Number(orderId),
-    );
+    )) as {
+      employeeId: string;
+    };
     // Extract the orderId from the query parameters for further processing
 
     if (!orderId) {

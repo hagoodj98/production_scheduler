@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState, useReducer } from 'react';
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { PickerValue } from '@mui/x-date-pickers/internals';
@@ -378,8 +378,9 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           )
         }
       />
+
       {customError?.error && (
-        <div className="mb-4">
+        <div className="p-4 mt-4">
           <p className="text-sm text-red-700">{customError?.error}</p>
         </div>
       )}
@@ -486,6 +487,24 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
                     }
                     slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                   />
+                  {Array.isArray(errors) &&
+                    errors.find((error) => error.field === 'dayMonthYear.month') && (
+                      <p className="text-red-500 text-sm">
+                        {errors.find((error) => error.field === 'dayMonthYear.month')?.message}
+                      </p>
+                    )}
+                  {Array.isArray(errors) &&
+                    errors.find((error) => error.field === 'dayMonthYear.day') && (
+                      <p className="text-red-500 text-sm">
+                        {errors.find((error) => error.field === 'dayMonthYear.day')?.message}
+                      </p>
+                    )}
+                  {Array.isArray(errors) &&
+                    errors.find((error) => error.field === 'dayMonthYear.year') && (
+                      <p className="text-red-500 text-sm">
+                        {errors.find((error) => error.field === 'dayMonthYear.year')?.message}
+                      </p>
+                    )}
                 </div>
                 <div className="min-w-0">
                   <TimePicker
@@ -502,6 +521,24 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
                     }
                     slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                   />
+                  {Array.isArray(errors) &&
+                  errors.find((error) => error.field === 'timeRange.startTimeSlot.hour') ? (
+                    <p className="text-red-500 text-sm">
+                      {
+                        errors.find((error) => error.field === 'timeRange.startTimeSlot.hour')
+                          ?.message
+                      }
+                    </p>
+                  ) : null}
+                  {Array.isArray(errors) &&
+                  errors.find((error) => error.field === 'timeRange.startTimeSlot.minute') ? (
+                    <p className="text-red-500 text-sm">
+                      {
+                        errors.find((error) => error.field === 'timeRange.startTimeSlot.minute')
+                          ?.message
+                      }
+                    </p>
+                  ) : null}
                 </div>
                 <div className="min-w-0">
                   <TimePicker
@@ -518,6 +555,24 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
                     }
                     slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                   />
+                  {Array.isArray(errors) &&
+                  errors.find((error) => error.field === 'timeRange.endTimeSlot.hour') ? (
+                    <p className="text-red-500 text-sm">
+                      {
+                        errors.find((error) => error.field === 'timeRange.endTimeSlot.hour')
+                          ?.message
+                      }
+                    </p>
+                  ) : null}
+                  {Array.isArray(errors) &&
+                  errors.find((error) => error.field === 'timeRange.endTimeSlot.minute') ? (
+                    <p className="text-red-500 text-sm">
+                      {
+                        errors.find((error) => error.field === 'timeRange.endTimeSlot.minute')
+                          ?.message
+                      }
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </LocalizationProvider>

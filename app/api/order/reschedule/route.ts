@@ -11,7 +11,9 @@ import { orderLog } from '@/lib/repositories/orderLog';
 export async function PATCH(req: NextRequest) {
   try {
     //First check if the user has the required permission to reschedule orders before processing data
-    const { employeeId } = await checkAuthMetaData(PERMISSIONS.reschedule?.name);
+    const { employeeId } = (await checkAuthMetaData(PERMISSIONS.reschedule?.name)) as {
+      employeeId: string;
+    };
 
     const rawData = await req.json();
     const order = productionOrderSchema.parse(rawData.productionOrder ?? rawData.order);
