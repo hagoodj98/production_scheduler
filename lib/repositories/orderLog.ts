@@ -21,6 +21,12 @@ const getOrderLogsByOrderId = async (orderId: number) => {
     },
   });
 };
+const update = async (id: number, data: Partial<{ employeeId: string; description: string }>) => {
+  return await prisma.orderLog.update({
+    where: { id },
+    data,
+  });
+};
 const getAllOrderLogs = async () => {
   return await prisma.orderLog.findMany({
     select: {
@@ -56,4 +62,4 @@ const getAllOrderLogs = async () => {
   });
 };
 
-export const orderLog = { createOrderLog, getOrderLogsByOrderId, getAllOrderLogs };
+export const orderLog = { createOrderLog, getOrderLogsByOrderId, getAllOrderLogs, update };

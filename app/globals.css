@@ -8,6 +8,7 @@
   --status-busy: #db441a;
   --status-completed: #2ecc71;
   --status-deleted: #092ec0;
+  --status-search-add: #9b59b6;
 }
 
 @theme inline {

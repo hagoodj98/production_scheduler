@@ -67,11 +67,16 @@ export async function PATCH(req: NextRequest) {
       resourceStatus: STATUSES.processing,
       employeeAssigneeID: order.assignedEmployeeId,
     });
-    await orderLog.createOrderLog(
-      orderId,
-      employeeId,
-      `Rescheduled order ${orderId} to Processing status`,
-    );
+    // Fetch the existing order log for this order to update it instead of creating a new one
+    const getoOrderLog = await productionOrder.findByIdOrThrow(orderId);
+    //instead of creating a new log, update the existing log for this order
+    if (getoOrderLog.orderLogs.length > 0) {
+      const orderLogId = getoOrderLog.orderLogs[0].id;
+      await orderLog.update(orderLogId, {
+        employeeId: employeeId,
+        description: `Rescheduled order ${orderId} to Processing status`,
+      });
+    }
     return NextResponse.json(
       {
         message: `Updated order ${orderId} to Processing status`,

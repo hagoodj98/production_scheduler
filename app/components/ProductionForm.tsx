@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useCallback, useEffect, useState, useReducer } from 'react';
+import React, { useCallback, useEffect, useState, useReducer, useRef } from 'react';
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { PickerValue } from '@mui/x-date-pickers/internals';
@@ -64,6 +64,8 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
   };
 
   const [productionOrder, setProductionOrder] = useState<ProductionOrder>(initialProductionOrder);
+  // Last order data successfully synced to mark-pending; prevents remounting an unchanged form from resending it
+  const lastSyncedOrderRef = useRef<string>(JSON.stringify(initialProductionOrder));
   const [workers, setWorkers] = useState<{ employeeId: string; name: string }[]>([]);
   const [resources, setResources] = useState<{ resource_name: string }[]>([]);
   useEffect(() => {
@@ -171,7 +173,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
     try {
       setSubmitting(true);
       // If the pending order is already scheduled, we need to reschedule it
-      if (pendingOrder?.resourceStatus === STATUSES.scheduled) {
+      if (pendingOrder) {
         await fetch(API_ENDPOINTS.RESCHEDULE_ORDER, {
           method: 'PATCH',
           headers: {
@@ -198,10 +200,10 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       dispatchNotifier({ type: 'setNotifierMessage', value: 'Order is created! Redirecting...' });
       dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.success });
       dispatchNotifier({ type: 'setOpenNotifier', value: true });
-      setSubmitting(false);
       setTimeout(() => {
         router.push('/');
       }, 3000);
+      setSubmitting(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: ErrorMessage[] = error.issues.map((issue) => ({
@@ -329,6 +331,10 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
 
     if (!isFormComplete()) return;
 
+    // Skip the call if this exact order was already synced (e.g. remounting with no changes)
+    const orderSnapshot = JSON.stringify(productionOrder);
+    if (orderSnapshot === lastSyncedOrderRef.current) return;
+
     if (pendingOrder) {
       const response = async () => {
         try {
@@ -346,7 +352,9 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
             const data = await response.json();
             setCustomError({ error: data.error });
             console.error('Failed to update pending order:', data.error);
+            return;
           }
+          lastSyncedOrderRef.current = orderSnapshot;
         } catch (error) {
           console.error('Network error updating pending order:', error);
         }

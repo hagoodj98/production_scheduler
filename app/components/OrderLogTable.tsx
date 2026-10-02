@@ -97,7 +97,7 @@ const OrderLogTable = () => {
                                 .getAllCells()
                                 .some((cell) => cell.getValue() === STATUSES.processing)
                             ? 'bg-(--status-processing) text-white'
-                            : ''
+                            : 'bg-(--status-search-add) text-white'
               }`}
             >
               {row.getAllCells().map((cell) => (

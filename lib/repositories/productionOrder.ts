@@ -33,6 +33,7 @@ const findByIdOrThrow = (id: number) => {
     where: { id },
     include: {
       resource: true,
+      orderLogs: true,
     },
   });
 };

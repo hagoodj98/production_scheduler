@@ -24,10 +24,12 @@ const Recharts: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
     );
     // calculate counts of production orders by status.
     //Recharts expects the data in the format of an array of objects with 'name' and 'value' properties.
-    const statusCounts = Object.values(STATUSES).map((s) => ({
-      name: s,
-      value: flattened.filter((p) => p.resourceStatus === s).length,
-    }));
+    const statusCounts = Object.values(STATUSES)
+      .filter((s) => s !== STATUSES.search_add && s !== STATUSES.deleted)
+      .map((s) => ({
+        name: s,
+        value: flattened.filter((p) => p.resourceStatus === s).length,
+      }));
     // return both the counts and the total number of production orders
     const total = statusCounts.reduce((acc, c) => acc + c.value, 0);
     return { chartData: statusCounts, total };
