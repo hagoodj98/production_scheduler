@@ -1,10 +1,8 @@
 'use client';
-import Link from 'next/link';
-import React from 'react';
+
 import useSWR from 'swr';
-import { ColumnDef, createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table';
+import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table';
 import { OrderLogData } from '@/app/components/types';
-import { useTanStackTableDevtools } from '@tanstack/react-table-devtools/production';
 import NavButton from './NavButton';
 import fetcher from '@/utils/fetcher';
 import { API_ENDPOINTS } from '../config/api';

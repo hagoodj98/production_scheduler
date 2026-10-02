@@ -7,6 +7,7 @@ import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 import { PERMISSIONS, STATUSES } from '@/utils/GlobalVar';
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 import { handleError } from '@/utils/ErrorHandlingHelper';
+import { checkTimeConflict } from '@/app/validation/timeConflictHelper';
 // Validating data before use
 // This handler takes care of the pending state. This route is only called when the data is valid.
 export async function POST(req: NextRequest) {
@@ -42,21 +43,23 @@ export async function POST(req: NextRequest) {
       `${year}-${month}-${day} ${endHour}:${endMinute}:00`,
       'YYYY-M-D HH:mm:ss',
     );
-    const date = dayjs(`${year}-${month}-${day}`);
+    // Construct a dayjs object for the date portion only, used for date comparisons with existing orders.
+    const dateScheduled = dayjs(`${year}-${month}-${day}`);
     //validating the times with the timeScheduleValidator function I created. This will throw an error if the times are not valid and the catch block will handle it.
     timeScheduleValidator(order.dayMonthYear, order.timeRange);
     //Get ID of resource from the SelectedResource database we can along with the rest of the production order
-    const getIdOfSelectedResource = await selectedResource.findByNameOrThrow(resourceName);
-    const retrievedId = getIdOfSelectedResource.id;
+    const resourceId = (await selectedResource.findByNameOrThrow(resourceName)).id;
 
     // At this point, we have all the necessary information to either create a new production order or update an existing one
     if (!existingOrder) {
+      // Check for time conflicts before creating the new order
+      await checkTimeConflict(resourceId, dateScheduled, startTime, endTime, assignedEmployeeId);
       // Best practice: convert to JS Date when saving with Prisma
       const createdOrder = await productionOrder.create({
-        dayMonthYear: date.toDate(), // Prisma DateTime
+        dayMonthYear: dateScheduled.toDate(), // Prisma DateTime
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
-        resourceId: retrievedId,
+        resourceId: resourceId,
         resourceStatus: STATUSES.pending,
         employeeAssigneeID: assignedEmployeeId,
       });
@@ -69,12 +72,15 @@ export async function POST(req: NextRequest) {
         { status: 200 },
       );
     } else {
+      // Check for time conflicts before updating the existing order
+      await checkTimeConflict(resourceId, dateScheduled, startTime, endTime, assignedEmployeeId);
+
       // If an existing order is provided, update it with the new details
       const updatedOrder = await productionOrder.update(order.orderId, {
-        dayMonthYear: date.toDate(), // Prisma DateTime
+        dayMonthYear: dateScheduled.toDate(), // Prisma DateTime
         startTime: startTime.toDate(),
         endTime: endTime.toDate(),
-        resourceId: retrievedId,
+        resourceId: resourceId,
         resourceStatus: STATUSES.pending,
         employeeAssigneeID: assignedEmployeeId,
       });

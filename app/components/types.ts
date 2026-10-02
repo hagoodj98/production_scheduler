@@ -232,8 +232,7 @@ export type ErrorMessage = {
   message: string;
 };
 export type CustomError = {
-  message: string;
-  status: number;
+  error: string;
 };
 
-export type FormErrors = ErrorMessage[] | CustomError;
+export type FormErrors = ErrorMessage[];

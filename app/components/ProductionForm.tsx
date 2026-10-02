@@ -28,7 +28,8 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
-  const [errors, setErrors] = useState<ErrorMessage[] | CustomError[]>([]);
+  const [errors, setErrors] = useState<ErrorMessage[]>([]);
+  const [customError, setCustomError] = useState<{ error: string } | null>(null);
   const initialProductionOrder: ProductionOrder = {
     dayMonthYear: pendingOrder
       ? {
@@ -159,10 +160,10 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       setErrors(fieldErrors);
       return;
     } else if (error instanceof CustomError) {
-      setErrors([error]);
+      setCustomError({ error: error.message });
       return;
     } else if (error) {
-      setErrors([{ message: 'An unknown error occurred' }]);
+      setCustomError({ error: 'An unknown error occurred' });
       return;
     }
 
@@ -185,7 +186,11 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ productionOrder }),
         });
         if (!response.ok) {
-          throw new CustomError('Failed to create order', 400);
+          dispatchNotifier({ type: 'setNotifierMessage', value: 'Failed to create order' });
+          dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+          dispatchNotifier({ type: 'setOpenNotifier', value: true });
+          setSubmitting(false);
+          return;
         }
       }
       dispatchNotifier({ type: 'setNotifierMessage', value: 'Order is created! Redirecting...' });
@@ -206,7 +211,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       }
       if (error instanceof CustomError) {
         const customError: CustomError = error;
-        setErrors([customError]);
+        setCustomError({ error: customError.message });
         return;
       }
       console.error('Submission error:', error);
@@ -272,10 +277,10 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           setErrors(fieldErrors);
           return;
         } else if (error instanceof CustomError) {
-          setErrors([error]);
+          setCustomError({ error: error.message });
           return;
         } else if (error) {
-          setErrors([{ message: 'An unknown error occurred' }]);
+          setCustomError({ error: 'An unknown error occurred' });
           return;
         }
         // Send the request to mark the order as pending
@@ -287,10 +292,10 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ order }),
         });
         if (!response.ok) {
-          const responseError = await response.json();
+          const data = await response.json();
           // Handle the error response from the server
-          setErrors([{ message: responseError.error }]);
-          console.error('Failed to mark order as pending:', responseError.error);
+          setCustomError({ error: data.error });
+          console.error('Failed to mark order as pending:', data.error);
           return;
         }
         // Update the local state with the new order ID returned from the server
@@ -325,7 +330,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
     if (pendingOrder) {
       const response = async () => {
         try {
-          await fetch(API_ENDPOINTS.MARK_PENDING, {
+          const response = await fetch(API_ENDPOINTS.MARK_PENDING, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -335,6 +340,11 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
               existingOrder: true,
             }),
           });
+          if (!response.ok) {
+            const data = await response.json();
+            setCustomError({ error: data.error });
+            console.error('Failed to update pending order:', data.error);
+          }
         } catch (error) {
           console.error('Network error updating pending order:', error);
         }
@@ -368,6 +378,11 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           )
         }
       />
+      {customError?.error && (
+        <div className="mb-4">
+          <p className="text-sm text-red-700">{customError?.error}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="space-y-6 px-6 py-6">
@@ -471,16 +486,6 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
                     }
                     slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                   />
-                  {(['month', 'day', 'year'] as const).map((part) => {
-                    const message = errors.find(
-                      (err) => 'field' in err && err.field === `dayMonthYear.${part}`,
-                    )?.message;
-                    return message ? (
-                      <p key={part} className="mt-1 text-sm text-red-700">
-                        {message}
-                      </p>
-                    ) : null;
-                  })}
                 </div>
                 <div className="min-w-0">
                   <TimePicker
@@ -497,16 +502,6 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
                     }
                     slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                   />
-                  {(['hour', 'minute'] as const).map((part) => {
-                    const message = errors.find(
-                      (err) => 'field' in err && err.field === `timeRange.startTimeSlot.${part}`,
-                    )?.message;
-                    return message ? (
-                      <p key={part} className="mt-1 text-sm text-red-700">
-                        {message}
-                      </p>
-                    ) : null;
-                  })}
                 </div>
                 <div className="min-w-0">
                   <TimePicker
@@ -523,16 +518,6 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
                     }
                     slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                   />
-                  {(['hour', 'minute'] as const).map((part) => {
-                    const message = errors.find(
-                      (err) => 'field' in err && err.field === `timeRange.endTimeSlot.${part}`,
-                    )?.message;
-                    return message ? (
-                      <p key={part} className="mt-1 text-sm text-red-700">
-                        {message}
-                      </p>
-                    ) : null;
-                  })}
                 </div>
               </div>
             </LocalizationProvider>
