@@ -21,6 +21,21 @@ jobs:
     env:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
       SESSION_SECRET: ci-only-session-secret-for-playwright-tests-32-bytes
+      JOHN_ADMIN_PASSWORD: password123
+      JANE_ADMIN_PASSWORD: password456
+      MICHAEL_ADMIN_PASSWORD: password789
+      WILLIAM_ADMIN_PASSWORD: password202
+      EMILY_ADMIN_PASSWORD: password101
+      OLIVIA_ADMIN_PASSWORD: password303
+      JOHN_ADMIN_EMAIL: john.doe@example.com
+      JANE_ADMIN_EMAIL: jane.smith@example.com
+      MICHAEL_ADMIN_EMAIL: michael.johnson@example.com
+      WILLIAM_ADMIN_EMAIL: william.brown@example.com
+      EMILY_ADMIN_EMAIL: emily.davis@example.com
+      OLIVIA_ADMIN_EMAIL: olivia.wilson@example.com
+      CREATE_ASSIGN_ADMIN_ACCESS_KEY: create_assign_admin_access_key
+      ALL_ACCESS_ADMIN_ACCESS_KEY: all_access_admin_access_key
+      RESCHEDULE_TASK_ADMIN_ACCESS_KEY: reschedule_task_admin_access_key
     services:
       postgres:
         image: postgres:16

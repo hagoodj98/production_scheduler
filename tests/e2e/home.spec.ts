@@ -56,7 +56,7 @@ test('shows validation error on add resource page', async ({ page }) => {
 });
 
 test('shows network error snackbar when add resource API fails', async ({ page }) => {
-  await page.route('**/api/search-resource/add-resource', async (route) => {
+  await page.route('**/api/resource/add', async (route) => {
     await route.abort('failed');
   });
 
