@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 import { selectedResource } from '@/lib/repositories/selectedResource';
 import { orderLog } from '@/lib/repositories/orderLog';
+import { checkTimeConflict } from '@/app/validation/timeConflictHelper';
 export async function PATCH(req: NextRequest) {
   try {
     //First check if the user has the required permission to reschedule orders before processing data
@@ -58,6 +59,15 @@ export async function PATCH(req: NextRequest) {
     if (!getIdOfSelectedResource) {
       return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
     }
+
+    await checkTimeConflict(
+      getIdOfSelectedResource.id,
+      date,
+      startTime,
+      endTime,
+      order.assignedEmployeeId,
+    );
+
     // Update the production order with the new schedule and set its status to 'Processing'
     await productionOrder.update(orderId, {
       dayMonthYear: date.toDate(),

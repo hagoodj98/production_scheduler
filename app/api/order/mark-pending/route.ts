@@ -12,8 +12,10 @@ import { checkTimeConflict } from '@/app/validation/timeConflictHelper';
 // This handler takes care of the pending state. This route is only called when the data is valid.
 export async function POST(req: NextRequest) {
   try {
+    const params = req.nextUrl.searchParams;
+
     // Check if the user has the necessary permission to assign a production order
-    await checkAuthMetaData(PERMISSIONS.assign?.name);
+    await checkAuthMetaData(PERMISSIONS.assign?.name, params.toString());
 
     const rawData = await req.json();
     if (!rawData) {

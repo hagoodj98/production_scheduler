@@ -16,6 +16,10 @@ export const checkAuthMetaData = async (
   if (!sessionCookie || sessionCookie === 'undefined') {
     throw new CustomError('You are unauthenticated', 401);
   }
+
+  const pathHasForwardSlash = path?.includes('/');
+  const orderID = path?.split(pathHasForwardSlash ? '/' : '')?.pop();
+
   const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
   // Check if the user has the required permission in their session payload
   const hasPermission = payloadSession.permissions.find(
@@ -23,8 +27,13 @@ export const checkAuthMetaData = async (
     (p) => {
       if (p === permission || p === PERMISSIONS.all_access.name) {
         return true;
-        //Check if user has reschedule permission while trying to assign an order. Allow them through
-      } else if (p === PERMISSIONS.reschedule.name && permission === PERMISSIONS.assign.name) {
+      }
+      // Temporary override for reschedule permission allowing assignment
+      if (
+        p === PERMISSIONS.reschedule.name &&
+        permission === PERMISSIONS.assign.name &&
+        Number(orderID)
+      ) {
         return true;
       }
       return false;
@@ -52,7 +61,6 @@ export const checkAuthMetaData = async (
     throw new CustomError(`You are unauthorized to ${permission} this resource`, 403);
   }
   // If the user has passed all checks, they are authorized to proceed but prevent if status is completed or busy
-  const orderID = path?.split('/').pop();
 
   if (Number(orderID)) {
     const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderID))).resourceStatus;

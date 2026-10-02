@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { timeScheduleValidator } from '@/app/validation/timeScheduleValidator';
 import { PERMISSIONS, STATUSES } from '@/utils/GlobalVar';
 import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
+import { checkTimeConflict } from '@/app/validation/timeConflictHelper';
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,6 +54,8 @@ export async function POST(req: NextRequest) {
     const getIdOfSelectedResource = await selectedResource.findByNameOrThrow(resourceName);
     const retrievedId = getIdOfSelectedResource.id;
     // Update the existing pending order with the new schedule and set its status to 'Processing'
+
+    await checkTimeConflict(retrievedId, date, startTime, endTime, employeeAssigneeID);
 
     const createdOrder = await productionOrder.update(orderId, {
       dayMonthYear: date.toDate(),
