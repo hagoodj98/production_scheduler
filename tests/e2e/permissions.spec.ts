@@ -86,7 +86,7 @@ test.describe('permission-based access', () => {
     expect((await callJsonApi(page, '/api/order/delete?orderId=1', 'DELETE')).status).toBe(403);
   });
 
-  test('reschedule-and-delete admins can use those actions but not add or assign', async ({
+  test('reschedule admins can access assignment via the temporary permission override', async ({
     page,
   }) => {
     await loginAs(page, rescheduleDeleteAdmin);
@@ -95,11 +95,12 @@ test.describe('permission-based access', () => {
     await expectRedirectedHome(page);
 
     await page.goto('/assign-order');
-    await expectRedirectedHome(page);
+    await expect(page).toHaveURL(/\/assign-order$/);
+    await expect(page.getByRole('heading', { name: 'Schedule production' })).toBeVisible();
 
     expect((await callJsonApi(page, '/api/order/reschedule', 'PATCH', {})).status).toBe(400);
     expect((await callJsonApi(page, '/api/order/delete', 'DELETE')).status).toBe(400);
-    expect((await callJsonApi(page, '/api/order/mark-pending', 'POST', {})).status).toBe(403);
+    expect((await callJsonApi(page, '/api/order/mark-pending', 'POST', {})).status).toBe(400);
   });
 
   test('all-access admins can enter both protected pages and pass each API permission check', async ({
