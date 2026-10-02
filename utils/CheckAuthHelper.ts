@@ -20,7 +20,15 @@ export const checkAuthMetaData = async (
   // Check if the user has the required permission in their session payload
   const hasPermission = payloadSession.permissions.find(
     // Check if the current permission matches the required permission or if the user has all access
-    (p) => p === permission || p === PERMISSIONS.all_access.name,
+    (p) => {
+      if (p === permission || p === PERMISSIONS.all_access.name) {
+        return true;
+        //Check if user has reschedule permission while trying to assign an order. Allow them through
+      } else if (p === PERMISSIONS.reschedule.name && permission === PERMISSIONS.assign.name) {
+        return true;
+      }
+      return false;
+    },
   );
   const isWorker = payloadSession.permissions.includes(PERMISSIONS.view.name);
   // if user is a worker, they've gained unauthoruzed access to the system
