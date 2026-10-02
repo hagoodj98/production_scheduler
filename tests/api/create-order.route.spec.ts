@@ -17,20 +17,20 @@ vi.mock('@/lib/repositories', () => ({
 }));
 vi.mock('@/utils/CheckAuthHelper', () => ({ checkAuthMetaData }));
 
-import { POST } from '@/app/api/pending-order/route';
+import { POST } from '@/app/api/order/mark-pending/route';
 
 const makeRequest = (order: Record<string, unknown>) =>
-  new Request('http://localhost/api/pending-order', {
+  new Request('http://localhost/api/order/mark-pending', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ order }),
   });
 
-describe('POST /api/pending-order schedule validation', () => {
+describe('POST /api/order/mark-pending schedule validation', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
-    checkAuthMetaData.mockResolvedValue('Assign Admin');
+    checkAuthMetaData.mockResolvedValue({ employeeId: 'emp-1' });
   });
 
   afterEach(() => {
@@ -48,7 +48,8 @@ describe('POST /api/pending-order schedule validation', () => {
           endTimeSlot: { hour: 11, minute: 0 },
         },
         resource: { resource_name: 'Mixer A' },
-        orderId: null,
+        assignedEmployeeId: 'EMP-1',
+        orderId: 0,
       }) as never,
     );
     const body = await res.json();
@@ -71,7 +72,8 @@ describe('POST /api/pending-order schedule validation', () => {
           endTimeSlot: { hour: 9, minute: 30 },
         },
         resource: { resource_name: 'Mixer A' },
-        orderId: null,
+        assignedEmployeeId: 'EMP-1',
+        orderId: 0,
       }) as never,
     );
     const body = await res.json();

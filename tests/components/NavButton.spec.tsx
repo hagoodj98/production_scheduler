@@ -15,6 +15,10 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 vi.mock('@/app/components/AdminAccessForm', () => ({
   default: () => null,
 }));

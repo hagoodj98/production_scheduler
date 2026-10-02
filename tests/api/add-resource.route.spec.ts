@@ -1,26 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { selectedResource, checkAuthMetaData, validateSession } = vi.hoisted(() => ({
+const { selectedResource, orderLog, checkAuthMetaData } = vi.hoisted(() => ({
   selectedResource: {
     create: vi.fn(),
   },
+  orderLog: {
+    createOrderLog: vi.fn(),
+  },
   checkAuthMetaData: vi.fn(),
-  validateSession: vi.fn(),
 }));
 
 vi.mock('@/lib/repositories', () => ({
   selectedResource,
+  orderLog,
 }));
 vi.mock('@/utils/CheckAuthHelper', () => ({ checkAuthMetaData }));
-vi.mock('@/lib/session', () => ({ validateSession }));
 
-import { POST } from '@/app/api/search-resource/add-resource/route';
+import { POST } from '@/app/api/resource/add/route';
 
-describe('POST /api/search-resource/add-resource', () => {
+describe('POST /api/resource/add', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    checkAuthMetaData.mockResolvedValue('Resource Admin');
-    validateSession.mockResolvedValue('session-token');
+    checkAuthMetaData.mockResolvedValue({ employeeId: 'emp-1' });
+    orderLog.createOrderLog.mockResolvedValue({ id: 1 });
   });
 
   it('creates a selected resource and returns 200', async () => {
@@ -29,7 +31,7 @@ describe('POST /api/search-resource/add-resource', () => {
       resource_name: 'CNC Machine 99',
     });
 
-    const req = new Request('http://localhost/api/add-resource', {
+    const req = new Request('http://localhost/api/resource/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ resource_name: 'CNC Machine 99' }),
@@ -46,7 +48,7 @@ describe('POST /api/search-resource/add-resource', () => {
   it('returns 500 when repository create fails', async () => {
     selectedResource.create.mockRejectedValueOnce(new Error('db write failed'));
 
-    const req = new Request('http://localhost/api/add-resource', {
+    const req = new Request('http://localhost/api/resource/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ resource_name: 'CNC Machine 99' }),

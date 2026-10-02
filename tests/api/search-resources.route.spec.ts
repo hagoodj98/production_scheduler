@@ -12,12 +12,12 @@ vi.mock('@/lib/repositories', () => ({
 }));
 vi.mock('@/utils/CheckAuthHelper', () => ({ checkAuthMetaData }));
 
-import { GET } from '@/app/api/search-resource/route';
+import { GET } from '@/app/api/resource/search/route';
 
-describe('GET /api/search-resource', () => {
+describe('GET /api/resource/search', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    checkAuthMetaData.mockResolvedValue('Resource Admin');
+    checkAuthMetaData.mockResolvedValue({ employeeId: 'emp-1' });
   });
 
   it('queries repository by name prefix and returns resources', async () => {
@@ -27,7 +27,7 @@ describe('GET /api/search-resource', () => {
     ];
     resource.findByNamePrefix.mockResolvedValueOnce(resources);
 
-    const req = new Request('http://localhost/api/search-resource?name=Pr', {
+    const req = new Request('http://localhost/api/resource/search?name=Pr', {
       method: 'GET',
     });
 

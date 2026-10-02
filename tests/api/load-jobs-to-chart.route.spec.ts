@@ -10,9 +10,9 @@ vi.mock('@/lib/repositories', () => ({
   selectedResource,
 }));
 
-import { GET } from '@/app/api/load-jobs-to-chart/route';
+import { GET } from '@/app/api/order/load/route';
 
-describe('GET /api/load-jobs-to-chart', () => {
+describe('GET /api/order/load', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -43,7 +43,7 @@ describe('GET /api/load-jobs-to-chart', () => {
     expect(selectedResource.findAllWithOrders).toHaveBeenCalledTimes(1);
     expect(res.status).toBe(200);
     expect(body).toEqual({
-      ResourceProductionOrders: [
+      jobs: [
         {
           id: 1,
           resource_name: 'CNC Machine 1',

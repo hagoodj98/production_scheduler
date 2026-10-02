@@ -22,7 +22,7 @@ describe('checkAuthMetaData', () => {
     cookiesMock.mockResolvedValueOnce({ get: vi.fn().mockReturnValue(undefined) });
 
     await expect(checkAuthMetaData('delete')).rejects.toMatchObject({
-      message: 'No session cookie found',
+      message: 'You are unauthenticated',
       statusCode: 401,
     });
     expect(decryptMock).not.toHaveBeenCalled();
@@ -40,7 +40,7 @@ describe('checkAuthMetaData', () => {
   it('allows a user with the requested permission', async () => {
     decryptMock.mockResolvedValueOnce({ name: 'Delete Admin', permissions: ['delete'] });
 
-    await expect(checkAuthMetaData('delete')).resolves.toBe('Delete Admin');
+    await expect(checkAuthMetaData('delete')).resolves.toMatchObject({ adminName: 'Delete Admin' });
   });
 
   it('does not let a delete-only user reschedule orders', async () => {
@@ -55,6 +55,8 @@ describe('checkAuthMetaData', () => {
   it('allows an all-access user to perform any permission-gated action', async () => {
     decryptMock.mockResolvedValueOnce({ name: 'All Access Admin', permissions: ['all_access'] });
 
-    await expect(checkAuthMetaData('add')).resolves.toBe('All Access Admin');
+    await expect(checkAuthMetaData('add')).resolves.toMatchObject({
+      adminName: 'All Access Admin',
+    });
   });
 });

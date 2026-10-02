@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
@@ -9,30 +9,32 @@ const { prismaMock } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@/lib/database", () => ({
+vi.mock('@/lib/database', () => ({
   prisma: prismaMock,
 }));
 
-import { loopThroughScheduledJobs } from "@/task/schedulerTask";
+import { updateOrderStatuses } from '@/task/schedulerTask';
 
 type TestOrder = {
   id: number;
   dayMonthYear: Date;
   startTime: Date;
   endTime: Date;
+  resourceId: number;
   resourceStatus: string;
 };
 
 const makeOrder = (overrides: Partial<TestOrder>): TestOrder => ({
   id: 1,
-  dayMonthYear: new Date("2026-03-08T00:00:00.000Z"),
-  startTime: new Date("2026-03-08T10:00:00.000Z"),
-  endTime: new Date("2026-03-08T11:00:00.000Z"),
-  resourceStatus: "Processing",
+  dayMonthYear: new Date('2026-03-08T00:00:00.000Z'),
+  startTime: new Date('2026-03-08T10:00:00.000Z'),
+  endTime: new Date('2026-03-08T11:00:00.000Z'),
+  resourceId: 1,
+  resourceStatus: 'Processing',
   ...overrides,
 });
 
-describe("schedulerTask status transitions", () => {
+describe('schedulerTask status transitions', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
@@ -42,59 +44,56 @@ describe("schedulerTask status transitions", () => {
     vi.useRealTimers();
   });
 
-  it("does not update when order is still Pending", async () => {
-    vi.setSystemTime(new Date("2026-03-08T10:30:00.000Z"));
-    prismaMock.productionOrder.findUniqueOrThrow.mockResolvedValueOnce({
-      resourceStatus: "Pending",
-    });
+  it('does not update when order is still Pending', async () => {
+    vi.setSystemTime(new Date('2026-03-08T10:30:00.000Z'));
 
-    await loopThroughScheduledJobs([makeOrder({})] as never);
+    await updateOrderStatuses([makeOrder({ resourceStatus: 'Pending' })] as never);
 
     expect(prismaMock.productionOrder.update).not.toHaveBeenCalled();
   });
 
-  it("sets status to Scheduled when now is before start time", async () => {
-    vi.setSystemTime(new Date("2026-03-08T09:30:00.000Z"));
+  it('sets status to Scheduled when now is before start time', async () => {
+    vi.setSystemTime(new Date('2026-03-08T09:30:00.000Z'));
     prismaMock.productionOrder.findUniqueOrThrow.mockResolvedValueOnce({
-      resourceStatus: "Processing",
+      resourceStatus: 'Processing',
     });
     prismaMock.productionOrder.update.mockResolvedValueOnce({});
 
-    await loopThroughScheduledJobs([makeOrder({})] as never);
+    await updateOrderStatuses([makeOrder({})] as never);
 
     expect(prismaMock.productionOrder.update).toHaveBeenCalledWith({
       where: { id: 1 },
-      data: { resourceStatus: "Scheduled" },
+      data: { resourceStatus: 'Scheduled' },
     });
   });
 
-  it("sets status to Busy when now is within start/end window", async () => {
-    vi.setSystemTime(new Date("2026-03-08T10:30:00.000Z"));
+  it('sets status to Busy when now is within start/end window', async () => {
+    vi.setSystemTime(new Date('2026-03-08T10:30:00.000Z'));
     prismaMock.productionOrder.findUniqueOrThrow.mockResolvedValueOnce({
-      resourceStatus: "Processing",
+      resourceStatus: 'Processing',
     });
     prismaMock.productionOrder.update.mockResolvedValueOnce({});
 
-    await loopThroughScheduledJobs([makeOrder({})] as never);
+    await updateOrderStatuses([makeOrder({})] as never);
 
     expect(prismaMock.productionOrder.update).toHaveBeenCalledWith({
       where: { id: 1 },
-      data: { resourceStatus: "Busy" },
+      data: { resourceStatus: 'Busy' },
     });
   });
 
-  it("sets status to Completed when now is after end time", async () => {
-    vi.setSystemTime(new Date("2026-03-08T12:00:00.000Z"));
+  it('sets status to Completed when now is after end time', async () => {
+    vi.setSystemTime(new Date('2026-03-08T12:00:00.000Z'));
     prismaMock.productionOrder.findUniqueOrThrow.mockResolvedValueOnce({
-      resourceStatus: "Processing",
+      resourceStatus: 'Processing',
     });
     prismaMock.productionOrder.update.mockResolvedValueOnce({});
 
-    await loopThroughScheduledJobs([makeOrder({})] as never);
+    await updateOrderStatuses([makeOrder({})] as never);
 
     expect(prismaMock.productionOrder.update).toHaveBeenCalledWith({
       where: { id: 1 },
-      data: { resourceStatus: "Completed" },
+      data: { resourceStatus: 'Completed' },
     });
   });
 });

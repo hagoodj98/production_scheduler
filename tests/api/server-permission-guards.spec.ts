@@ -5,32 +5,34 @@ import { CustomError } from '@/utils/CustomErrors';
 const {
   checkAuthMetaDataMock,
   productionOrderCreateMock,
-  productionOrderRemoveMock,
+  productionOrderSoftRemoveMock,
   productionOrderUpdateMock,
   selectedResourceCreateMock,
   selectedResourceFindMock,
-  validateSessionMock,
+  orderLogCreateMock,
 } = vi.hoisted(() => ({
   checkAuthMetaDataMock: vi.fn(),
   productionOrderCreateMock: vi.fn(),
-  productionOrderRemoveMock: vi.fn(),
+  productionOrderSoftRemoveMock: vi.fn(),
   productionOrderUpdateMock: vi.fn(),
   selectedResourceCreateMock: vi.fn(),
   selectedResourceFindMock: vi.fn(),
-  validateSessionMock: vi.fn(),
+  orderLogCreateMock: vi.fn(),
 }));
 
 vi.mock('@/utils/CheckAuthHelper', () => ({ checkAuthMetaData: checkAuthMetaDataMock }));
-vi.mock('@/lib/session', () => ({ validateSession: validateSessionMock }));
 vi.mock('@/lib/repositories', () => ({
   productionOrder: {
     create: productionOrderCreateMock,
-    remove: productionOrderRemoveMock,
+    softRemove: productionOrderSoftRemoveMock,
     update: productionOrderUpdateMock,
   },
   selectedResource: {
     create: selectedResourceCreateMock,
     findByNameOrThrow: selectedResourceFindMock,
+  },
+  orderLog: {
+    createOrderLog: orderLogCreateMock,
   },
 }));
 vi.mock('@/lib/repositories/productionOrder', () => ({
@@ -43,11 +45,16 @@ vi.mock('@/lib/repositories/selectedResource', () => ({
     findByNameOrThrow: selectedResourceFindMock,
   },
 }));
+vi.mock('@/lib/repositories/orderLog', () => ({
+  orderLog: {
+    createOrderLog: orderLogCreateMock,
+  },
+}));
 
-import { DELETE } from '@/app/api/delete-order/route';
-import { POST as addResource } from '@/app/api/search-resource/add-resource/route';
-import { POST as createPendingOrder } from '@/app/api/pending-order/route';
-import { PATCH as rescheduleOrder } from '@/app/api/reschedule-order/route';
+import { DELETE } from '@/app/api/order/delete/route';
+import { POST as addResource } from '@/app/api/resource/add/route';
+import { POST as createPendingOrder } from '@/app/api/order/mark-pending/route';
+import { PATCH as rescheduleOrder } from '@/app/api/order/reschedule/route';
 
 describe('server-side permission guards', () => {
   beforeEach(() => {
@@ -56,19 +63,19 @@ describe('server-side permission guards', () => {
   });
 
   it('blocks deletion before the repository is called', async () => {
-    const request = new NextRequest('http://localhost/api/delete-order?orderId=11', {
+    const request = new NextRequest('http://localhost/api/order/delete?orderId=11', {
       method: 'DELETE',
     });
 
     const response = await DELETE(request);
 
-    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('delete');
+    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('delete', undefined, 11);
     expect(response.status).toBe(403);
-    expect(productionOrderRemoveMock).not.toHaveBeenCalled();
+    expect(productionOrderSoftRemoveMock).not.toHaveBeenCalled();
   });
 
   it('blocks rescheduling before parsing or updating the order', async () => {
-    const request = new NextRequest('http://localhost/api/reschedule-order', {
+    const request = new NextRequest('http://localhost/api/order/reschedule', {
       method: 'PATCH',
       body: '{',
     });
@@ -81,7 +88,7 @@ describe('server-side permission guards', () => {
   });
 
   it('blocks order assignment before creating an order', async () => {
-    const request = new NextRequest('http://localhost/api/pending-order', {
+    const request = new NextRequest('http://localhost/api/order/mark-pending', {
       method: 'POST',
       body: '{',
     });
@@ -94,7 +101,7 @@ describe('server-side permission guards', () => {
   });
 
   it('blocks resource creation before writing to the repository', async () => {
-    const request = new NextRequest('http://localhost/api/search-resource/add-resource', {
+    const request = new NextRequest('http://localhost/api/resource/add', {
       method: 'POST',
       body: '{',
     });
