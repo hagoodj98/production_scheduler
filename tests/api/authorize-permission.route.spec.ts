@@ -24,7 +24,7 @@ describe('GET /api/auth/permission-check', () => {
 
     const response = await GET(request);
 
-    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('add', '/add-resource', undefined);
+    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('add', '/add-resource', 'add-resource');
     expect(response.status).toBe(200);
   });
 
@@ -35,7 +35,7 @@ describe('GET /api/auth/permission-check', () => {
 
     const response = await GET(request);
 
-    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('assign', '/assign-order', undefined);
+    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('assign', '/assign-order', 'assign-order');
     expect(response.status).toBe(200);
   });
 
@@ -49,7 +49,7 @@ describe('GET /api/auth/permission-check', () => {
     expect(checkAuthMetaDataMock).toHaveBeenCalledWith(
       'reschedule',
       '/assign-order/123',
-      undefined,
+      '123',
     );
     expect(response.status).toBe(200);
   });

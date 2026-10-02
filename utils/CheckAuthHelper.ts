@@ -8,7 +8,7 @@ import { productionOrder } from '@/lib/repositories';
 export const checkAuthMetaData = async (
   permission?: string,
   path?: string | null,
-  deleteOrderId?: number,
+  orderId?: string | null,
 ) => {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session')?.value;
@@ -16,9 +16,6 @@ export const checkAuthMetaData = async (
   if (!sessionCookie || sessionCookie === 'undefined') {
     throw new CustomError('You are unauthenticated', 401);
   }
-
-  const pathHasForwardSlash = path?.includes('/');
-  const orderID = path?.split(pathHasForwardSlash ? '/' : '')?.pop();
 
   const payloadSession = (await decrypt(sessionCookie)) as PayloadSession;
   // Check if the user has the required permission in their session payload
@@ -32,7 +29,7 @@ export const checkAuthMetaData = async (
       if (
         p === PERMISSIONS.reschedule.name &&
         permission === PERMISSIONS.assign.name &&
-        Number(orderID)
+        Number(orderId)
       ) {
         return true;
       }
@@ -62,15 +59,14 @@ export const checkAuthMetaData = async (
   }
   // If the user has passed all checks, they are authorized to proceed but prevent if status is completed or busy
 
-  if (Number(orderID)) {
-    const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderID))).resourceStatus;
+  if (Number(orderId)) {
+    const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderId))).resourceStatus;
     if (orderStatus === STATUSES.completed || orderStatus === STATUSES.busy) {
       throw new CustomError(`You cannot modify an order that is ${orderStatus}`, 403);
     }
-  } else if (deleteOrderId) {
+  } else if (orderId) {
     // Check the status of the order before allowing deletion
-    const orderStatus = (await productionOrder.findByIdOrThrow(Number(deleteOrderId)))
-      .resourceStatus;
+    const orderStatus = (await productionOrder.findByIdOrThrow(Number(orderId))).resourceStatus;
     if (orderStatus === STATUSES.busy) {
       throw new CustomError(`You cannot delete a busy order that is ${orderStatus}`, 403);
     }
