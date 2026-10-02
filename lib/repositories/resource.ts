@@ -1,5 +1,4 @@
 import prisma from './../../prisma/client';
-
 const findAll = () => {
   return prisma.resource.findMany();
 };

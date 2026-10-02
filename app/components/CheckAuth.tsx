@@ -1,13 +1,15 @@
 'use client';
-import { useAuthenticatedAdminUserContext } from '../context';
+import { useAdminUserContext } from '../context';
 import { useEffect } from 'react';
+import { API_ENDPOINTS } from '../config/api';
+
 export const CheckAuth = () => {
-  const { userIsAuthenticated, setUserIsAuthenticated } = useAuthenticatedAdminUserContext();
+  const { userIsAuthenticated, setUserIsAuthenticated } = useAdminUserContext();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/fetch-auth-status', {
+        const response = await fetch(API_ENDPOINTS.AUTH_STATUS, {
           method: 'GET',
         });
         if (!response.ok) {
@@ -26,7 +28,7 @@ export const CheckAuth = () => {
         if (userIsAuthenticated.state !== 'authenticated') {
           setUserIsAuthenticated({
             state: 'authenticated',
-            name: data.userName,
+            name: data.adminName,
           });
         }
       } catch (error) {

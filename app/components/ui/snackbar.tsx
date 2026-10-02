@@ -2,6 +2,7 @@
 import React from 'react';
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import { NotifierAction, NotifierState } from '../types';
 
 // Snackbar component for displaying notifications with different severity levels.
 export enum Severity {
@@ -10,6 +11,34 @@ export enum Severity {
   info = 'info',
   warning = 'warning',
 }
+// Reducer function for managing the state of the notifier component.
+export const notifierReducer = (notifierState: NotifierState, action: NotifierAction) => {
+  switch (action.type) {
+    case 'setOpenNotifier':
+      return {
+        ...notifierState,
+        openNotifier: action.value,
+      };
+    case 'setNotifierMessage':
+      return {
+        ...notifierState,
+        notifierMessage: action.value,
+      };
+    case 'setNotifierSeverity':
+      return {
+        ...notifierState,
+        notifierSeverity: action.value,
+      };
+
+    default:
+      return notifierState;
+  }
+};
+export const initialNotifierState: NotifierState = {
+  openNotifier: false,
+  notifierMessage: '',
+  notifierSeverity: Severity.success,
+};
 export interface NotifierProps {
   open: boolean;
   message: string;

@@ -1,27 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleError } from '@/utils/ErrorHandlingHelper';
 export async function proxy(req: NextRequest) {
-  if (req.nextUrl.pathname === '/api/authorize-permission') {
+  const pathname = req.nextUrl.pathname;
+
+  if (pathname === '/api/authorize-permission' || pathname === '/') {
     return NextResponse.next();
   }
 
   const session = req.cookies.get('session')?.value;
-  /*
-  if (!session) {
-    const redirectUrl = new URL('/', req.url);
-    return NextResponse.redirect(redirectUrl);
-  }
-    */
+
   const url = new URL(req.url);
 
   // Skip authorization for load-jobs endpoint
   if (url.pathname.includes('/load-jobs')) {
     return;
   }
-  if (url.pathname.includes('/assign-order') || url.pathname.includes('/add-resource')) {
+  if (
+    url.pathname.includes('/assign-order') ||
+    url.pathname.includes('/add-resource') ||
+    url.pathname.includes('/order-log')
+  ) {
     try {
       const response = await fetch(
-        `${req.nextUrl.origin}/api/authorize-permission?path=${url.pathname}`,
+        `${req.nextUrl.origin}/api/auth/permission-check?path=${url.pathname}`,
         {
           method: 'GET',
           headers: {

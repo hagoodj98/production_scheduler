@@ -64,7 +64,7 @@ test.describe('permission-based access', () => {
     await page.goto('/add-resource');
     await expectRedirectedHome(page);
 
-    const response = await callJsonApi(page, '/api/delete-order?orderId=1', 'DELETE');
+    const response = await callJsonApi(page, '/api/order/delete?orderId=1', 'DELETE');
     expect(response.status).toBe(401);
   });
 
@@ -80,12 +80,10 @@ test.describe('permission-based access', () => {
     await page.goto('/assign-order');
     await expect(page).toHaveURL(/\/assign-order$/);
 
-    expect((await callJsonApi(page, '/api/search-resource/add-resource', 'POST', {})).status).toBe(
-      400,
-    );
-    expect((await callJsonApi(page, '/api/pending-order', 'POST', {})).status).toBe(400);
-    expect((await callJsonApi(page, '/api/reschedule-order', 'PATCH', {})).status).toBe(403);
-    expect((await callJsonApi(page, '/api/delete-order?orderId=1', 'DELETE')).status).toBe(403);
+    expect((await callJsonApi(page, '/api/resource/add', 'POST', {})).status).toBe(400);
+    expect((await callJsonApi(page, '/api/order/mark-pending', 'POST', {})).status).toBe(400);
+    expect((await callJsonApi(page, '/api/order/reschedule', 'PATCH', {})).status).toBe(403);
+    expect((await callJsonApi(page, '/api/order/delete?orderId=1', 'DELETE')).status).toBe(403);
   });
 
   test('reschedule-and-delete admins can use those actions but not add or assign', async ({
@@ -99,9 +97,9 @@ test.describe('permission-based access', () => {
     await page.goto('/assign-order');
     await expectRedirectedHome(page);
 
-    expect((await callJsonApi(page, '/api/reschedule-order', 'PATCH', {})).status).toBe(400);
-    expect((await callJsonApi(page, '/api/delete-order', 'DELETE')).status).toBe(400);
-    expect((await callJsonApi(page, '/api/pending-order', 'POST', {})).status).toBe(403);
+    expect((await callJsonApi(page, '/api/order/reschedule', 'PATCH', {})).status).toBe(400);
+    expect((await callJsonApi(page, '/api/order/delete', 'DELETE')).status).toBe(400);
+    expect((await callJsonApi(page, '/api/order/mark-pending', 'POST', {})).status).toBe(403);
   });
 
   test('all-access admins can enter both protected pages and pass each API permission check', async ({
@@ -116,11 +114,9 @@ test.describe('permission-based access', () => {
     await page.goto('/assign-order');
     await expect(page).toHaveURL(/\/assign-order$/);
 
-    expect((await callJsonApi(page, '/api/search-resource/add-resource', 'POST', {})).status).toBe(
-      400,
-    );
-    expect((await callJsonApi(page, '/api/pending-order', 'POST', {})).status).toBe(400);
-    expect((await callJsonApi(page, '/api/reschedule-order', 'PATCH', {})).status).toBe(400);
-    expect((await callJsonApi(page, '/api/delete-order', 'DELETE')).status).toBe(400);
+    expect((await callJsonApi(page, '/api/resource/add', 'POST', {})).status).toBe(400);
+    expect((await callJsonApi(page, '/api/order/mark-pending', 'POST', {})).status).toBe(400);
+    expect((await callJsonApi(page, '/api/order/reschedule', 'PATCH', {})).status).toBe(400);
+    expect((await callJsonApi(page, '/api/order/delete', 'DELETE')).status).toBe(400);
   });
 });

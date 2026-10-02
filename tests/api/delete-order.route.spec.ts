@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
-const { productionOrder, checkAuthMetaData } = vi.hoisted(() => ({
+const { productionOrder, orderLog, checkAuthMetaData } = vi.hoisted(() => ({
   productionOrder: {
-    remove: vi.fn(),
+    softRemove: vi.fn(),
+  },
+  orderLog: {
+    createOrderLog: vi.fn(),
   },
   checkAuthMetaData: vi.fn(),
 }));
@@ -11,46 +14,50 @@ const { productionOrder, checkAuthMetaData } = vi.hoisted(() => ({
 vi.mock('@/lib/repositories', () => ({
   productionOrder,
 }));
+vi.mock('@/lib/repositories/orderLog', () => ({
+  orderLog,
+}));
 vi.mock('@/utils/CheckAuthHelper', () => ({ checkAuthMetaData }));
 
-import { DELETE } from '@/app/api/delete-order/route';
+import { DELETE } from '@/app/api/order/delete/route';
 
-describe('DELETE /api/delete-order', () => {
+describe('DELETE /api/order/delete', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    checkAuthMetaData.mockResolvedValue('Delete Admin');
+    checkAuthMetaData.mockResolvedValue({ employeeId: 'emp-1' });
+    orderLog.createOrderLog.mockResolvedValue({ id: 1 });
   });
 
   it('returns 400 when orderId is missing', async () => {
-    const req = new NextRequest('http://localhost/api/delete-order', { method: 'DELETE' });
+    const req = new NextRequest('http://localhost/api/order/delete', { method: 'DELETE' });
 
     const res = await DELETE(req as never);
     const body = await res.json();
 
     expect(res.status).toBe(400);
     expect(body).toEqual({ error: 'orderId is required' });
-    expect(productionOrder.remove).not.toHaveBeenCalled();
+    expect(productionOrder.softRemove).not.toHaveBeenCalled();
   });
 
   it('deletes an order and returns 200', async () => {
-    productionOrder.remove.mockResolvedValueOnce({ id: 11 });
+    productionOrder.softRemove.mockResolvedValueOnce({ id: 11 });
 
-    const req = new NextRequest('http://localhost/api/delete-order?orderId=11', {
+    const req = new NextRequest('http://localhost/api/order/delete?orderId=11', {
       method: 'DELETE',
     });
 
     const res = await DELETE(req as never);
     const body = await res.json();
 
-    expect(productionOrder.remove).toHaveBeenCalledWith(11);
+    expect(productionOrder.softRemove).toHaveBeenCalledWith(11);
     expect(res.status).toBe(200);
     expect(body).toEqual({ message: 'Order deleted successfully' });
   });
 
-  it('returns 500 when repository remove throws', async () => {
-    productionOrder.remove.mockRejectedValueOnce(new Error('delete failed'));
+  it('returns 500 when repository softRemove throws', async () => {
+    productionOrder.softRemove.mockRejectedValueOnce(new Error('delete failed'));
 
-    const req = new NextRequest('http://localhost/api/delete-order?orderId=11', {
+    const req = new NextRequest('http://localhost/api/order/delete?orderId=11', {
       method: 'DELETE',
     });
 

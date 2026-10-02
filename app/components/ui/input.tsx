@@ -1,14 +1,15 @@
 import TextField from '@mui/material/TextField';
 
-type TextInputProps = {
+interface TextInputProps {
   label: string;
   value: string;
   name: string;
   type: string;
+  sx?: object;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-};
+}
 
-const TextInput = ({ label, value, onChange, name, type }: TextInputProps) => {
+const TextInput = ({ label, value, onChange, name, type, sx }: TextInputProps) => {
   return (
     <TextField
       label={label}
@@ -18,6 +19,8 @@ const TextInput = ({ label, value, onChange, name, type }: TextInputProps) => {
       type={type}
       variant="outlined"
       fullWidth
+      autoComplete="off"
+      sx={sx}
     />
   );
 };

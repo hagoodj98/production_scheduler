@@ -1,5 +1,6 @@
 import { Prisma } from '../generated/prisma/client';
 import React from 'react';
+import { Severity } from './ui/snackbar';
 
 export type SlotStatus = 'Pending' | 'Available' | 'Scheduled' | 'Busy';
 
@@ -7,6 +8,72 @@ export type CellID = {
   row: string;
   column: string;
 };
+export type NotifierState = {
+  openNotifier: boolean;
+  notifierMessage: string;
+  notifierSeverity: Severity | undefined;
+};
+export type OrderProps = {
+  id: number;
+  resource_name: string;
+  productionOrders: {
+    id: number;
+    dayMonthYear: Date;
+    startTime: Date;
+    endTime: Date;
+    resourceStatus: string;
+    resourceId: number;
+  }[];
+};
+export type AllPossibleResource = {
+  id: number;
+  resource_name: string;
+};
+export type CalendarEvent = {
+  id: number;
+  title: string;
+  start: Date;
+  end: Date;
+  resourceStatus: string;
+  resource_name?: string;
+  resourceId?: number;
+  [key: string]: unknown;
+};
+export type AdminFormState = {
+  formData: {
+    employee_id: string;
+    password: string;
+    admin_key: string;
+  };
+};
+export type LoadJob = {
+  resource_name: string;
+  productionOrders?: Array<{ resourceStatus: string } & Record<string, unknown>>;
+};
+
+export type PendingOrder = {
+  id: number | null;
+  dayMonthYear: Date;
+  resourceStatus: string;
+  resourceId: number;
+  startTime: Date;
+  endTime: Date;
+  resourceName: string;
+  employeeAssigneeID: string;
+};
+export type OrderType = {
+  pendingOrder?: PendingOrder;
+};
+
+export type AdminFormAction =
+  | { type: 'setEmployee_id'; value: string }
+  | { type: 'setPassword'; value: string }
+  | { type: 'setAdmin_key'; value: string };
+
+export type NotifierAction =
+  | { type: 'setOpenNotifier'; value: boolean }
+  | { type: 'setNotifierMessage'; value: string }
+  | { type: 'setNotifierSeverity'; value: Severity | undefined };
 
 export type Resource = {
   id: number;
@@ -52,7 +119,14 @@ export type TimeRange = {
   startTimeSlot: Pick<TimeSlot, 'hour' | 'minute'>;
   endTimeSlot: Pick<TimeSlot, 'hour' | 'minute'>;
 };
-
+export type ProductionOrderWriteInput = {
+  dayMonthYear: Date;
+  startTime: Date;
+  endTime: Date;
+  resourceId: number;
+  resourceStatus: string;
+  employeeAssigneeID: string;
+};
 export type DayMonthYear = {
   month: number | null;
   day: number | null;
@@ -63,6 +137,7 @@ export type ProductionOrder = {
   timeRange: TimeRange;
   resource: ClientResource;
   orderId: number; // Production order ID for tracking pending → processing transition
+  assignedEmployeeId: string;
 };
 export type AvailableSlotPair = {
   name: ClientResource;
@@ -96,9 +171,31 @@ export type RequestScheduledJobs = Prisma.ProductionOrderGetPayload<{
     startTime: true;
     endTime: true;
     resourceStatus: true;
+    resourceId: true;
   };
 }>;
-
+export type OrderLogData = {
+  creationDate: Date;
+  description: string;
+  employee: {
+    employeeId: string;
+    name: string;
+    role: string;
+  };
+  employeeId: string;
+  id: number;
+  order: {
+    employee: {
+      name: string;
+      role: string;
+    };
+    resourceStatus: string;
+    resource: {
+      resource_name: string;
+    };
+  } | null;
+  orderId: number | null;
+};
 export type SlotContextType = {
   dataSlot: Slot;
   setDataSlot: React.Dispatch<React.SetStateAction<Slot>>;
@@ -117,9 +214,17 @@ export type ResourcesContextType = {
 
 export type ClientResource = Omit<Resource, 'id' | 'status'>;
 
-export type GetAllSelectedResourcesContextType = {
-  selectedResourceData: ClientResource[];
-  setSelectedResourceData: React.Dispatch<React.SetStateAction<ClientResource[]>>;
+export type AuthContextType = {
+  userIsAuthenticated: {
+    name: string | null;
+    state: 'idle' | 'checking' | 'authenticated' | 'unauthenticated';
+  };
+  setUserIsAuthenticated: React.Dispatch<
+    React.SetStateAction<{
+      name: string | null;
+      state: 'idle' | 'checking' | 'authenticated' | 'unauthenticated';
+    }>
+  >;
 };
 
 export type ErrorMessage = {
@@ -127,8 +232,7 @@ export type ErrorMessage = {
   message: string;
 };
 export type CustomError = {
-  message: string;
-  status: number;
+  error: string;
 };
 
-export type FormErrors = ErrorMessage[] | CustomError;
+export type FormErrors = ErrorMessage[];

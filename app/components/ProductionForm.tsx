@@ -1,43 +1,36 @@
 'use client';
 
-import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState, useReducer, useRef } from 'react';
+import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { PickerValue } from '@mui/x-date-pickers/internals';
-import { useGetAllSelectedResourcesContext } from '../context';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
-import Notifier, { Severity } from './ui/snackbar';
-import { ProductionOrder } from './types';
+import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
+import FormHeader from './ui/FormHeader';
+import { ProductionOrder, OrderType } from './types';
 import type { ErrorMessage } from './types';
 import * as z from 'zod/v4';
 import { CustomError } from '@/utils/CustomErrors';
 import { productionOrderSchema } from '@/app/validation/productionOrderSchemas';
 import { timeScheduleValidator } from '../validation/timeScheduleValidator';
-
-type PendingOrder = {
-  id: number;
-  dayMonthYear: Date;
-  resourceStatus: string;
-  resourceId: number;
-  startTime: Date;
-  endTime: Date;
-  resourceName: string;
-};
-type OrderType = {
-  pendingOrder?: PendingOrder;
-};
+import { API_ENDPOINTS } from '../config/api';
+import { STATUSES } from '@/utils/GlobalVar';
 
 const ProductionForm = ({ pendingOrder }: OrderType) => {
-  /* build initial state using dayjs and conditional checks */
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+  const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
+  const [errors, setErrors] = useState<ErrorMessage[]>([]);
+  const [customError, setCustomError] = useState<{ error: string } | null>(null);
   const initialProductionOrder: ProductionOrder = {
     dayMonthYear: pendingOrder
       ? {
@@ -62,23 +55,35 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           }
         : { hour: null, minute: null },
     },
-
+    assignedEmployeeId: pendingOrder?.employeeAssigneeID ?? '',
     resource: {
       resource_name: pendingOrder?.resourceName ?? null,
     },
 
     orderId: pendingOrder?.id ?? 0,
   };
-  const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
-  const [openNotifier, setOpenNotifier] = useState(false);
-  const [notifierSeverity, setNotifierSeverity] = useState<Severity>();
-  const [notifierMessage, setNotifierMessage] = useState('');
-  const markhasRun = useRef(false);
-  const [errors, setErrors] = useState<ErrorMessage[] | CustomError[]>([]);
-  const { selectedResourceData } = useGetAllSelectedResourcesContext();
-  const [productionOrder, setProductionOrder] = useState<ProductionOrder>(initialProductionOrder);
 
+  const [productionOrder, setProductionOrder] = useState<ProductionOrder>(initialProductionOrder);
+  // Last order data successfully synced to mark-pending; prevents remounting an unchanged form from resending it
+  const lastSyncedOrderRef = useRef<string>(JSON.stringify(initialProductionOrder));
+  const [workers, setWorkers] = useState<{ employeeId: string; name: string }[]>([]);
+  const [resources, setResources] = useState<{ resource_name: string }[]>([]);
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const res = await fetch(API_ENDPOINTS.LOAD_EMPLOYEES);
+      const data: { employeeId: string; name: string }[] = await res.json();
+      setWorkers(data);
+    };
+    const fetchResources = async () => {
+      const res = await fetch(API_ENDPOINTS.LOAD_RESOURCES);
+      const data = await res.json();
+      // Assuming you have a context or state to store the resources
+      setResources(data.Resources);
+    };
+
+    fetchEmployees();
+    fetchResources();
+  }, []);
   const handleTimeAcceptOnStart = (value: PickerValue) => {
     if (value && dayjs.isDayjs(value)) {
       const hour = value.hour();
@@ -158,17 +163,18 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       setErrors(fieldErrors);
       return;
     } else if (error instanceof CustomError) {
-      setErrors([error]);
+      setCustomError({ error: error.message });
       return;
     } else if (error) {
-      setErrors([{ message: 'An unknown error occurred' }]);
+      setCustomError({ error: 'An unknown error occurred' });
       return;
     }
 
     try {
       setSubmitting(true);
+      // If the pending order is already scheduled, we need to reschedule it
       if (pendingOrder) {
-        await fetch('/api/reschedule-order', {
+        await fetch(API_ENDPOINTS.RESCHEDULE_ORDER, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -176,19 +182,28 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ productionOrder }),
         });
       } else {
-        await fetch('/api/schedule-order', {
+        const response = await fetch(API_ENDPOINTS.SCHEDULE_ORDER, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ productionOrder }),
         });
+        if (!response.ok) {
+          dispatchNotifier({ type: 'setNotifierMessage', value: 'Failed to create order' });
+          dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+          dispatchNotifier({ type: 'setOpenNotifier', value: true });
+          setSubmitting(false);
+          return;
+        }
       }
-      setNotifierMessage('Order created');
-      setNotifierSeverity(Severity.success);
-      setOpenNotifier(true);
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Order is created! Redirecting...' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.success });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
+      setTimeout(() => {
+        router.push('/');
+      }, 3000);
       setSubmitting(false);
-      router.push('/');
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: ErrorMessage[] = error.issues.map((issue) => ({
@@ -200,17 +215,24 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       }
       if (error instanceof CustomError) {
         const customError: CustomError = error;
-        setErrors([customError]);
+        setCustomError({ error: customError.message });
         return;
       }
       console.error('Submission error:', error);
-      setNotifierMessage('Could not create order');
-      setNotifierSeverity(Severity.error);
-      setOpenNotifier(true);
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Could not create order' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
       setSubmitting(false);
     }
   };
+  const handleEmployeeChange = (event: SelectChangeEvent) => {
+    const employeeId = event.target.value;
 
+    setProductionOrder((prev) => ({
+      ...prev,
+      assignedEmployeeId: employeeId,
+    }));
+  };
   const handleStartTimeChange = (value: PickerValue) => {
     if (value && dayjs.isDayjs(value)) {
       const hour = value.hour();
@@ -246,6 +268,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         timeRange: { ...productionOrder.timeRange },
         resource: { ...productionOrder.resource },
         orderId: productionOrder.orderId,
+        assignedEmployeeId: productionOrder.assignedEmployeeId,
       };
       try {
         // Before sending the request, validate the data again to ensure that any changes made after the initial validation are also checked. This is important because the user might have changed some fields after the first validation, and we want to catch any new errors before making the API call.
@@ -258,14 +281,14 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           setErrors(fieldErrors);
           return;
         } else if (error instanceof CustomError) {
-          setErrors([error]);
+          setCustomError({ error: error.message });
           return;
         } else if (error) {
-          setErrors([{ message: 'An unknown error occurred' }]);
+          setCustomError({ error: 'An unknown error occurred' });
           return;
         }
-
-        const response = await fetch('/api/pending-order', {
+        // Send the request to mark the order as pending
+        const response = await fetch(API_ENDPOINTS.MARK_PENDING, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -273,14 +296,14 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ order }),
         });
         if (!response.ok) {
-          const responseError = await response.json();
-
-          setErrors([{ message: responseError.error }]);
-          console.error('Failed to mark order as pending:', responseError.error);
+          const data = await response.json();
+          // Handle the error response from the server
+          setCustomError({ error: data.error });
+          console.error('Failed to mark order as pending:', data.error);
           return;
         }
+        // Update the local state with the new order ID returned from the server
         const responseData = await response.json();
-
         setProductionOrder((prev) => ({
           ...prev,
           orderId: responseData.orderId,
@@ -290,8 +313,9 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
       }
     };
 
+    // Check if the form is complete before allowing submission
     const isFormComplete = () => {
-      const { dayMonthYear, timeRange, resource } = productionOrder;
+      const { dayMonthYear, timeRange, resource, assignedEmployeeId } = productionOrder;
       return (
         dayMonthYear.day !== null &&
         dayMonthYear.month !== null &&
@@ -300,17 +324,21 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
         timeRange.startTimeSlot.minute !== null &&
         timeRange.endTimeSlot.hour !== null &&
         timeRange.endTimeSlot.minute !== null &&
-        resource.resource_name !== null
+        resource.resource_name !== null &&
+        assignedEmployeeId !== null
       );
     };
 
     if (!isFormComplete()) return;
 
+    // Skip the call if this exact order was already synced (e.g. remounting with no changes)
+    const orderSnapshot = JSON.stringify(productionOrder);
+    if (orderSnapshot === lastSyncedOrderRef.current) return;
+
     if (pendingOrder) {
-      markhasRun.current = true;
       const response = async () => {
         try {
-          await fetch('/api/pending-order', {
+          const response = await fetch(API_ENDPOINTS.MARK_PENDING, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -320,207 +348,267 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
               existingOrder: true,
             }),
           });
+          if (!response.ok) {
+            const data = await response.json();
+            setCustomError({ error: data.error });
+            console.error('Failed to update pending order:', data.error);
+            return;
+          }
+          lastSyncedOrderRef.current = orderSnapshot;
         } catch (error) {
           console.error('Network error updating pending order:', error);
         }
       };
       response();
-    }
-    if (!markhasRun.current) {
-      sendPendingStatus();
-      markhasRun.current = true;
+    } else {
+      if (!productionOrder.orderId) {
+        sendPendingStatus();
+      }
     }
   }, [pendingOrder, productionOrder, validate]);
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-lg font-semibold mb-4">Create Order</h2>
-      {Array.isArray(errors) && errors.find((err) => 'message' in err) && (
-        <div className=" text-red-600 my-2">{errors.find((err) => 'message' in err)?.message}</div>
-      )}
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <FormControl fullWidth sx={{ minWidth: 120 }}>
-            <InputLabel id="demo-simple-select-autowidth-label">Resource</InputLabel>
-            <Select
-              labelId="demo-simple-select-autowidth-label"
-              id="demo-simple-select-autowidth"
-              value={productionOrder.resource.resource_name ?? ''}
-              onChange={handleChange}
-              autoWidth
-              label="Resource"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {selectedResourceData.map((chosenResource, index) => (
-                <MenuItem key={index} value={chosenResource.resource_name ?? ''}>
-                  {chosenResource.resource_name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {Array.isArray(errors) &&
-            errors.find((err) => 'field' in err && err.field === 'resource.resource_name') && (
-              <div className=" text-red-600">
-                {
-                  errors.find((err) => 'field' in err && err.field === 'resource.resource_name')
-                    ?.message
-                }
-              </div>
-            )}
-          <div className="mt-3">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={['DatePicker']}>
-                <DatePicker
-                  name="calendar"
-                  onAccept={handleDayAccept}
-                  label="Pick Date"
-                  value={
-                    productionOrder.dayMonthYear.month
-                      ? dayjs()
-                          .year(productionOrder.dayMonthYear.year ?? dayjs().year())
-                          .month((productionOrder.dayMonthYear.month ?? 1) - 1)
-                          .date(productionOrder.dayMonthYear.day ?? 1)
-                      : null
-                  }
-                />
-                {Array.isArray(errors) &&
-                  errors.find((err) => {
-                    return 'field' in err && err.field === 'dayMonthYear.month';
-                  }) && (
-                    <div className=" text-red-600">
-                      {
-                        errors.find((err) => 'field' in err && err.field === 'dayMonthYear.month')
-                          ?.message
-                      }
-                    </div>
-                  )}
-                {Array.isArray(errors) &&
-                  errors.find((err) => 'field' in err && err.field === 'dayMonthYear.day') && (
-                    <div className=" text-red-600">
-                      {
-                        errors.find((err) => 'field' in err && err.field === 'dayMonthYear.day')
-                          ?.message
-                      }
-                    </div>
-                  )}
-                {Array.isArray(errors) &&
-                  errors.find((err) => 'field' in err && err.field === 'dayMonthYear.year') && (
-                    <div className=" text-red-600">
-                      {
-                        errors.find((err) => 'field' in err && err.field === 'dayMonthYear.year')
-                          ?.message
-                      }
-                    </div>
-                  )}
-              </DemoContainer>
-            </LocalizationProvider>
-          </div>
+    <div className="mx-auto w-full max-w-3xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      <FormHeader
+        icon={<EventNoteOutlinedIcon />}
+        eyebrow="Production scheduler"
+        title={pendingOrder ? 'Update production order' : 'Schedule production'}
+        description={
+          pendingOrder
+            ? 'Adjust the assignment and timing for this order.'
+            : 'Choose a resource, an employee, and a production window.'
+        }
+        titleAs="h1"
+        className="border-b border-slate-200 border-l-4 border-l-emerald-600 bg-slate-50 px-6 py-5"
+        badge={
+          pendingOrder && (
+            <span className="shrink-0 rounded border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900">
+              Editing order
+            </span>
+          )
+        }
+      />
+
+      {customError?.error && (
+        <div className="p-4 mt-4">
+          <p className="text-sm text-red-700">{customError?.error}</p>
         </div>
-        <div>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <div>
-              <TimePicker
-                onAccept={handleTimeAcceptOnStart}
-                label="Start time"
-                onChange={handleStartTimeChange}
-                value={
-                  productionOrder.timeRange.startTimeSlot.hour !== null &&
-                  productionOrder.timeRange.startTimeSlot.minute !== null
-                    ? dayjs()
-                        .hour(productionOrder.timeRange.startTimeSlot.hour)
-                        .minute(productionOrder.timeRange.startTimeSlot.minute)
-                    : null
-                }
-              />
-              {Array.isArray(errors) &&
-                errors.find(
-                  (err) => 'field' in err && err.field === 'timeRange.startTimeSlot.hour',
-                ) && (
-                  <div className=" text-red-600">
-                    {
-                      errors.find(
-                        (err) => 'field' in err && err.field === 'timeRange.startTimeSlot.hour',
-                      )?.message
-                    }
-                  </div>
-                )}
-              {Array.isArray(errors) &&
-                errors.find(
-                  (err) => 'field' in err && err.field === 'timeRange.startTimeSlot.minute',
-                ) && (
-                  <div className=" text-red-600">
-                    {
-                      errors.find(
-                        (err) => 'field' in err && err.field === 'timeRange.startTimeSlot.minute',
-                      )?.message
-                    }
-                  </div>
-                )}
+      )}
+
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-6 px-6 py-6">
+          <section aria-labelledby="assignment-heading">
+            <div className="mb-4">
+              <h2 id="assignment-heading" className="text-base font-semibold text-slate-900">
+                Assignment
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Select the resource and employee for this order.
+              </p>
             </div>
-            <div>
-              <TimePicker
-                onAccept={handleTimeAcceptOnEnd}
-                label="End time"
-                onChange={handleEndTimeChange}
-                value={
-                  productionOrder.timeRange.endTimeSlot.hour !== null &&
-                  productionOrder.timeRange.endTimeSlot.minute !== null
-                    ? dayjs()
-                        .hour(productionOrder.timeRange.endTimeSlot.hour)
-                        .minute(productionOrder.timeRange.endTimeSlot.minute)
-                    : null
-                }
-              />
-              {Array.isArray(errors) &&
-                errors.find(
-                  (err) => 'field' in err && err.field === 'timeRange.endTimeSlot.hour',
-                ) && (
-                  <div className=" text-red-600">
-                    {
-                      errors.find(
-                        (err) => 'field' in err && err.field === 'timeRange.endTimeSlot.hour',
-                      )?.message
-                    }
-                  </div>
-                )}
-              {Array.isArray(errors) &&
-                errors.find(
-                  (err) => 'field' in err && err.field === 'timeRange.endTimeSlot.minute',
-                ) && (
-                  <div className=" text-red-600">
-                    {
-                      errors.find(
-                        (err) => 'field' in err && err.field === 'timeRange.endTimeSlot.minute',
-                      )?.message
-                    }
-                  </div>
-                )}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <FormControl fullWidth>
+                  <InputLabel id="resource-label">Resource</InputLabel>
+                  <Select
+                    labelId="resource-label"
+                    id="resource-select"
+                    value={productionOrder.resource.resource_name ?? ''}
+                    onChange={handleChange}
+                    label="Resource"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {resources.map((resource, index) => (
+                      <MenuItem key={index} value={resource.resource_name ?? ''}>
+                        {resource.resource_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {Array.isArray(errors) &&
+                  errors.find(
+                    (err) => 'field' in err && err.field === 'resource.resource_name',
+                  ) && (
+                    <p className="mt-1 text-sm text-red-700">
+                      {
+                        errors.find(
+                          (err) => 'field' in err && err.field === 'resource.resource_name',
+                        )?.message
+                      }
+                    </p>
+                  )}
+              </div>
+              <div>
+                <FormControl fullWidth>
+                  <InputLabel id="employee-label">Assign employee</InputLabel>
+                  <Select
+                    labelId="employee-label"
+                    id="employee-select"
+                    value={productionOrder.assignedEmployeeId ?? ''}
+                    onChange={handleEmployeeChange}
+                    label="Assigned employee"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {workers.map((worker, index) => (
+                      <MenuItem key={index} value={worker.employeeId ?? ''}>
+                        {worker.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {Array.isArray(errors) &&
+                  errors.find((err) => 'field' in err && err.field === 'assignedEmployeeId') && (
+                    <p className="mt-1 text-sm text-red-700">
+                      {
+                        errors.find((err) => 'field' in err && err.field === 'assignedEmployeeId')
+                          ?.message
+                      }
+                    </p>
+                  )}
+              </div>
             </div>
-          </LocalizationProvider>
+          </section>
+
+          <section aria-labelledby="schedule-heading" className="border-t border-slate-200 pt-6">
+            <div className="mb-4">
+              <h2 id="schedule-heading" className="text-base font-semibold text-slate-900">
+                Production window
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">Set the date and start and end times.</p>
+            </div>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="min-w-0">
+                  <DatePicker
+                    name="calendar"
+                    onAccept={handleDayAccept}
+                    label="Production date"
+                    value={
+                      productionOrder.dayMonthYear.month
+                        ? dayjs()
+                            .year(productionOrder.dayMonthYear.year ?? dayjs().year())
+                            .month((productionOrder.dayMonthYear.month ?? 1) - 1)
+                            .date(productionOrder.dayMonthYear.day ?? 1)
+                        : null
+                    }
+                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                  />
+                  {Array.isArray(errors) &&
+                    errors.find((error) => error.field === 'dayMonthYear.month') && (
+                      <p className="text-red-500 text-sm">
+                        {errors.find((error) => error.field === 'dayMonthYear.month')?.message}
+                      </p>
+                    )}
+                  {Array.isArray(errors) &&
+                    errors.find((error) => error.field === 'dayMonthYear.day') && (
+                      <p className="text-red-500 text-sm">
+                        {errors.find((error) => error.field === 'dayMonthYear.day')?.message}
+                      </p>
+                    )}
+                  {Array.isArray(errors) &&
+                    errors.find((error) => error.field === 'dayMonthYear.year') && (
+                      <p className="text-red-500 text-sm">
+                        {errors.find((error) => error.field === 'dayMonthYear.year')?.message}
+                      </p>
+                    )}
+                </div>
+                <div className="min-w-0">
+                  <TimePicker
+                    onAccept={handleTimeAcceptOnStart}
+                    label="Start time"
+                    onChange={handleStartTimeChange}
+                    value={
+                      productionOrder.timeRange.startTimeSlot.hour !== null &&
+                      productionOrder.timeRange.startTimeSlot.minute !== null
+                        ? dayjs()
+                            .hour(productionOrder.timeRange.startTimeSlot.hour)
+                            .minute(productionOrder.timeRange.startTimeSlot.minute)
+                        : null
+                    }
+                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                  />
+                  {Array.isArray(errors) &&
+                  errors.find((error) => error.field === 'timeRange.startTimeSlot.hour') ? (
+                    <p className="text-red-500 text-sm">
+                      {
+                        errors.find((error) => error.field === 'timeRange.startTimeSlot.hour')
+                          ?.message
+                      }
+                    </p>
+                  ) : null}
+                  {Array.isArray(errors) &&
+                  errors.find((error) => error.field === 'timeRange.startTimeSlot.minute') ? (
+                    <p className="text-red-500 text-sm">
+                      {
+                        errors.find((error) => error.field === 'timeRange.startTimeSlot.minute')
+                          ?.message
+                      }
+                    </p>
+                  ) : null}
+                </div>
+                <div className="min-w-0">
+                  <TimePicker
+                    onAccept={handleTimeAcceptOnEnd}
+                    label="End time"
+                    onChange={handleEndTimeChange}
+                    value={
+                      productionOrder.timeRange.endTimeSlot.hour !== null &&
+                      productionOrder.timeRange.endTimeSlot.minute !== null
+                        ? dayjs()
+                            .hour(productionOrder.timeRange.endTimeSlot.hour)
+                            .minute(productionOrder.timeRange.endTimeSlot.minute)
+                        : null
+                    }
+                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                  />
+                  {Array.isArray(errors) &&
+                  errors.find((error) => error.field === 'timeRange.endTimeSlot.hour') ? (
+                    <p className="text-red-500 text-sm">
+                      {
+                        errors.find((error) => error.field === 'timeRange.endTimeSlot.hour')
+                          ?.message
+                      }
+                    </p>
+                  ) : null}
+                  {Array.isArray(errors) &&
+                  errors.find((error) => error.field === 'timeRange.endTimeSlot.minute') ? (
+                    <p className="text-red-500 text-sm">
+                      {
+                        errors.find((error) => error.field === 'timeRange.endTimeSlot.minute')
+                          ?.message
+                      }
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </LocalizationProvider>
+          </section>
         </div>
 
-        <div className="md:col-span-2 flex items-center gap-3">
-          <Button type="submit" variant="contained" disabled={submitting}>
-            {submitting && !pendingOrder
-              ? 'Creating…'
-              : pendingOrder
-                ? 'Update'
-                : submitting && pendingOrder
-                  ? 'Updating…'
-                  : 'Create Order'}
-          </Button>
-          <Button variant="outlined" onClick={() => router.push('/')}>
+        <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outlined" onClick={() => router.push('/')}>
             Cancel
           </Button>
-        </div>
+          <Button type="submit" variant="contained" disabled={submitting}>
+            {submitting
+              ? pendingOrder
+                ? 'Updating…'
+                : 'Creating…'
+              : pendingOrder
+                ? 'Update order'
+                : 'Create order'}
+          </Button>
+        </footer>
       </form>
       <Notifier
-        open={openNotifier}
-        onClose={() => setOpenNotifier(false)}
-        severity={notifierSeverity}
-        message={notifierMessage}
+        open={notifierState.openNotifier}
+        onClose={() => dispatchNotifier({ type: 'setOpenNotifier', value: false })}
+        severity={notifierState.notifierSeverity}
+        message={notifierState.notifierMessage}
       />
     </div>
   );

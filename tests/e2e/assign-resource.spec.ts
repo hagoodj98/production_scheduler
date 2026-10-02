@@ -86,13 +86,17 @@ const fillSchedule = async (
   await expect(page.getByText('Mixer A', { exact: true })).toBeVisible();
   await page.getByText('Mixer A', { exact: true }).click();
 
+  await page.getByRole('combobox', { name: 'Assign employee' }).click();
+  await expect(page.getByText('John Doe', { exact: true })).toBeVisible();
+  await page.getByText('John Doe', { exact: true }).click();
+
   const [month, day, year] = values.date.split('/');
   const [startHour, startMinuteWithMeridiem] = values.startTime.split(':');
   const [startMinute, startMeridiem] = startMinuteWithMeridiem.split(' ');
   const [endHour, endMinuteWithMeridiem] = values.endTime.split(':');
   const [endMinute, endMeridiem] = endMinuteWithMeridiem.split(' ');
 
-  const dateGroup = page.getByRole('group', { name: 'Pick Date' });
+  const dateGroup = page.getByRole('group', { name: 'Production date' });
   await dateGroup.getByRole('spinbutton', { name: 'Month' }).fill(month);
   await dateGroup.getByRole('spinbutton', { name: 'Day' }).fill(day);
   await dateGroup.getByRole('spinbutton', { name: 'Year' }).fill(year);
@@ -114,7 +118,7 @@ const fillResourceAndDate = async (page: Page, date: string) => {
   await page.getByText('Mixer A', { exact: true }).click();
 
   const [month, day, year] = date.split('/');
-  const dateGroup = page.getByRole('group', { name: 'Pick Date' });
+  const dateGroup = page.getByRole('group', { name: 'Production date' });
   await dateGroup.getByRole('spinbutton', { name: 'Month' }).fill(month);
   await dateGroup.getByRole('spinbutton', { name: 'Day' }).fill(day);
   await dateGroup.getByRole('spinbutton', { name: 'Year' }).fill(year);

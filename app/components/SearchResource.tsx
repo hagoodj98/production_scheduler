@@ -1,68 +1,52 @@
 'use client';
 
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState, SubmitEvent } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import Divider from '@mui/material/Divider';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import { useRouter } from 'next/navigation';
-import { useResourcesContext } from '../context';
+import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
+import { AllPossibleResource } from './types';
+import { API_ENDPOINTS } from '../config/api';
+import FormHeader from './ui/FormHeader';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 
-interface AllPossibleResource {
-  id: number;
-  resource_name: string;
-}
-
-const AddResource: React.FC = () => {
+const SearchResource: React.FC = () => {
   const router = useRouter();
-  const { setResourceData } = useResourcesContext();
   const [resourceName, setResourceName] = useState('');
   const [allPossibleResources, setAllPossibleResources] = useState<AllPossibleResource[]>([]);
   const [loading, setLoading] = useState(false);
-  const [snack, setSnack] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({ open: false, message: '', severity: 'success' });
+  const [notifierState, dispatchNotifier] = useReducer(notifierReducer, initialNotifierState);
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!resourceName || resourceName.trim().length < 2) {
-      setSnack({
-        open: true,
-        message: 'Please enter a valid resource name',
-        severity: 'error',
-      });
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Please enter a valid resource name' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch('/api/search-resource/add-resource', {
+      const response = await fetch(API_ENDPOINTS.ADD_RESOURCE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ resource_name: resourceName.trim() }),
       });
-      const data = await response.json();
-      // Optimistically update UI
-      const newResource = data.resource || {
-        id: Date.now(),
-        resource_name: resourceName.trim(),
-      };
+      if (!response.ok) {
+        dispatchNotifier({ type: 'setNotifierMessage', value: 'Failed to add resource' });
+        dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+        dispatchNotifier({ type: 'setOpenNotifier', value: true });
+        setLoading(false);
+        return;
+      }
 
-      setResourceData((prev) => [newResource, ...prev]);
-
-      setSnack({
-        open: true,
-        message: 'Resource added. Redirecting...',
-        severity: 'success',
-      });
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Resource added. Redirecting...' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.success });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
       setTimeout(() => {
         router.push('/');
       }, 3000);
@@ -71,11 +55,9 @@ const AddResource: React.FC = () => {
     } catch (error) {
       console.error(error);
       setLoading(false);
-      setSnack({
-        open: true,
-        message: 'Could not add resource',
-        severity: 'error',
-      });
+      dispatchNotifier({ type: 'setNotifierMessage', value: 'Could not add resource' });
+      dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+      dispatchNotifier({ type: 'setOpenNotifier', value: true });
     }
   };
   useEffect(() => {
@@ -85,8 +67,14 @@ const AddResource: React.FC = () => {
     try {
       const searchResources = async () => {
         const response = await fetch(
-          `/api/search-resource?name=${encodeURIComponent(resourceName)}`,
+          `${API_ENDPOINTS.SEARCH_RESOURCES}?name=${encodeURIComponent(resourceName)}`,
         );
+        if (!response.ok) {
+          dispatchNotifier({ type: 'setNotifierMessage', value: 'Could not search resources' });
+          dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });
+          dispatchNotifier({ type: 'setOpenNotifier', value: true });
+          return;
+        }
         const data = await response.json();
         setAllPossibleResources(data.resources);
       };
@@ -97,69 +85,85 @@ const AddResource: React.FC = () => {
   }, [resourceName]);
 
   return (
-    <div className="my-auto max-w-xl mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-lg font-semibold mb-4">Add a Resource</h2>
+    <div className="mx-auto w-full max-w-3xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      <FormHeader
+        icon={<Inventory2OutlinedIcon />}
+        eyebrow="Resource management"
+        title="Add a Resource"
+        description="Add a resource for production scheduling."
+        titleAs="h1"
+        className="border-b border-slate-200 border-l-4 border-l-emerald-600 bg-slate-50 px-6 py-5"
+      />
+      <form onSubmit={handleSubmit} className="space-y-6 p-6">
+        <div>
+          <TextField
+            label="Resource name"
+            value={resourceName}
+            onChange={(e) => {
+              const value = e.target.value;
+              setResourceName(value);
+              if (!value || value.trim().length === 0) {
+                setAllPossibleResources([]);
+              }
+            }}
+            fullWidth
+            size="small"
+          />
+          <p className="mt-2 text-sm text-slate-500">
+            Use a distinct name so production orders can be assigned clearly.
+          </p>
+        </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <TextField
-          label="Resource name"
-          value={resourceName}
-          onChange={(e) => {
-            const value = e.target.value;
-            setResourceName(value);
-            if (!value || value.trim().length === 0) {
-              setAllPossibleResources([]);
-            }
-          }}
-          fullWidth
-          size="small"
-        />
+        {resourceName.trim().length > 0 && (
+          <section aria-label="Matching resources" className="border-t border-slate-200 pt-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold text-slate-900">Matching resources</h2>
+              {allPossibleResources.length > 0 && (
+                <span className="text-xs text-slate-500">
+                  {allPossibleResources.length}{' '}
+                  {allPossibleResources.length === 1 ? 'match' : 'matches'}
+                </span>
+              )}
+            </div>
+            {allPossibleResources.length > 0 ? (
+              <ul className="divide-y divide-slate-200 rounded border border-slate-200">
+                {allPossibleResources.map((resource) => (
+                  <li key={resource.id}>
+                    <button
+                      className="flex w-full items-center justify-between gap-4 px-3 py-2.5 text-left text-sm text-slate-800 hover:bg-slate-50"
+                      type="button"
+                      onClick={() => setResourceName(resource.resource_name)}
+                    >
+                      <span>{resource.resource_name}</span>
+                      <span className="shrink-0 text-xs text-slate-500">#{resource.id}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-slate-500">No existing resources match this name.</p>
+            )}
+          </section>
+        )}
 
-        <Divider className="my-4" />
-        <List dense>
-          {allPossibleResources.length > 0 ? (
-            allPossibleResources.map((r) => (
-              <ListItem key={r.id} className="justify-between">
-                <button
-                  className="text-sm text-left w-full hover:underline"
-                  type="button"
-                  onClick={() => setResourceName(r.resource_name)}
-                >
-                  {r.resource_name}
-                </button>
-                <small className="text-xs text-gray-400">#{r.id}</small>
-              </ListItem>
-            ))
-          ) : (
-            <p className="text-sm text-gray-500">No matching resources</p>
-          )}
-        </List>
-
-        <div className="flex gap-3">
+        <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outlined" color="inherit" onClick={() => router.push('/')}>
+            Back
+          </Button>
           <Button type="submit" variant="contained" color="primary" disabled={loading}>
             {loading ? 'Adding…' : 'Add Resource'}
           </Button>
-          <Button variant="outlined" color="inherit" onClick={() => router.push('/')}>
-            Back
-          </Button>
-        </div>
+        </footer>
       </form>
 
-      <Snackbar
-        open={snack.open}
-        autoHideDuration={3500}
-        onClose={() => setSnack((s) => ({ ...s, open: false }))}
-      >
-        <Alert
-          onClose={() => setSnack((s) => ({ ...s, open: false }))}
-          severity={snack.severity}
-          sx={{ width: '100%' }}
-        >
-          {snack.message}
-        </Alert>
-      </Snackbar>
+      <Notifier
+        open={notifierState.openNotifier}
+        message={notifierState.notifierMessage}
+        severity={notifierState.notifierSeverity}
+        onClose={() => dispatchNotifier({ type: 'setOpenNotifier', value: false })}
+      />
     </div>
   );
 };
 
-export default AddResource;
+export default SearchResource;

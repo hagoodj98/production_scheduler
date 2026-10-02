@@ -2,13 +2,10 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import {
-  ResourceWrapper,
-  GetAllSelectedResourcesWrapper,
-  AuthenticatedAdminUserWrapper,
-} from './context';
+import { AdminUserContextWrapper } from './context';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import GlobalMessageReader from './components/GlobalMessageReader';
+import CheckAuth from './components/CheckAuth';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -33,14 +30,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {' '}
-        <AuthenticatedAdminUserWrapper>
-          <ResourceWrapper>
-            <GetAllSelectedResourcesWrapper>{children}</GetAllSelectedResourcesWrapper>
-          </ResourceWrapper>
-        </AuthenticatedAdminUserWrapper>
-        <Suspense fallback={null}>
-          <GlobalMessageReader />
-        </Suspense>
+        <AdminUserContextWrapper>
+          <CheckAuth />
+          {children}
+          <Suspense fallback={null}>
+            <GlobalMessageReader />
+          </Suspense>
+        </AdminUserContextWrapper>
       </body>
     </html>
   );

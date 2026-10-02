@@ -10,43 +10,47 @@ vi.mock('@/utils/CheckAuthHelper', () => ({
   checkAuthMetaData: checkAuthMetaDataMock,
 }));
 
-import { GET } from '@/app/api/authorize-permission/route';
+import { GET } from '@/app/api/auth/permission-check/route';
 
-describe('GET /api/authorize-permission', () => {
+describe('GET /api/auth/permission-check', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('checks add permission for add-resource paths', async () => {
     const request = new NextRequest(
-      'http://localhost/api/authorize-permission?path=%2Fadd-resource',
+      'http://localhost/api/auth/permission-check?path=%2Fadd-resource',
     );
 
     const response = await GET(request);
 
-    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('add', '/add-resource');
+    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('add', '/add-resource', undefined);
     expect(response.status).toBe(200);
   });
 
   it('checks assign permission for the assign-order page', async () => {
     const request = new NextRequest(
-      'http://localhost/api/authorize-permission?path=%2Fassign-order',
+      'http://localhost/api/auth/permission-check?path=%2Fassign-order',
     );
 
     const response = await GET(request);
 
-    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('assign', '/assign-order');
+    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('assign', '/assign-order', undefined);
     expect(response.status).toBe(200);
   });
 
   it('checks reschedule permission for an existing order path', async () => {
     const request = new NextRequest(
-      'http://localhost/api/authorize-permission?path=%2Fassign-order%2F123',
+      'http://localhost/api/auth/permission-check?path=%2Fassign-order%2F123',
     );
 
     const response = await GET(request);
 
-    expect(checkAuthMetaDataMock).toHaveBeenCalledWith('reschedule', '/assign-order/123');
+    expect(checkAuthMetaDataMock).toHaveBeenCalledWith(
+      'reschedule',
+      '/assign-order/123',
+      undefined,
+    );
     expect(response.status).toBe(200);
   });
 
@@ -55,7 +59,7 @@ describe('GET /api/authorize-permission', () => {
       new CustomError('You are unauthorized to reschedule this resource', 403),
     );
     const request = new NextRequest(
-      'http://localhost/api/authorize-permission?path=%2Fassign-order%2F123',
+      'http://localhost/api/auth/permission-check?path=%2Fassign-order%2F123',
     );
 
     const response = await GET(request);

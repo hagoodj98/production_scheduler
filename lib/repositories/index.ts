@@ -4,3 +4,4 @@ export { productionOrder } from './productionOrder';
 export { user } from './user';
 export { permission } from './permission';
 export { userPermission } from './UserPermission';
+export { orderLog } from './orderLog';

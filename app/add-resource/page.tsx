@@ -1,11 +1,15 @@
-import AddResource from '../components/SearchResource';
+import Header from '../components/Header';
+import SearchResource from '../components/SearchResource';
 
-const page = () => {
+const AddResourcePage = () => {
   return (
-    <div>
-      <AddResource />
-    </div>
+    <main>
+      <Header />
+      <div className="p-6 top-0 z-20 bg-white py-4">
+        <SearchResource />
+      </div>
+    </main>
   );
 };
 
-export default page;
+export default AddResourcePage;

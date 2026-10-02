@@ -25,6 +25,12 @@ model ProductionOrder {
   endTime        DateTime
   resourceStatus String
   resourceId     Int
+  creationDate   DateTime @default(now())
+  updatedAt     DateTime @updatedAt 
+  orderLogs      OrderLog[]
+  deletedAt     DateTime?
+  employeeAssigneeID String
+  employee       User       @relation(fields: [employeeAssigneeID], references: [employeeId])
   resource       SelectedResource @relation(fields: [resourceId], references: [id])
 }
 
@@ -43,6 +49,8 @@ model User {
   role     String
   admin_key String?
   userPermissions UserPermission[]
+  orderLogs      OrderLog[]
+  productionOrders ProductionOrder[]
 }
 
 model UserPermission {
@@ -57,4 +65,14 @@ model Permission {
   id       Int    @id @default(autoincrement())
   name     String @unique
   userPermissions UserPermission[]
+}
+
+model OrderLog {
+  id        Int      @id @default(autoincrement())
+  orderId   Int?
+  employeeId    String
+  order     ProductionOrder? @relation(fields: [orderId], references: [id])
+  employee  User            @relation(fields: [employeeId], references: [employeeId])
+  creationDate DateTime @default(now())
+  description String
 }

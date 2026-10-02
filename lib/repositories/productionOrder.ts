@@ -1,12 +1,5 @@
 import prisma from './../../prisma/client';
-
-type ProductionOrderWriteInput = {
-  dayMonthYear: Date;
-  startTime: Date;
-  endTime: Date;
-  resourceId: number;
-  resourceStatus: string;
-};
+import type { ProductionOrderWriteInput } from '../../app/components/types';
 
 const findAll = () => {
   return prisma.productionOrder.findMany({
@@ -23,8 +16,14 @@ const findAllForStatusCheck = () => {
       dayMonthYear: true,
       startTime: true,
       endTime: true,
+      employee: {
+        select: {
+          employeeId: true,
+          name: true,
+        },
+      },
       resourceStatus: true,
-      resourceId: false,
+      resourceId: true,
     },
   });
 };
@@ -32,13 +31,16 @@ const findAllForStatusCheck = () => {
 const findByIdOrThrow = (id: number) => {
   return prisma.productionOrder.findUniqueOrThrow({
     where: { id },
+    include: {
+      resource: true,
+      orderLogs: true,
+    },
   });
 };
 
 const create = (data: ProductionOrderWriteInput) => {
   return prisma.productionOrder.create({ data });
 };
-
 const update = (id: number, data: ProductionOrderWriteInput) => {
   return prisma.productionOrder.update({
     where: { id },
@@ -46,9 +48,10 @@ const update = (id: number, data: ProductionOrderWriteInput) => {
   });
 };
 
-const remove = (id: number) => {
-  return prisma.productionOrder.delete({
+const softRemove = (id: number) => {
+  return prisma.productionOrder.update({
     where: { id },
+    data: { deletedAt: new Date() },
   });
 };
 
@@ -58,5 +61,5 @@ export const productionOrder = {
   findByIdOrThrow,
   create,
   update,
-  remove,
+  softRemove,
 };

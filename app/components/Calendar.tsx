@@ -1,56 +1,25 @@
 'use client';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useReducer } from 'react';
+import { OrderProps } from './types';
+import fetcher from '../../utils/fetcher';
 import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
-import { useResourcesContext } from '../context';
-import Notifier, { Severity } from './ui/snackbar';
-
+import Notifier, { initialNotifierState, notifierReducer, Severity } from './ui/snackbar';
+import { CalendarEvent } from './types';
+import { API_ENDPOINTS } from '../config/api';
+// Initialize the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
 
-interface OrderProps {
-  id: number;
-  resource_name: string;
-  productionOrders: {
-    id: number;
-    dayMonthYear: Date;
-    startTime: Date;
-    endTime: Date;
-    resourceStatus: string;
-    resourceId: number;
-  }[];
-}
-
-interface CalendarEvent {
-  id: number;
-  title: string;
-  start: Date;
-  end: Date;
-  resourceStatus: string;
-  resource_name?: string;
-  resourceId?: number;
-  [key: string]: unknown;
-}
-
-const MyCalendar = () => {
-  const fetcher = async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`API ${url} failed: ${res.status}`);
-    return await res.json();
-  };
-
-  const { data: fetchedData } = useSWR<{
-    ResourceProductionOrders: OrderProps[];
-  }>('/api/load-jobs-to-chart', fetcher, {
+const CalendarComponent = () => {
+  const { data: fetchedData } = useSWR(API_ENDPOINTS.LOAD_ORDERS, fetcher, {
     refreshInterval: 5000, // poll every 5 seconds
   });
-  const { selectedResourceIds, selectedStatus } = useResourcesContext();
-  const [openNotifier, setOpenNotifier] = useState(false);
+  const [notifierState, notififierDispatcher] = useReducer(notifierReducer, initialNotifierState);
   const navigate = useRouter();
-  const [notifierSeverity, setNotifierSeverity] = useState<Severity>();
-  const [notifierMessage, setNotifierMessage] = useState('');
-  const events = fetchedData?.ResourceProductionOrders.flatMap((order) =>
+
+  const events = (fetchedData as { jobs: OrderProps[] })?.jobs?.flatMap((order) =>
     order.productionOrders.map((job) => ({
       title: `${order.resource_name} at ${dayjs(job.startTime).format('h:mm A')}`,
       start: dayjs(job.startTime).toDate(),
@@ -60,16 +29,7 @@ const MyCalendar = () => {
       resourceId: job.resourceId,
       id: job.id,
     })),
-  )?.filter((e) => {
-    // Only filter by resource selection; status selection will highlight instead of filtering
-    if (
-      selectedResourceIds &&
-      selectedResourceIds.length > 0 &&
-      !selectedResourceIds.includes(e.resourceId as number)
-    )
-      return false;
-    return true;
-  });
+  );
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => {
     const [hover, setHover] = useState(false);
@@ -90,24 +50,27 @@ const MyCalendar = () => {
           className="w-1/2 cursor-pointer bg-red-500 hover:bg-red-600 text-white px-2  rounded"
           onClick={async () => {
             try {
-              const response = await fetch(`/api/delete-order?orderId=${event.id}`, {
+              const response = await fetch(`${API_ENDPOINTS.DELETE_ORDER}?orderId=${event.id}`, {
                 method: 'DELETE',
               });
               if (!response.ok) {
                 const data = await response.json();
-                setOpenNotifier(true);
-                setNotifierMessage(data.error);
-                setNotifierSeverity(Severity.error);
+                notififierDispatcher({ type: 'setOpenNotifier', value: true });
+                notififierDispatcher({ type: 'setNotifierMessage', value: data.error });
+                notififierDispatcher({ type: 'setNotifierSeverity', value: Severity.error });
                 return;
               }
-              setNotifierMessage('Order deleted successfully');
-              setOpenNotifier(true);
-              setNotifierSeverity(Severity.success);
+              notififierDispatcher({
+                type: 'setNotifierMessage',
+                value: 'Order deleted successfully',
+              });
+              notififierDispatcher({ type: 'setOpenNotifier', value: true });
+              notififierDispatcher({ type: 'setNotifierSeverity', value: Severity.success });
             } catch (error) {
               console.error('Error deleting order:', error);
-              setNotifierMessage('Error deleting order');
-              setOpenNotifier(true);
-              setNotifierSeverity(Severity.error);
+              notififierDispatcher({ type: 'setNotifierMessage', value: 'Error deleting order' });
+              notififierDispatcher({ type: 'setOpenNotifier', value: true });
+              notififierDispatcher({ type: 'setNotifierSeverity', value: Severity.error });
             }
           }}
         >
@@ -148,26 +111,11 @@ const MyCalendar = () => {
         transition: 'opacity 200ms ease, box-shadow 200ms ease, transform 150ms ease',
       };
 
-      if (selectedStatus) {
-        if (event.resourceStatus === selectedStatus) {
-          style.boxShadow = '0 0 0 3px rgba(0,0,0,0.12)';
-          style.opacity = 1;
-          style.transform = 'scale(1.02)';
-        } else {
-          style.opacity = 0.25;
-          style.transform = 'none';
-          style.boxShadow = 'none';
-        }
-      } else {
-        style.opacity = 1;
-        style.transform = 'none';
-      }
-
       return {
         style,
       };
     };
-  }, [selectedStatus]);
+  }, []);
 
   return (
     <div className="w-full h-full">
@@ -181,13 +129,13 @@ const MyCalendar = () => {
         components={{ event: EventComponent }}
       />
       <Notifier
-        open={openNotifier}
-        onClose={() => setOpenNotifier(false)}
-        severity={notifierSeverity}
-        message={notifierMessage}
+        open={notifierState.openNotifier}
+        onClose={() => notififierDispatcher({ type: 'setOpenNotifier', value: false })}
+        severity={notifierState.notifierSeverity}
+        message={notifierState.notifierMessage}
       />
     </div>
   );
 };
 
-export default MyCalendar;
+export default CalendarComponent;

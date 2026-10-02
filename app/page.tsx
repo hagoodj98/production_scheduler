@@ -1,33 +1,21 @@
 import Recharts from './components/Recharts';
 import NavButton from './components/NavButton';
 import Calendar from './components/Calendar';
-import LockBox from './components/lockBox';
 import Header from './components/Header';
-import CheckAuth from './components/CheckAuth';
 
 export default async function Home() {
-  // Check if the admin user is authenticated
   return (
-    <div className="p-6">
-      <CheckAuth />
+    <div>
       {/* Header */}
       <Header />
-      <div className=" top-0 z-20  bg-white py-4 flex  gap-4">
-        <LockBox />
+      <div className="p-6 top-0 z-20  bg-white py-4 flex justify-around  gap-4">
         <div className="flex ml-1 mr-1 w-1/3 md:ml-4 md:mr-4">
           <Recharts compact />
         </div>
-        <div className=" flex items-center w-1/3 gap-3">
-          <NavButton
-            //isAdminUserAuthenticated={isAdminUserAuthenticated}
-            pageNav="/add-resource"
-            resourceLabel="Add Resource"
-          />
-          <NavButton
-            // isAdminUserAuthenticated={isAdminUserAuthenticated}
-            pageNav="/assign-order"
-            resourceLabel="Create Order"
-          />
+        <div className=" flex items-center  gap-2">
+          <NavButton pageNav="/add-resource" resourceLabel="Add Resource" />
+          <NavButton pageNav="/assign-order" resourceLabel="Create Order" />
+          <NavButton pageNav="/order-log" resourceLabel="Order Log" />
         </div>
       </div>
 
