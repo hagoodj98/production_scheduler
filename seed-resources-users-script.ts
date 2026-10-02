@@ -20,6 +20,15 @@ async function seedAdminAuth() {
     const williamAdminPassword = process.env.WILLIAM_ADMIN_PASSWORD;
     const emilyAdminPassword = process.env.EMILY_ADMIN_PASSWORD;
     const oliviaAdminPassword = process.env.OLIVIA_ADMIN_PASSWORD;
+    const johnAdminEmail = process.env.JOHN_ADMIN_EMAIL;
+    const janeAdminEmail = process.env.JANE_ADMIN_EMAIL;
+    const michaelAdminEmail = process.env.MICHAEL_ADMIN_EMAIL;
+    const williamAdminEmail = process.env.WILLIAM_ADMIN_EMAIL;
+    const emilyAdminEmail = process.env.EMILY_ADMIN_EMAIL;
+    const oliviaAdminEmail = process.env.OLIVIA_ADMIN_EMAIL;
+    const createAssignAdminAccessKey = process.env.CREATE_ASSIGN_ADMIN_ACCESS_KEY;
+    const allAccessAdminAccessKey = process.env.ALL_ACCESS_ADMIN_ACCESS_KEY;
+    const rescheduleTaskAdminAccessKey = process.env.RESCHEDULE_TASK_ADMIN_ACCESS_KEY;
     if (
       !johnAdminPassword ||
       !janeAdminPassword ||
@@ -30,11 +39,24 @@ async function seedAdminAuth() {
     ) {
       throw new Error('One or more admin passwords are not set in the environment variables');
     }
+    if (
+      !johnAdminEmail ||
+      !janeAdminEmail ||
+      !michaelAdminEmail ||
+      !williamAdminEmail ||
+      !emilyAdminEmail ||
+      !oliviaAdminEmail
+    ) {
+      throw new Error('One or more admin emails are not set in the environment variables');
+    }
+    if (!createAssignAdminAccessKey || !allAccessAdminAccessKey || !rescheduleTaskAdminAccessKey) {
+      throw new Error('One or more admin access keys are not set in the environment variables');
+    }
     // Seed initial admin and worker employees with their permissions
     insertEmployees.push(
       generateEmployee(
         'John Doe',
-        process.env.JOHN_ADMIN_EMAIL || 'john.doe@example.com',
+        johnAdminEmail,
         'EMP001',
         hashPassword(johnAdminPassword),
         null,
@@ -49,10 +71,10 @@ async function seedAdminAuth() {
     insertEmployees.push(
       generateEmployee(
         'Jane Smith',
-        process.env.JANE_ADMIN_EMAIL || 'jane.smith@example.com',
+        janeAdminEmail,
         'EMP002',
         hashPassword(janeAdminPassword),
-        process.env.CREATE_ASSIGN_ADMIN_ACCESS_KEY || 'create_assign_admin_access_key',
+        createAssignAdminAccessKey,
         'admin',
       ),
     );
@@ -68,10 +90,10 @@ async function seedAdminAuth() {
     insertEmployees.push(
       generateEmployee(
         'Michael Johnson',
-        process.env.MICHAEL_ADMIN_EMAIL || 'michael.johnson@example.com',
+        michaelAdminEmail,
         'EMP003',
         hashPassword(michaelAdminPassword),
-        process.env.ALL_ACCESS_ADMIN_ACCESS_KEY || 'all_access_admin_access_key',
+        allAccessAdminAccessKey,
         'admin',
       ),
     );
@@ -83,7 +105,7 @@ async function seedAdminAuth() {
     insertEmployees.push(
       generateEmployee(
         'William Brown',
-        process.env.WILLIAM_ADMIN_EMAIL || 'william.brown@example.com',
+        williamAdminEmail,
         'EMP005',
         hashPassword(williamAdminPassword),
         null,
@@ -98,10 +120,10 @@ async function seedAdminAuth() {
     insertEmployees.push(
       generateEmployee(
         'Emily Davis',
-        process.env.EMILY_ADMIN_EMAIL || 'emily.davis@example.com',
+        emilyAdminEmail,
         'EMP004',
         hashPassword(emilyAdminPassword),
-        process.env.RESCHEDULE_TASK_ADMIN_ACCESS_KEY || 'reschedule_task_admin_access_key',
+        rescheduleTaskAdminAccessKey,
         'admin',
       ),
     );
@@ -117,7 +139,7 @@ async function seedAdminAuth() {
     insertEmployees.push(
       generateEmployee(
         'Olivia Wilson',
-        process.env.OLIVIA_ADMIN_EMAIL || 'olivia.wilson@example.com',
+        oliviaAdminEmail,
         'EMP006',
         hashPassword(oliviaAdminPassword),
         null,
