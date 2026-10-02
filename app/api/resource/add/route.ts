@@ -8,7 +8,9 @@ import { checkAuthMetaData } from '@/utils/CheckAuthHelper';
 export async function POST(req: NextRequest) {
   try {
     // Check if the user has the 'add' permission before proceeding
-    const { employeeId } = await checkAuthMetaData(PERMISSIONS.add?.name);
+    const { employeeId } = (await checkAuthMetaData(PERMISSIONS.add?.name)) as {
+      employeeId: string;
+    };
     const rawData = await req.json();
     const addResource = resourceSchema.parse(rawData).resource_name;
     // Extract the resource name from the validated data
