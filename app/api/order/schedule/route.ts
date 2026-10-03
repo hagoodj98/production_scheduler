@@ -10,8 +10,15 @@ import { checkTimeConflict } from '@/app/validation/timeConflictHelper';
 
 export async function POST(req: NextRequest) {
   try {
+    const params = req.nextUrl.searchParams;
+    const orderIdParam = params.get('orderId');
+
     // Check if the user has the necessary permission to assign a production order
-    const { employeeId } = (await checkAuthMetaData(PERMISSIONS.assign?.name)) as {
+    const { employeeId } = (await checkAuthMetaData(
+      PERMISSIONS.assign?.name,
+      undefined,
+      orderIdParam,
+    )) as {
       employeeId: string;
     };
 
