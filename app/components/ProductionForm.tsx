@@ -173,7 +173,7 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
     try {
       setSubmitting(true);
       // If the pending order is already scheduled, we need to reschedule it
-      if (pendingOrder) {
+      if (pendingOrder && pendingOrder.resourceStatus === STATUSES.scheduled) {
         await fetch(API_ENDPOINTS.RESCHEDULE_ORDER, {
           method: 'PATCH',
           headers: {
@@ -182,13 +182,16 @@ const ProductionForm = ({ pendingOrder }: OrderType) => {
           body: JSON.stringify({ productionOrder }),
         });
       } else {
-        const response = await fetch(API_ENDPOINTS.SCHEDULE_ORDER, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `${API_ENDPOINTS.SCHEDULE_ORDER}${pendingOrder ? `?orderId=${pendingOrder.id}` : ''}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productionOrder }),
           },
-          body: JSON.stringify({ productionOrder }),
-        });
+        );
         if (!response.ok) {
           dispatchNotifier({ type: 'setNotifierMessage', value: 'Failed to create order' });
           dispatchNotifier({ type: 'setNotifierSeverity', value: Severity.error });

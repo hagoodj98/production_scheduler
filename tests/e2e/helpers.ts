@@ -46,7 +46,14 @@ export const mockSelectableResources = async (page: Page, resourceNames: string[
 };
 
 export const loginAsAllAccess = async (page: Page) => {
-  await page.goto('/');
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === '/api/auth/status' &&
+        response.request().method() === 'GET',
+    ),
+    page.goto('/'),
+  ]);
   await page.getByRole('button', { name: 'Login' }).click();
   await page.getByLabel('Employee ID').fill('EMP003');
   await page.getByLabel('Password').fill(process.env.MICHAEL_ADMIN_PASSWORD || 'password789');

@@ -131,14 +131,28 @@ test.describe('permission-based access', () => {
     await page.goto(`/assign-order/${existingOrderId}`);
     await expect(page).toHaveURL(new RegExp(`/assign-order/${existingOrderId}$`));
     await expect(page.getByRole('heading', { name: 'Update production order' })).toBeVisible();
-    expect(
-      (
-        await callJsonApi(page, `/api/order/mark-pending?orderId=${existingOrderId}`, 'POST', {
-          order: { ...order, orderId: existingOrderId },
-          existingOrder: true,
-        })
-      ).status,
-    ).toBe(200);
+
+    await page.getByRole('combobox', { name: 'Assign employee' }).click();
+    await page.getByRole('option', { name: 'John Doe' }).click();
+
+    const scheduleResponsePromise = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === '/api/order/schedule' &&
+        url.searchParams.get('orderId') === String(existingOrderId)
+      );
+    });
+    await page.getByRole('button', { name: 'Update order' }).click();
+    const scheduleResponse = await scheduleResponsePromise;
+    expect(scheduleResponse.status()).toBe(200);
+
+    const ordersResponse = await callJsonApi(page, '/api/order/load', 'GET');
+    const savedOrder = ordersResponse.body.jobs
+      .flatMap((job: { productionOrders: Array<{ id: number; employeeAssigneeID: string }> }) =>
+        job.productionOrders,
+      )
+      .find((productionOrder: { id: number }) => productionOrder.id === existingOrderId);
+    expect(savedOrder?.employeeAssigneeID).toBe('EMP001');
   });
 
   test('all-access admins can enter both protected pages and pass each API permission check', async ({

@@ -8,7 +8,7 @@ export async function GET() {
     // Your logic to load the order log goes here
     const logs: OrderLogData[] = (await orderLog.getAllOrderLogs()).map((log) => {
       (log.creationDate as unknown as string) = dayjs(log.creationDate).format(
-        'YYYY-MM-DD [at] HH:mm:A',
+        'YYYY-MM-DD [at] HH:mm',
       );
       if (log.description.includes('Deleted') && log.order) {
         // Mark the resource status as 'Deleted' for this order
