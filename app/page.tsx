@@ -1,13 +1,12 @@
 import Recharts from './components/Recharts';
 import NavButton from './components/NavButton';
-import Calendar from './components/Calendar';
-import Header from './components/Header';
+import CalendarEvents from './components/CalendarEvents';
 
 export default async function Home() {
   return (
     <div>
       {/* Header */}
-      <Header />
+
       <div className="p-6 top-0 z-20  bg-white py-4 flex justify-around  gap-4">
         <div className="flex ml-1 mr-1 w-1/3 md:ml-4 md:mr-4">
           <Recharts compact />
@@ -23,7 +22,7 @@ export default async function Home() {
       <main className="md:col-span-9">
         <div>
           <div className="bg-white p-4 rounded shadow-sm min-h-[60vh]">
-            <Calendar />
+            <CalendarEvents />
           </div>
         </div>
       </main>

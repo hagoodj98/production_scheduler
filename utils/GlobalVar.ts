@@ -20,7 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
   [STATUSES.processing]: '#cccccc',
   [STATUSES.pending]: '#FFBB28',
   [STATUSES.scheduled]: '#007bff',
-  [STATUSES.busy]: '#DB441A',
+  [STATUSES.busy]: '#ff4d4d',
   [STATUSES.deleted]: '#092ec0',
   [STATUSES.completed]: '#2ecc71',
   [STATUSES.search_add]: '#9b59b6',

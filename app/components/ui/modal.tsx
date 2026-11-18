@@ -18,7 +18,7 @@ const CustomModal = ({
   maxWidthClass,
 }: CustomModalProps) => {
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal disableScrollLock open={open} onClose={onClose}>
       <div
         className={`absolute left-1/2 top-1/2 w-[92%] -translate-x-1/2 -translate-y-1/2 ${maxWidthClass ?? 'max-w-lg'} outline-none bg-white p-4 rounded shadow-lg relative`}
       >
