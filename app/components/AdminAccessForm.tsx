@@ -1,10 +1,9 @@
 'use client';
 import CustomModal from './ui/modal';
-import TextInput from './ui/input';
 import FormHeader from './ui/FormHeader';
 import Button from '@mui/material/Button';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { useActionState, useEffect, useReducer } from 'react';
+import { useCallback, useActionState, useEffect, useReducer, Suspense, lazy } from 'react';
 import { login } from '../actions/auth';
 import { useAdminUserContext } from '../context';
 import { useRouter } from 'next/navigation';
@@ -14,7 +13,10 @@ interface AdminAccessFormProps {
   open: boolean;
   onClose: () => void;
   redirectPath?: string;
+  onTransition?: () => void;
 }
+
+const TextInput = lazy(() => import('./ui/input'));
 
 const reducer = (adminFormState: AdminFormState, action: AdminFormAction) => {
   switch (action.type) {
@@ -73,78 +75,86 @@ const AdminAccessForm = ({ open, onClose, redirectPath }: AdminAccessFormProps) 
     }
   }, [state, router, setUserIsAuthenticated, redirectPath, onClose, userIsAuthenticated.state]);
 
-  return (
-    <CustomModal open={open} onClose={onClose}>
-      <FormHeader
-        icon={<LockOutlinedIcon fontSize="small" />}
-        eyebrow="Secure sign-in"
-        title="Admin access required"
-        description="Enter your credentials to continue."
-        titleAs="h2"
-        className="mb-5 border-b border-slate-200 pb-4 pr-8"
-      />
-      {state?.error && <p style={{ color: 'red' }}>{state.error}</p>}
-      <form
-        action={() => {
-          // Convert the formData state into a FormData object for submission
-          const data = new FormData();
-          data.append('employee_id', adminFormState.formData.employee_id);
-          data.append('password', adminFormState.formData.password);
-          data.append('admin_key', adminFormState.formData.admin_key);
-          formAction(data);
-        }}
-      >
-        <TextInput
-          label="Employee ID"
-          value={adminFormState.formData.employee_id}
-          onChange={(e) => dispatch({ type: 'setEmployee_id', value: e.target.value })}
-          name="employee_id"
-          type="text"
-          sx={{
-            marginTop: 2,
-          }}
-        />
-        {state?.fields?.find((field) => field.path === 'employee_id') && (
-          <p style={{ color: 'red' }}>
-            {state.fields.find((field) => field.path === 'employee_id')?.message}
-          </p>
-        )}
-        <TextInput
-          label="Password"
-          value={adminFormState.formData.password}
-          onChange={(e) => dispatch({ type: 'setPassword', value: e.target.value })}
-          name="password"
-          sx={{
-            marginY: 2,
-          }}
-          type="password"
-        />
-        {state?.fields?.find((field) => field.path === 'password') && (
-          <p style={{ color: 'red' }}>
-            {state.fields.find((field) => field.path === 'password')?.message}
-          </p>
-        )}
-        <TextInput
-          label="Admin Key"
-          value={adminFormState.formData.admin_key}
-          onChange={(e) => dispatch({ type: 'setAdmin_key', value: e.target.value })}
-          name="admin_key"
-          type="text"
-          sx={{
-            marginBottom: 3,
-          }}
-        />
-        {state?.fields?.find((field) => field.path === 'admin_key') && (
-          <p style={{ color: 'red' }}>
-            {state.fields.find((field) => field.path === 'admin_key')?.message}
-          </p>
-        )}
+  const handleOnChange = useCallback((action: AdminFormAction) => {
+    dispatch({ type: action.type, value: action.value });
+  }, []);
 
-        <Button disabled={pending} variant="contained" fullWidth type="submit">
-          Submit
-        </Button>
-      </form>
-    </CustomModal>
+  return (
+    <div>
+      <CustomModal open={open} onClose={onClose}>
+        <FormHeader
+          icon={<LockOutlinedIcon fontSize="small" />}
+          eyebrow="Secure sign-in"
+          title="Admin access required"
+          description="Enter your credentials to continue."
+          titleAs="h2"
+          className="mb-5 border-b border-slate-200 pb-4 pr-8"
+        />
+        {state?.error && <p style={{ color: 'red' }}>{state.error}</p>}
+
+        <form
+          action={() => {
+            // Convert the formData state into a FormData object for submission
+            const data = new FormData();
+            data.append('employee_id', adminFormState.formData.employee_id);
+            data.append('password', adminFormState.formData.password);
+            data.append('admin_key', adminFormState.formData.admin_key);
+            formAction(data);
+          }}
+        >
+          <Suspense fallback={<div>Loading form...</div>}>
+            <TextInput
+              label="Employee ID"
+              value={adminFormState.formData.employee_id}
+              onChange={(e) => handleOnChange({ type: 'setEmployee_id', value: e.target.value })}
+              name="employee_id"
+              type="text"
+              sx={{
+                marginTop: 2,
+              }}
+            />
+            {state?.fields?.find((field) => field.path === 'employee_id') && (
+              <p style={{ color: 'red' }}>
+                {state.fields.find((field) => field.path === 'employee_id')?.message}
+              </p>
+            )}
+            <TextInput
+              label="Password"
+              value={adminFormState.formData.password}
+              onChange={(e) => handleOnChange({ type: 'setPassword', value: e.target.value })}
+              name="password"
+              sx={{
+                marginY: 2,
+              }}
+              type="password"
+            />
+            {state?.fields?.find((field) => field.path === 'password') && (
+              <p style={{ color: 'red' }}>
+                {state.fields.find((field) => field.path === 'password')?.message}
+              </p>
+            )}
+            <TextInput
+              label="Admin Key"
+              value={adminFormState.formData.admin_key}
+              onChange={(e) => handleOnChange({ type: 'setAdmin_key', value: e.target.value })}
+              name="admin_key"
+              type="text"
+              sx={{
+                marginBottom: 3,
+              }}
+            />
+            {state?.fields?.find((field) => field.path === 'admin_key') && (
+              <p style={{ color: 'red' }}>
+                {state.fields.find((field) => field.path === 'admin_key')?.message}
+              </p>
+            )}
+            <Button disabled={pending} variant="contained" fullWidth type="submit">
+              Submit
+            </Button>
+          </Suspense>
+        </form>
+      </CustomModal>
+    </div>
   );
 };
 

@@ -211,6 +211,20 @@ export type ResourcesContextType = {
   selectedStatus: string | null;
   setSelectedStatus: React.Dispatch<React.SetStateAction<string | null>>;
 };
+export type NotifierContextType = {
+  eventComponentNotifier: {
+    open: boolean;
+    message: string;
+    severity: Severity;
+  } | null;
+  setEventComponentNotifier: React.Dispatch<
+    React.SetStateAction<{
+      open: boolean;
+      message: string;
+      severity: Severity;
+    } | null>
+  >;
+};
 
 export type ClientResource = Omit<Resource, 'id' | 'status'>;
 

@@ -1,4 +1,5 @@
 import TextField from '@mui/material/TextField';
+import { memo } from 'react';
 
 interface TextInputProps {
   label: string;
@@ -8,8 +9,8 @@ interface TextInputProps {
   sx?: object;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
-
-const TextInput = ({ label, value, onChange, name, type, sx }: TextInputProps) => {
+// Memoized text input component for form usage to prevent unnecessary re-renders
+const TextInput = memo(({ label, value, onChange, name, type, sx }: TextInputProps) => {
   return (
     <TextField
       label={label}
@@ -23,6 +24,8 @@ const TextInput = ({ label, value, onChange, name, type, sx }: TextInputProps) =
       sx={sx}
     />
   );
-};
+});
+
+TextInput.displayName = 'TextInput';
 
 export default TextInput;
